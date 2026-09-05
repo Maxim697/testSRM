@@ -74,67 +74,92 @@ function TaskCommentCell({
 
 export function WeeklyTasksSection({
   reportId,
+  authorId,
   tasks,
   editable,
 }: {
   reportId: string;
+  authorId: string;
   tasks: WeeklyTaskWithNote[];
   editable: boolean;
 }) {
-  const columns: DataTableColumn<WeeklyTaskWithNote>[] = [
-    {
-      key: "title",
-      header: "Завдання",
-      accessor: (t) => (
-        <div className="relative pl-3">
-          <span
-            className="absolute inset-y-0 left-0 w-0.5 rounded-full"
-            style={{ background: STATUS_STRIPE[t.status] }}
-          />
-          <div className="text-text-primary">{t.title}</div>
-          {t.trader_id && t.trader_code && (
-            <Link href={`/trader/${t.trader_id}`} className="text-xs text-info hover:underline">
-              {t.trader_code}
-            </Link>
-          )}
-        </div>
-      ),
-    },
-    {
-      key: "kind",
-      header: "Тип",
-      accessor: (t) => (t.kind ? KIND_LABELS[t.kind] : "—"),
-    },
-    {
-      key: "due_date",
-      header: "Дедлайн",
-      accessor: (t) => formatDate(t.due_date),
-      sortValue: (t) => t.due_date ?? "",
-    },
-    {
-      key: "status",
-      header: "Статус",
-      accessor: (t) => STATUS_LABELS[t.status],
-      sortValue: (t) => t.status,
-    },
-    {
-      key: "comment",
-      header: "Коментар",
-      accessor: (t) => (
-        <TaskCommentCell reportId={reportId} taskId={t.id} initialValue={t.comment} editable={editable} />
-      ),
-      width: "280px",
-    },
-  ];
+  function buildColumns(showCreator: boolean): DataTableColumn<WeeklyTaskWithNote>[] {
+    return [
+      {
+        key: "title",
+        header: "Завдання",
+        accessor: (t) => (
+          <div className="relative pl-3">
+            <span
+              className="absolute inset-y-0 left-0 w-0.5 rounded-full"
+              style={{ background: STATUS_STRIPE[t.status] }}
+            />
+            <div className="text-text-primary">{t.title}</div>
+            {t.trader_id && t.trader_code && (
+              <Link href={`/trader/${t.trader_id}`} className="text-xs text-info hover:underline">
+                {t.trader_code}
+              </Link>
+            )}
+            {showCreator && (
+              <div className="text-xs text-text-muted">Поставив: {t.creator_name ?? "—"}</div>
+            )}
+          </div>
+        ),
+      },
+      {
+        key: "kind",
+        header: "Тип",
+        accessor: (t) => (t.kind ? KIND_LABELS[t.kind] : "—"),
+      },
+      {
+        key: "due_date",
+        header: "Дедлайн",
+        accessor: (t) => formatDate(t.due_date),
+        sortValue: (t) => t.due_date ?? "",
+      },
+      {
+        key: "status",
+        header: "Статус",
+        accessor: (t) => STATUS_LABELS[t.status],
+        sortValue: (t) => t.status,
+      },
+      {
+        key: "result_comment",
+        header: "Звіт про виконання",
+        accessor: (t) => <span className="text-text-secondary">{t.result_comment || "—"}</span>,
+      },
+      {
+        key: "comment",
+        header: "Коментар у звіті",
+        accessor: (t) => (
+          <TaskCommentCell reportId={reportId} taskId={t.id} initialValue={t.comment} editable={editable} />
+        ),
+        width: "240px",
+      },
+    ];
+  }
+
+  const fromLead = tasks.filter((t) => t.created_by !== authorId);
+  const own = tasks.filter((t) => t.created_by === authorId);
 
   return (
-    <div>
-      <h2 className="mb-2 text-base font-medium text-text-primary">Завдання за тиждень</h2>
-      {tasks.length === 0 ? (
-        <EmptyState title="Немає завдань" description="На цей тиждень немає завдань з дедлайном." />
-      ) : (
-        <DataTable columns={columns} data={tasks} rowKey={(t) => t.id} />
-      )}
+    <div className="flex flex-col gap-4">
+      <div>
+        <h2 className="mb-2 text-base font-medium text-text-primary">Завдання за тиждень · від керівника</h2>
+        {fromLead.length === 0 ? (
+          <EmptyState title="Немає завдань" description="На цей тиждень керівник не ставив завдань." />
+        ) : (
+          <DataTable columns={buildColumns(true)} data={fromLead} rowKey={(t) => t.id} />
+        )}
+      </div>
+      <div>
+        <h2 className="mb-2 text-base font-medium text-text-primary">Завдання за тиждень · власні</h2>
+        {own.length === 0 ? (
+          <EmptyState title="Немає завдань" description="На цей тиждень немає власних завдань з дедлайном." />
+        ) : (
+          <DataTable columns={buildColumns(false)} data={own} rowKey={(t) => t.id} />
+        )}
+      </div>
     </div>
   );
 }

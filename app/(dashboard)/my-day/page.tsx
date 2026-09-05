@@ -4,10 +4,11 @@ import { KpiCard } from "@/components/ui/kpi-card";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { MyTasksSection } from "@/components/my-day/my-tasks-section";
 import { getEnrichedTraders } from "@/lib/trader-metrics";
 import { getCurrentProfile } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate } from "@/lib/format";
+import { TASK_WITH_RELATIONS_SELECT } from "@/lib/task-actions";
 import type { TaskWithRelations } from "@/lib/types";
 
 type Reason = { text: string; metric: string; weight: number };
@@ -21,7 +22,7 @@ export default async function MyDayPage() {
     getEnrichedTraders(),
     supabase
       .from("tasks")
-      .select("*, trader:traders(code), assignee:profiles(full_name)")
+      .select(TASK_WITH_RELATIONS_SELECT)
       .order("due_date", { ascending: true }),
   ]);
 
@@ -129,30 +130,7 @@ export default async function MyDayPage() {
         )}
       </div>
 
-      <div>
-        <h2 className="mb-2 text-base font-medium text-text-primary">Мої завдання на сьогодні</h2>
-        {myTasksToday.length === 0 ? (
-          <EmptyState title="Завдань немає" description="На сьогодні для вас немає завдань з дедлайном." />
-        ) : (
-          <div className="flex flex-col gap-2">
-            {myTasksToday.map((task) => (
-              <Card key={task.id} className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-text-primary">{task.title}</div>
-                  <div className="mt-0.5 text-xs text-text-muted">
-                    {task.trader?.code ?? "Загальне завдання"} · Дедлайн: {formatDate(task.due_date)}
-                  </div>
-                </div>
-                {task.trader_id && (
-                  <Button href={`/trader/${task.trader_id}`} variant="ghost" className="shrink-0">
-                    Відкрити
-                  </Button>
-                )}
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+      <MyTasksSection tasks={myTasksToday} currentUserId={current.userId} />
     </>
   );
 }

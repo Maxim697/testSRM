@@ -157,7 +157,7 @@ export function WeeklyReportView({
         />
       </div>
 
-      <WeeklyTasksSection reportId={report.id} tasks={tasks} editable={editable} />
+      <WeeklyTasksSection reportId={report.id} authorId={report.author_id} tasks={tasks} editable={editable} />
 
       <WorkSummarySection report={report} editable={editable} />
 

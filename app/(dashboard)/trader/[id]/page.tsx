@@ -2,6 +2,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { TraderDetailView } from "@/components/trader/trader-detail-view";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/current-user";
+import { TASK_WITH_RELATIONS_SELECT } from "@/lib/task-actions";
 import type {
   InteractionWithAuthor,
   TaskWithRelations,
@@ -32,7 +33,7 @@ export default async function TraderDetailPage({
       .order("created_at", { ascending: false }),
     supabase
       .from("tasks")
-      .select("*, trader:traders(code), assignee:profiles(full_name)")
+      .select(TASK_WITH_RELATIONS_SELECT)
       .eq("trader_id", id)
       .order("due_date", { ascending: true }),
   ]);

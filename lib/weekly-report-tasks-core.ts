@@ -10,6 +10,9 @@ export type WeeklyTaskWithNote = {
   due_date: string | null;
   trader_id: string | null;
   trader_code: string | null;
+  created_by: string | null;
+  creator_name: string | null;
+  result_comment: string | null;
   comment: string;
 };
 
@@ -24,7 +27,11 @@ export async function getWeeklyTasksWithNotesData(
   const [tasksRes, notesRes] = await Promise.all([
     supabase
       .from("tasks")
-      .select("id, title, kind, status, due_date, trader_id, trader:traders(code)")
+      // tasks has two FKs into profiles (assignee_id, created_by) — needs an
+      // explicit constraint-name hint or the embed is ambiguous (PGRST201)
+      .select(
+        "id, title, kind, status, due_date, trader_id, created_by, result_comment, trader:traders(code), creator:profiles!tasks_created_by_fkey(full_name)",
+      )
       .eq("assignee_id", authorId)
       .gte("due_date", weekStart)
       .lte("due_date", endDate)
@@ -39,16 +46,22 @@ export async function getWeeklyTasksWithNotesData(
     ]),
   );
 
-  return ((tasksRes.data ?? []) as unknown as (WeeklyTaskWithNote & { trader: { code: string } | null })[]).map(
-    (t) => ({
-      id: t.id,
-      title: t.title,
-      kind: t.kind,
-      status: t.status,
-      due_date: t.due_date,
-      trader_id: t.trader_id,
-      trader_code: t.trader?.code ?? null,
-      comment: noteByTask.get(t.id) ?? "",
-    }),
-  );
+  type TaskRow = Omit<WeeklyTaskWithNote, "trader_code" | "creator_name" | "comment"> & {
+    trader: { code: string } | null;
+    creator: { full_name: string | null } | null;
+  };
+
+  return ((tasksRes.data ?? []) as unknown as TaskRow[]).map((t) => ({
+    id: t.id,
+    title: t.title,
+    kind: t.kind,
+    status: t.status,
+    due_date: t.due_date,
+    trader_id: t.trader_id,
+    trader_code: t.trader?.code ?? null,
+    created_by: t.created_by,
+    creator_name: t.creator?.full_name ?? null,
+    result_comment: t.result_comment,
+    comment: noteByTask.get(t.id) ?? "",
+  }));
 }

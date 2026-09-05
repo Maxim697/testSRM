@@ -20,7 +20,7 @@ export async function computeActivityMetrics(
   weekStart: string,
 ): Promise<ActivityMetrics> {
   const supabase = await createClient();
-  const { start, end, endDate } = getWeekRange(weekStart);
+  const { start, end } = getWeekRange(weekStart);
 
   const [interactionsRes, tasksCreatedRes, tasksClosedRes, tradersRes] = await Promise.all([
     supabase
@@ -29,19 +29,23 @@ export async function computeActivityMetrics(
       .eq("author_id", authorId)
       .gte("created_at", start)
       .lt("created_at", end),
+    // tasks *created by* this manager this week (their own act of planning),
+    // as opposed to tasks assigned to them by someone else
     supabase
       .from("tasks")
       .select("id", { count: "exact", head: true })
-      .eq("assignee_id", authorId)
+      .eq("created_by", authorId)
       .gte("created_at", start)
       .lt("created_at", end),
+    // tasks this manager executed and closed this week, by actual
+    // completion time rather than the due date
     supabase
       .from("tasks")
       .select("id", { count: "exact", head: true })
       .eq("assignee_id", authorId)
       .eq("status", "done")
-      .gte("due_date", weekStart)
-      .lte("due_date", endDate),
+      .gte("completed_at", start)
+      .lt("completed_at", end),
     supabase.from("traders").select("id"),
   ]);
 

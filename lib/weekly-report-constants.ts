@@ -19,9 +19,9 @@ export const METRIC_SOURCES: Record<string, string> = {
   overdue_tasks:
     "завдання зі статусом overdue або з простроченою due_date серед задач вашого портфеля",
   contacts_count: "кількість записів в interactions за цей тиждень, де ви — автор",
-  tasks_created: "кількість задач у tasks, створених за цей тиждень і призначених на вас",
+  tasks_created: "кількість задач у tasks, які ви особисто поставили (created_by) за цей тиждень",
   tasks_closed:
-    "кількість ваших задач зі статусом done, у яких due_date припадає на цей тиждень",
+    "кількість ваших задач зі статусом done, у яких completed_at припадає на цей тиждень",
   zero_contact_traders:
     "трейдери вашого портфеля, по яких за цей тиждень немає жодного запису в interactions від вас",
 };

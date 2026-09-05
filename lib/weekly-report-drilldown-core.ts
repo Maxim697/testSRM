@@ -21,7 +21,7 @@ export async function buildDrilldownData(
   authorId: string,
   weekStart: string,
 ): Promise<Record<string, DrilldownItem[]>> {
-  const { start, end, endDate } = getWeekRange(weekStart);
+  const { start, end } = getWeekRange(weekStart);
 
   const { data: tradersData } = await supabase
     .from("traders")
@@ -52,7 +52,7 @@ export async function buildDrilldownData(
       supabase
         .from("tasks")
         .select("id, title, due_date, trader_id")
-        .eq("assignee_id", authorId)
+        .eq("created_by", authorId)
         .gte("created_at", start)
         .lt("created_at", end),
       supabase
@@ -60,8 +60,8 @@ export async function buildDrilldownData(
         .select("id, title, due_date, trader_id")
         .eq("assignee_id", authorId)
         .eq("status", "done")
-        .gte("due_date", weekStart)
-        .lte("due_date", endDate),
+        .gte("completed_at", start)
+        .lt("completed_at", end),
       traderIds.length
         ? supabase.from("tasks").select("id, title, due_date, trader_id").eq("status", "overdue").in("trader_id", traderIds)
         : Promise.resolve({ data: [] as TaskRow[] }),

@@ -141,7 +141,7 @@ export function ReportDetailModal({
                 <MetricTable rows={activityRows} drilldown={drilldown} editable={false} showDelta={false} />
               </div>
 
-              <WeeklyTasksSection reportId={report.id} tasks={tasks} editable={false} />
+              <WeeklyTasksSection reportId={report.id} authorId={report.author_id} tasks={tasks} editable={false} />
 
               <div className="flex flex-col gap-3">
                 <h3 className="text-sm font-medium text-text-primary">Робота за тиждень</h3>

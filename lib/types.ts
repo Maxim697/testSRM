@@ -35,21 +35,28 @@ export type TraderWithManager = Trader & {
 
 export type TaskKind = "daily" | "weekly" | "monthly";
 export type TaskStatus = "in_progress" | "done" | "overdue";
+export type TaskPriority = "low" | "normal" | "high";
 
 export type Task = {
   id: string;
   title: string;
+  description: string | null;
   kind: TaskKind | null;
   trader_id: string | null;
   assignee_id: string | null;
+  created_by: string | null;
+  priority: TaskPriority;
   due_date: string | null;
   status: TaskStatus;
+  result_comment: string | null;
+  completed_at: string | null;
   created_at: string;
 };
 
 export type TaskWithRelations = Task & {
   trader: { code: string } | null;
   assignee: { full_name: string | null } | null;
+  creator: { full_name: string | null } | null;
 };
 
 export type InteractionKind = "note" | "call" | "status_change" | "task_closed";
