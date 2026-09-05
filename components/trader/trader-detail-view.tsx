@@ -11,7 +11,9 @@ import { ScoreTrendChart } from "@/components/ui/score-trend-chart";
 import { HistoryTab } from "@/components/trader/history-tab";
 import { TasksTab } from "@/components/trader/tasks-tab";
 import { MetricsTab } from "@/components/trader/metrics-tab";
+import { RiskBadge } from "@/components/risk/risk-badge";
 import { daysSince, formatNumber, formatPercent, percentDelta, scoreDelta } from "@/lib/format";
+import { computeRiskScore, computeWeeklyDeltas, isTaskOverdue } from "@/lib/risk-score";
 import { useSetPageTitle } from "@/lib/page-title";
 import type {
   InteractionWithAuthor,
@@ -58,6 +60,21 @@ export function TraderDetailView({
     return Math.round((trader.cr - prev.cr) * 10) / 10;
   }, [weekly, trader.cr]);
 
+  const risk = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const overdueTaskCount = tasks.filter((t) => isTaskOverdue(t.status, t.due_date, today)).length;
+    const sortedWeekly = [...weekly].sort((a, b) => a.week_start.localeCompare(b.week_start));
+    const deltas = computeWeeklyDeltas(sortedWeekly);
+    return computeRiskScore({
+      daysSinceContact,
+      scoreDelta: deltas.scoreDelta,
+      turnoverDeltaPct: deltas.turnoverDeltaPct,
+      crDeltaPp: deltas.crDeltaPp,
+      status: trader.status,
+      overdueTaskCount,
+    });
+  }, [tasks, weekly, daysSinceContact, trader.status]);
+
   return (
     <div className="flex flex-1 flex-col gap-3">
       <div className="flex items-start justify-between gap-4">
@@ -67,6 +84,7 @@ export function TraderDetailView({
           {trader.status && (
             <Badge variant={STATUS_BADGE[trader.status]}>{STATUS_LABELS[trader.status]}</Badge>
           )}
+          <RiskBadge risk={risk} size="lg" />
           <span className="text-base text-text-secondary">
             Депозит: <span className="tabular-nums text-text-primary">{formatNumber(trader.deposit)}</span>
           </span>

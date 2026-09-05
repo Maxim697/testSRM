@@ -2,16 +2,15 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RiskBadge } from "@/components/risk/risk-badge";
+import { RiskFactorList } from "@/components/risk/risk-factor-list";
 import { MyTasksSection } from "@/components/my-day/my-tasks-section";
 import { getEnrichedTraders } from "@/lib/trader-metrics";
 import { getCurrentProfile } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { TASK_WITH_RELATIONS_SELECT } from "@/lib/task-actions";
 import type { TaskWithRelations } from "@/lib/types";
-
-type Reason = { text: string; metric: string; weight: number };
 
 export default async function MyDayPage() {
   const current = await getCurrentProfile();
@@ -28,50 +27,9 @@ export default async function MyDayPage() {
 
   const tasks = (tasksRes.data ?? []) as unknown as TaskWithRelations[];
 
-  const overdueTaskByTrader = new Map<string, TaskWithRelations>();
-  for (const t of tasks) {
-    if (t.trader_id && t.status !== "done") {
-      const isOverdue = t.status === "overdue" || (t.due_date && t.due_date < new Date().toISOString().slice(0, 10));
-      if (isOverdue) overdueTaskByTrader.set(t.trader_id, t);
-    }
-  }
-
   const attentionList = traders
-    .map((trader) => {
-      const reasons: Reason[] = [];
-
-      if (trader.daysSinceContact !== null && trader.daysSinceContact >= 5) {
-        reasons.push({
-          text: "5+ днів без контакту",
-          metric: `${trader.daysSinceContact} дн.`,
-          weight: 2,
-        });
-      }
-      if (trader.score_delta !== null && trader.score_delta <= -10) {
-        reasons.push({
-          text: "Score впав більше ніж на 10",
-          metric: `${trader.score_delta}`,
-          weight: 3,
-        });
-      }
-      if (trader.status === "red") {
-        reasons.push({ text: "Статус Red", metric: "Red", weight: 3 });
-      } else if (trader.status === "amber") {
-        reasons.push({ text: "Статус Amber", metric: "Amber", weight: 1 });
-      }
-      const overdueTask = overdueTaskByTrader.get(trader.id);
-      if (overdueTask) {
-        reasons.push({ text: "Прострочене завдання", metric: overdueTask.title, weight: 2 });
-      }
-
-      return { trader, reasons };
-    })
-    .filter((item) => item.reasons.length > 0)
-    .sort((a, b) => {
-      const scoreA = a.reasons.reduce((sum, r) => sum + r.weight, 0);
-      const scoreB = b.reasons.reduce((sum, r) => sum + r.weight, 0);
-      return scoreB - scoreA;
-    });
+    .filter((trader) => trader.risk.level !== "low")
+    .sort((a, b) => b.risk.score - a.risk.score);
 
   const today = new Date().toISOString().slice(0, 10);
   const myTasksToday = tasks.filter(
@@ -109,16 +67,15 @@ export default async function MyDayPage() {
           <EmptyState title="Все спокійно" description="Немає трейдерів, що потребують уваги." />
         ) : (
           <div className="flex flex-col gap-2">
-            {attentionList.map(({ trader, reasons }) => (
+            {attentionList.map((trader) => (
               <Card key={trader.id} className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="font-medium text-text-primary">{trader.code}</div>
-                  <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                    {reasons.map((r, i) => (
-                      <Badge key={i} variant={r.weight >= 3 ? "red" : r.weight >= 2 ? "amber" : "neutral"}>
-                        {r.text} · {r.metric}
-                      </Badge>
-                    ))}
+                <div className="flex min-w-0 items-center gap-3">
+                  <RiskBadge risk={trader.risk} />
+                  <div className="min-w-0">
+                    <div className="font-medium text-text-primary">{trader.code}</div>
+                    <div className="mt-1">
+                      <RiskFactorList factors={trader.risk.factors} />
+                    </div>
                   </div>
                 </div>
                 <Button href={`/trader/${trader.id}`} variant="secondary" className="shrink-0">

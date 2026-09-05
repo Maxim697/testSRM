@@ -7,6 +7,7 @@ import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tier } from "@/components/ui/tier";
+import { RiskBadge } from "@/components/risk/risk-badge";
 import { createClient } from "@/lib/supabase/client";
 import type { EnrichedTrader } from "@/lib/trader-metrics";
 import type { Profile } from "@/lib/types";
@@ -171,6 +172,13 @@ export function PortfolioTable({
       accessor: (t) =>
         t.status ? <Badge variant={STATUS_BADGE[t.status]}>{STATUS_LABELS[t.status]}</Badge> : "—",
       sortValue: (t) => t.status ?? "",
+    },
+    {
+      key: "risk",
+      header: "Ризик",
+      accessor: (t) => <RiskBadge risk={t.risk} size="sm" />,
+      sortValue: (t) => t.risk.score,
+      align: "right",
     },
     {
       key: "days_since_contact",
