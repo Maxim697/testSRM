@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { AUDIT_ACTIONS, logAudit } from "@/lib/audit-log";
 import type { TaskStatus } from "@/lib/types";
 
 // tasks has two FKs into profiles (assignee_id, created_by) — the shorthand
@@ -29,12 +30,23 @@ export async function updateTaskStatus(
     .select(TASK_WITH_RELATIONS_SELECT)
     .single();
 
-  if (!result.error && result.data && nextStatus === "done" && !wasDone && task.trader_id) {
-    await supabase.from("interactions").insert({
-      trader_id: task.trader_id,
-      author_id: currentUserId,
-      kind: "task_closed",
-      body: task.title,
+  if (!result.error && result.data && nextStatus === "done" && !wasDone) {
+    if (task.trader_id) {
+      await supabase.from("interactions").insert({
+        trader_id: task.trader_id,
+        author_id: currentUserId,
+        kind: "task_closed",
+        body: task.title,
+      });
+    }
+    await logAudit(supabase, {
+      actorId: currentUserId,
+      action: AUDIT_ACTIONS.TASK_CLOSED,
+      entityType: "task",
+      entityId: task.id,
+      entityLabel: task.title,
+      oldValue: task.status,
+      newValue: nextStatus,
     });
   }
 

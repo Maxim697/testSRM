@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { AUDIT_ACTIONS, logAudit } from "@/lib/audit-log";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,7 @@ export default function LoginPage() {
     setLoading(true);
 
     const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -39,6 +40,16 @@ export default function LoginPage() {
       setError(translateAuthError(signInError.message));
       setLoading(false);
       return;
+    }
+
+    if (signInData.user) {
+      await logAudit(supabase, {
+        actorId: signInData.user.id,
+        action: AUDIT_ACTIONS.LOGIN,
+        entityType: "profile",
+        entityId: signInData.user.id,
+        entityLabel: email,
+      });
     }
 
     router.push("/my-day");

@@ -15,7 +15,9 @@ export async function getEnrichedTraders(): Promise<EnrichedTrader[]> {
   const today = new Date().toISOString().slice(0, 10);
 
   const [tradersRes, interactionsRes, weeklyRes, tasksRes] = await Promise.all([
-    supabase.from("traders").select("*, manager:profiles(full_name)").order("code"),
+    // traders has two FKs into profiles (manager_id, previous_manager_id) — the
+    // embed needs an explicit constraint-name hint or it's ambiguous (PGRST201)
+    supabase.from("traders").select("*, manager:profiles!traders_manager_id_fkey(full_name)").order("code"),
     supabase.from("interactions").select("trader_id, created_at"),
     supabase.from("trader_weekly").select("trader_id, week_start, score, cr, turnover"),
     supabase.from("tasks").select("trader_id, status, due_date"),

@@ -16,6 +16,7 @@ export type Trader = {
   tier: TraderTier | null;
   deposit: number | null;
   manager_id: string | null;
+  previous_manager_id: string | null;
   status: TraderStatus | null;
   score: number | null;
   score_delta: number | null;
@@ -31,6 +32,23 @@ export type Trader = {
 
 export type TraderWithManager = Trader & {
   manager: { full_name: string | null } | null;
+  previous_manager?: { full_name: string | null } | null;
+};
+
+export type PortfolioTransfer = {
+  id: string;
+  from_manager_id: string | null;
+  to_manager_id: string | null;
+  initiated_by: string | null;
+  traders_count: number;
+  reason: string | null;
+  created_at: string;
+};
+
+export type PortfolioTransferWithNames = PortfolioTransfer & {
+  from_manager: { full_name: string | null } | null;
+  to_manager: { full_name: string | null } | null;
+  initiator: { full_name: string | null } | null;
 };
 
 export type TaskKind = "daily" | "weekly" | "monthly";
@@ -143,4 +161,20 @@ export type WeeklyReportTaskNote = {
   report_id: string;
   task_id: string;
   comment: string | null;
+};
+
+export type AuditLogEntry = {
+  id: string;
+  actor_id: string | null;
+  action: string;
+  entity_type: "trader" | "profile" | "task" | "report" | "dashboard";
+  entity_id: string | null;
+  entity_label: string | null;
+  old_value: string | null;
+  new_value: string | null;
+  created_at: string;
+};
+
+export type AuditLogWithActor = AuditLogEntry & {
+  actor: { full_name: string | null } | null;
 };

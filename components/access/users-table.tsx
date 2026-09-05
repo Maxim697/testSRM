@@ -8,6 +8,7 @@ import { Select } from "@/components/ui/select";
 import { Modal } from "@/components/ui/modal";
 import { createClient } from "@/lib/supabase/client";
 import { getInitials, roleLabel, type Role } from "@/lib/roles";
+import { AUDIT_ACTIONS, logAudit } from "@/lib/audit-log";
 import type { Profile } from "@/lib/types";
 
 export function UsersTable({
@@ -57,6 +58,16 @@ export function UsersTable({
       setError("Не вдалося зберегти роль. Спробуйте ще раз.");
       return;
     }
+
+    await logAudit(supabase, {
+      actorId: currentUserId,
+      action: AUDIT_ACTIONS.ROLE_CHANGE,
+      entityType: "profile",
+      entityId: editing.id,
+      entityLabel: editing.full_name ?? "Без імені",
+      oldValue: roleLabel(editing.role),
+      newValue: roleLabel(newRole),
+    });
 
     setUsers((prev) => prev.map((u) => (u.id === editing.id ? { ...u, role: newRole } : u)));
     setEditing(null);

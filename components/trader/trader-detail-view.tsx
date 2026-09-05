@@ -11,16 +11,20 @@ import { ScoreTrendChart } from "@/components/ui/score-trend-chart";
 import { HistoryTab } from "@/components/trader/history-tab";
 import { TasksTab } from "@/components/trader/tasks-tab";
 import { MetricsTab } from "@/components/trader/metrics-tab";
+import { AuditHistoryTab } from "@/components/trader/audit-history-tab";
 import { RiskBadge } from "@/components/risk/risk-badge";
-import { daysSince, formatNumber, formatPercent, percentDelta, scoreDelta } from "@/lib/format";
+import { daysSince, formatDate, formatNumber, formatPercent, percentDelta, scoreDelta } from "@/lib/format";
 import { computeRiskScore, computeWeeklyDeltas, isTaskOverdue } from "@/lib/risk-score";
 import { useSetPageTitle } from "@/lib/page-title";
+import type { Role } from "@/lib/roles";
 import type {
   InteractionWithAuthor,
   TaskWithRelations,
   TraderWeekly,
   TraderWithManager,
 } from "@/lib/types";
+
+type TransferContext = { fromManagerName: string; transferredAt: string; historyCount: number };
 
 const STATUS_LABELS: Record<string, string> = { green: "Green", amber: "Amber", red: "Red" };
 const STATUS_BADGE: Record<string, "green" | "amber" | "red"> = {
@@ -35,12 +39,16 @@ export function TraderDetailView({
   interactions: initialInteractions,
   tasks: initialTasks,
   currentUserId,
+  currentUserRole,
+  transferContext,
 }: {
   trader: TraderWithManager;
   weekly: TraderWeekly[];
   interactions: InteractionWithAuthor[];
   tasks: TaskWithRelations[];
   currentUserId: string;
+  currentUserRole: Role;
+  transferContext: TransferContext | null;
 }) {
   const [tab, setTab] = useState("history");
   const [interactions, setInteractions] = useState(initialInteractions);
@@ -77,6 +85,19 @@ export function TraderDetailView({
 
   return (
     <div className="flex flex-1 flex-col gap-3">
+      {transferContext && (
+        <Card className="border-info bg-info-bg">
+          <div className="text-xs font-medium uppercase tracking-wide text-info">
+            Нещодавно передано вам
+          </div>
+          <p className="mt-1 text-base text-text-primary">
+            Портфель передано {formatDate(transferContext.transferredAt)} від{" "}
+            <span className="font-medium">{transferContext.fromManagerName}</span>. Записів в історії
+            трейдера: <span className="font-medium">{transferContext.historyCount}</span>.
+          </p>
+        </Card>
+      )}
+
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2.5">
           <h1 className="text-xl font-semibold text-text-primary">{trader.code}</h1>
@@ -90,6 +111,9 @@ export function TraderDetailView({
           </span>
           <span className="text-base text-text-secondary">
             Менеджер: <span className="text-text-primary">{trader.manager?.full_name ?? "—"}</span>
+            {trader.previous_manager?.full_name && (
+              <span className="text-text-muted"> (раніше вів: {trader.previous_manager.full_name})</span>
+            )}
           </span>
           <span
             className={`text-base ${daysSinceContact !== null && daysSinceContact >= 5 ? "text-negative font-medium" : "text-text-secondary"}`}
@@ -141,6 +165,9 @@ export function TraderDetailView({
           { label: "Історія", value: "history" },
           { label: "Завдання", value: "tasks" },
           { label: "Показники", value: "metrics" },
+          ...(currentUserRole === "lead" || currentUserRole === "admin"
+            ? [{ label: "Історія змін", value: "audit" }]
+            : []),
         ]}
         value={tab}
         onValueChange={setTab}
@@ -165,6 +192,9 @@ export function TraderDetailView({
         />
       )}
       {tab === "metrics" && <MetricsTab weekly={weekly} />}
+      {tab === "audit" && (currentUserRole === "lead" || currentUserRole === "admin") && (
+        <AuditHistoryTab traderId={trader.id} />
+      )}
     </div>
   );
 }

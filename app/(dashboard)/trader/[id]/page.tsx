@@ -3,12 +3,15 @@ import { TraderDetailView } from "@/components/trader/trader-detail-view";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/current-user";
 import { TASK_WITH_RELATIONS_SELECT } from "@/lib/task-actions";
+import { daysSince } from "@/lib/format";
 import type {
   InteractionWithAuthor,
   TaskWithRelations,
   TraderWeekly,
   TraderWithManager,
 } from "@/lib/types";
+
+const RECENT_TRANSFER_DAYS = 14;
 
 export default async function TraderDetailPage({
   params,
@@ -20,7 +23,15 @@ export default async function TraderDetailPage({
   const current = await getCurrentProfile();
 
   const [traderRes, weeklyRes, interactionsRes, tasksRes] = await Promise.all([
-    supabase.from("traders").select("*, manager:profiles(full_name)").eq("id", id).maybeSingle(),
+    // traders has two FKs into profiles (manager_id, previous_manager_id) — the
+    // embed needs an explicit constraint-name hint or it's ambiguous (PGRST201)
+    supabase
+      .from("traders")
+      .select(
+        "*, manager:profiles!traders_manager_id_fkey(full_name), previous_manager:profiles!traders_previous_manager_id_fkey(full_name)",
+      )
+      .eq("id", id)
+      .maybeSingle(),
     supabase
       .from("trader_weekly")
       .select("*")
@@ -49,13 +60,39 @@ export default async function TraderDetailPage({
     );
   }
 
+  const interactions = (interactionsRes.data ?? []) as unknown as InteractionWithAuthor[];
+
+  let transferContext: { fromManagerName: string; transferredAt: string; historyCount: number } | null = null;
+  if (trader.previous_manager_id && trader.manager_id) {
+    const { data: transferRow } = await supabase
+      .from("portfolio_transfers")
+      .select("created_at")
+      .eq("from_manager_id", trader.previous_manager_id)
+      .eq("to_manager_id", trader.manager_id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const transferredAt = transferRow?.created_at ?? null;
+    const days = daysSince(transferredAt);
+    if (transferredAt && days !== null && days <= RECENT_TRANSFER_DAYS) {
+      transferContext = {
+        fromManagerName: trader.previous_manager?.full_name ?? "—",
+        transferredAt,
+        historyCount: interactions.length,
+      };
+    }
+  }
+
   return (
     <TraderDetailView
       trader={trader}
       weekly={(weeklyRes.data ?? []) as TraderWeekly[]}
-      interactions={(interactionsRes.data ?? []) as unknown as InteractionWithAuthor[]}
+      interactions={interactions}
       tasks={(tasksRes.data ?? []) as unknown as TaskWithRelations[]}
       currentUserId={current.userId}
+      currentUserRole={current.profile.role}
+      transferContext={transferContext}
     />
   );
 }

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getCurrentProfile } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { buildReportDraftContext } from "@/lib/report-draft-context";
+import { AUDIT_ACTIONS, logAudit } from "@/lib/audit-log";
+import { formatDate } from "@/lib/format";
 import type { WeeklyReport, WeeklyReportRow } from "@/lib/types";
 import type { ReportDraftResponse } from "@/lib/report-draft-types";
 
@@ -151,6 +153,14 @@ export async function POST(request: Request) {
   if (!isValidDraft(parsed)) {
     return NextResponse.json({ error: "Відповідь сервісу генерації має неочікуваний формат." }, { status: 502 });
   }
+
+  await logAudit(supabase, {
+    actorId: current.userId,
+    action: AUDIT_ACTIONS.DRAFT_GENERATED,
+    entityType: "report",
+    entityId: report.id,
+    entityLabel: `Тижневий звіт за ${formatDate(report.week_start)}`,
+  });
 
   return NextResponse.json(parsed satisfies ReportDraftResponse);
 }

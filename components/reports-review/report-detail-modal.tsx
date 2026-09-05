@@ -9,6 +9,7 @@ import { MetricTable } from "@/components/weekly-report/metric-table";
 import { WeeklyTasksSection } from "@/components/weekly-report/weekly-tasks-section";
 import type { DrilldownItem } from "@/components/weekly-report/metric-drilldown-modal";
 import { createClient } from "@/lib/supabase/client";
+import { AUDIT_ACTIONS, logAudit } from "@/lib/audit-log";
 import { buildDrilldownData } from "@/lib/weekly-report-drilldown-core";
 import { getWeeklyTasksWithNotesData, type WeeklyTaskWithNote } from "@/lib/weekly-report-tasks-core";
 import { ACTIVITY_METRIC_KEYS } from "@/lib/weekly-report-constants";
@@ -104,6 +105,17 @@ export function ReportDetailModal({
       setError("Не вдалося зберегти рішення. Спробуйте ще раз.");
       return;
     }
+
+    await logAudit(supabase, {
+      actorId: currentUserId,
+      action: AUDIT_ACTIONS.REPORT_REVIEWED,
+      entityType: "report",
+      entityId: report.id,
+      entityLabel: `Тижневий звіт: ${report.author?.full_name ?? "—"} за ${formatDate(report.week_start)}`,
+      oldValue: report.status,
+      newValue: status,
+    });
+
     onReviewed(data as unknown as WeeklyReportWithAuthor);
   }
 

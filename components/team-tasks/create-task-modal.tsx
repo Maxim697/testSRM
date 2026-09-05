@@ -8,6 +8,7 @@ import { DateInput } from "@/components/ui/date-input";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { TASK_WITH_RELATIONS_SELECT } from "@/lib/task-actions";
+import { AUDIT_ACTIONS, logAudit } from "@/lib/audit-log";
 import type { Profile, TaskKind, TaskPriority, TaskWithRelations, Trader } from "@/lib/types";
 
 const KIND_LABELS: Record<TaskKind, string> = { daily: "Щоденна", weekly: "Щотижнева", monthly: "Щомісячна" };
@@ -88,6 +89,16 @@ export function CreateTaskModal({
       setError("Не вдалося створити завдання. Спробуйте ще раз.");
       return;
     }
+
+    const assignee = managers.find((m) => m.id === assigneeId);
+    await logAudit(supabase, {
+      actorId: currentUserId,
+      action: AUDIT_ACTIONS.TASK_ASSIGNED,
+      entityType: "task",
+      entityId: (data as unknown as TaskWithRelations).id,
+      entityLabel: title.trim(),
+      newValue: `Виконавець: ${assignee?.full_name ?? "—"}`,
+    });
 
     onCreated(data as unknown as TaskWithRelations);
     handleClose();

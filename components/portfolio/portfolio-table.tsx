@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tier } from "@/components/ui/tier";
 import { RiskBadge } from "@/components/risk/risk-badge";
 import { createClient } from "@/lib/supabase/client";
+import { AUDIT_ACTIONS, logAudit } from "@/lib/audit-log";
 import type { EnrichedTrader } from "@/lib/trader-metrics";
 import type { Profile } from "@/lib/types";
 import { formatNumber, formatPercent } from "@/lib/format";
@@ -35,10 +36,12 @@ export function PortfolioTable({
   traders: initialTraders,
   allManagers,
   canReassign,
+  currentUserId,
 }: {
   traders: EnrichedTrader[];
   allManagers: Profile[];
   canReassign: boolean;
+  currentUserId: string;
 }) {
   const [traders, setTraders] = useState(initialTraders);
   const [managerFilter, setManagerFilter] = useState("");
@@ -65,6 +68,8 @@ export function PortfolioTable({
   }, [traders, managerFilter, tierFilter, statusFilter, search]);
 
   async function handleManagerChange(traderId: string, managerId: string) {
+    const trader = traders.find((t) => t.id === traderId);
+    const previousManagerId = trader?.manager_id ?? null;
     const newManager = allManagers.find((m) => m.id === managerId) ?? null;
     setTraders((prev) =>
       prev.map((t) =>
@@ -73,7 +78,22 @@ export function PortfolioTable({
     );
 
     const supabase = createClient();
-    await supabase.from("traders").update({ manager_id: managerId }).eq("id", traderId);
+    await supabase
+      .from("traders")
+      .update({ manager_id: managerId, previous_manager_id: previousManagerId })
+      .eq("id", traderId);
+
+    if (trader) {
+      await logAudit(supabase, {
+        actorId: currentUserId,
+        action: AUDIT_ACTIONS.MANAGER_CHANGE,
+        entityType: "trader",
+        entityId: traderId,
+        entityLabel: trader.code,
+        oldValue: trader.manager?.full_name ?? "—",
+        newValue: newManager?.full_name ?? "—",
+      });
+    }
   }
 
   const columns: DataTableColumn<EnrichedTrader>[] = [

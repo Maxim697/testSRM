@@ -31,6 +31,7 @@ export default async function PortfolioPage() {
           traders={traders}
           allManagers={(managersRes.data ?? []) as Profile[]}
           canReassign={canReassign}
+          currentUserId={current.userId}
         />
       )}
     </>

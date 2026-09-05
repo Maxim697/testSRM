@@ -35,6 +35,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Тижневий звіт", href: "/weekly-report" },
       { label: "Перевірка звітів", href: "/reports-review", roles: ["lead", "admin"] },
       { label: "Завдання команді", href: "/team-tasks", roles: ["lead", "admin"] },
+      { label: "Передача портфеля", href: "/portfolio-transfer", roles: ["lead", "admin"] },
       { label: "Новини", href: "/news" },
     ],
   },
@@ -44,6 +45,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Створити дашборд", href: "/create-dashboard" },
       { label: "Доступи", href: "/access", roles: ["lead", "admin"] },
+      { label: "Історія змін", href: "/audit", roles: ["lead", "admin"] },
     ],
   },
 ];

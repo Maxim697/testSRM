@@ -13,6 +13,7 @@ import { WeeklyTasksSection } from "@/components/weekly-report/weekly-tasks-sect
 import type { DrilldownItem } from "@/components/weekly-report/metric-drilldown-modal";
 import { DraftAssistant } from "@/components/weekly-report/draft-assistant";
 import { createClient } from "@/lib/supabase/client";
+import { AUDIT_ACTIONS, logAudit } from "@/lib/audit-log";
 import { ACTIVITY_METRIC_KEYS } from "@/lib/weekly-report-constants";
 import { addDays } from "@/lib/week-range";
 import { formatDate, formatDateTime } from "@/lib/format";
@@ -101,6 +102,17 @@ export function WeeklyReportView({
       setError("Не вдалося надіслати звіт. Спробуйте ще раз.");
       return;
     }
+
+    await logAudit(supabase, {
+      actorId: report.author_id,
+      action: AUDIT_ACTIONS.REPORT_SUBMITTED,
+      entityType: "report",
+      entityId: report.id,
+      entityLabel: `Тижневий звіт за ${formatDate(report.week_start)}`,
+      oldValue: report.status,
+      newValue: "submitted",
+    });
+
     setReport(data as WeeklyReport);
   }
 

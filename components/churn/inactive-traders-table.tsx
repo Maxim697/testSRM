@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
+import { AUDIT_ACTIONS, logAudit } from "@/lib/audit-log";
 import { cn } from "@/lib/utils";
 import { formatDate, formatNumber } from "@/lib/format";
 import type { EnrichedTrader } from "@/lib/trader-metrics";
@@ -82,7 +83,19 @@ export function InactiveTradersTable({
     const { error } = await supabase.from("traders").update({ status }).eq("id", traderId);
     if (error) {
       setStatuses((prev) => ({ ...prev, [traderId]: previous }));
+      return;
     }
+
+    const trader = traders.find((t) => t.id === traderId);
+    await logAudit(supabase, {
+      actorId: currentUserId,
+      action: AUDIT_ACTIONS.STATUS_CHANGE,
+      entityType: "trader",
+      entityId: traderId,
+      entityLabel: trader?.code ?? traderId,
+      oldValue: STATUS_LABELS[previous],
+      newValue: STATUS_LABELS[status],
+    });
   }
 
   const columns: DataTableColumn<EnrichedTrader>[] = [
