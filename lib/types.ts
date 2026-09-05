@@ -89,3 +89,12 @@ export type TraderWeekly = {
   status: TraderStatus | null;
   created_at: string;
 };
+
+export type WeeklyReportComment = {
+  id: string;
+  week_start: string;
+  metric_key: string;
+  comment: string | null;
+  author_id: string | null;
+  updated_at: string;
+};
