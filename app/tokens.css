@@ -1,0 +1,115 @@
+/*
+  Design tokens. Single source of truth for the whole app.
+  Dark theme is the default (:root). Light theme overrides the same
+  variables under [data-theme="light"]. Components must never hardcode
+  colors — reference these variables (via the Tailwind theme mapping
+  in globals.css) only.
+*/
+
+:root {
+  /* Surfaces — 4 levels, darkest to lightest, each step clearly visible */
+  --surface-0: #0d0d12; /* page background */
+  --surface-1: #14141c; /* sidebar, header, recessed inputs */
+  --surface-2: #1a1a24; /* cards, table containers */
+  --surface-3: #212130; /* popovers, menus, tooltips, hover/active states */
+
+  /* Text */
+  --text-primary: #f1f3f6;
+  --text-secondary: #a2acbd;
+  --text-muted: #6b7488;
+
+  /* Borders — thin, but readable against surfaces */
+  --border: #2c2c3a;
+  --border-strong: #3a3a4c;
+
+  /* Semantic */
+  --positive: #2fbf6e;
+  --positive-bg: rgba(47, 191, 110, 0.14);
+  --negative: #ef4a5e;
+  --negative-bg: rgba(239, 74, 94, 0.14);
+  --warning: #e8a339;
+  --warning-bg: rgba(232, 163, 57, 0.14);
+  --info: #3b8ff0;
+  --info-bg: rgba(59, 143, 240, 0.14);
+
+  /* Data series palette — fixed order, 8 colors */
+  --series-1: #3b8ff0;
+  --series-2: #2fbf6e;
+  --series-3: #e8a339;
+  --series-4: #a874e8;
+  --series-5: #ea5fa0;
+  --series-6: #33b8c4;
+  --series-7: #e8823b;
+  --series-8: #9fcf3e;
+
+  /* Tier colors */
+  --tier-gold: #d4a628;
+  --tier-gold-bg: rgba(212, 166, 40, 0.14);
+  --tier-silver: #a7b0bd;
+  --tier-silver-bg: rgba(167, 176, 189, 0.14);
+  --tier-bronze: #c07a4a;
+  --tier-bronze-bg: rgba(192, 122, 74, 0.14);
+
+  /* Section accents — one per nav group */
+  --accent-analytics: #3b8ff0;
+  --accent-analytics-bg: rgba(59, 143, 240, 0.15);
+  --accent-crm: #a874e8;
+  --accent-crm-bg: rgba(168, 116, 232, 0.15);
+  --accent-platform: #33b8c4;
+  --accent-platform-bg: rgba(51, 184, 196, 0.15);
+
+  /* Focus ring */
+  --focus-ring: #3b8ff0;
+
+  /* Layout */
+  --sidebar-width: 220px;
+  --row-height: 34px;
+}
+
+[data-theme="light"] {
+  --surface-0: #e7e9ed;
+  --surface-1: #f4f5f7;
+  --surface-2: #ffffff;
+  --surface-3: #ffffff;
+
+  --text-primary: #14171c;
+  --text-secondary: #545c6b;
+  --text-muted: #838b99;
+
+  --border: rgba(20, 23, 28, 0.14);
+  --border-strong: rgba(20, 23, 28, 0.24);
+
+  --positive: #1f9d57;
+  --positive-bg: rgba(31, 157, 87, 0.12);
+  --negative: #d8394c;
+  --negative-bg: rgba(216, 57, 76, 0.12);
+  --warning: #b97f1e;
+  --warning-bg: rgba(185, 127, 30, 0.12);
+  --info: #2b74d1;
+  --info-bg: rgba(43, 116, 209, 0.12);
+
+  --series-1: #2b74d1;
+  --series-2: #1f9d57;
+  --series-3: #b97f1e;
+  --series-4: #8a51d1;
+  --series-5: #c94886;
+  --series-6: #1f96a1;
+  --series-7: #c96a2b;
+  --series-8: #7aa82b;
+
+  --tier-gold: #a9791a;
+  --tier-gold-bg: rgba(169, 121, 26, 0.12);
+  --tier-silver: #6b7484;
+  --tier-silver-bg: rgba(107, 116, 132, 0.12);
+  --tier-bronze: #9c5c34;
+  --tier-bronze-bg: rgba(156, 92, 52, 0.12);
+
+  --accent-analytics: #2b74d1;
+  --accent-analytics-bg: rgba(43, 116, 209, 0.12);
+  --accent-crm: #8a51d1;
+  --accent-crm-bg: rgba(138, 81, 209, 0.12);
+  --accent-platform: #1f96a1;
+  --accent-platform-bg: rgba(31, 150, 161, 0.12);
+
+  --focus-ring: #2b74d1;
+}
