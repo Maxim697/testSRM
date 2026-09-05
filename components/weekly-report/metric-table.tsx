@@ -14,11 +14,19 @@ export function MetricTable({
   drilldown,
   editable,
   showDelta = true,
+  suggestions,
+  handledKeys,
+  applyAllSignal,
+  onSuggestionHandled,
 }: {
   rows: WeeklyReportRow[];
   drilldown: Record<string, DrilldownItem[]>;
   editable: boolean;
   showDelta?: boolean;
+  suggestions?: Record<string, string>;
+  handledKeys?: Set<string>;
+  applyAllSignal?: number;
+  onSuggestionHandled?: (metricKey: string) => void;
 }) {
   const [openMetric, setOpenMetric] = useState<string | null>(null);
   const openRow = rows.find((r) => r.metric_key === openMetric);
@@ -83,6 +91,9 @@ export function MetricTable({
           initialValue={r.comment ?? ""}
           editable={editable}
           placeholder="Причина зростання/падіння..."
+          suggestion={handledKeys?.has(r.metric_key) ? undefined : suggestions?.[r.metric_key]}
+          applyAllSignal={applyAllSignal}
+          onSuggestionHandled={() => onSuggestionHandled?.(r.metric_key)}
         />
       ),
       width: "320px",

@@ -11,11 +11,14 @@ import { MetricTable } from "@/components/weekly-report/metric-table";
 import { WorkSummarySection } from "@/components/weekly-report/work-summary-section";
 import { WeeklyTasksSection } from "@/components/weekly-report/weekly-tasks-section";
 import type { DrilldownItem } from "@/components/weekly-report/metric-drilldown-modal";
+import { DraftAssistant } from "@/components/weekly-report/draft-assistant";
 import { createClient } from "@/lib/supabase/client";
 import { ACTIVITY_METRIC_KEYS } from "@/lib/weekly-report-constants";
+import { addDays } from "@/lib/week-range";
 import { formatDate, formatDateTime } from "@/lib/format";
 import type { WeeklyReport, WeeklyReportRow, WeeklyReportStatus } from "@/lib/types";
 import type { WeeklyTaskWithNote } from "@/lib/weekly-reports";
+import type { ReportDraftResponse } from "@/lib/report-draft-types";
 
 const STATUS_LABELS: Record<WeeklyReportStatus, string> = {
   draft: "Чернетка",
@@ -29,12 +32,6 @@ const STATUS_BADGE: Record<WeeklyReportStatus, "neutral" | "amber" | "green" | "
   approved: "green",
   returned: "red",
 };
-
-function addDays(dateStr: string, days: number): string {
-  const d = new Date(dateStr + "T00:00:00Z");
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-}
 
 export function WeeklyReportView({
   weeks,
@@ -59,11 +56,34 @@ export function WeeklyReportView({
   const [report, setReport] = useState(initialReport);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [draft, setDraft] = useState<ReportDraftResponse | null>(null);
+  const [handledSuggestionKeys, setHandledSuggestionKeys] = useState<Set<string>>(new Set());
+  const [applyAllSignal, setApplyAllSignal] = useState(0);
 
   const editable = report.status === "draft" || report.status === "returned";
   const activityKeys: readonly string[] = ACTIVITY_METRIC_KEYS;
   const mainRows = rows.filter((r) => !activityKeys.includes(r.metric_key));
   const activityRows = rows.filter((r) => activityKeys.includes(r.metric_key));
+
+  const workSummaryKeys = ["work_done", "blockers", "next_week_plan"] as const;
+  const commentSuggestions = draft
+    ? Object.fromEntries(Object.entries(draft.comments).filter(([, v]) => v.trim()))
+    : undefined;
+  const workSuggestions = draft
+    ? Object.fromEntries(workSummaryKeys.filter((k) => draft[k]?.trim()).map((k) => [k, draft[k]]))
+    : undefined;
+  const hasPendingSuggestions =
+    (!!commentSuggestions && Object.keys(commentSuggestions).some((k) => !handledSuggestionKeys.has(k))) ||
+    (!!workSuggestions && Object.keys(workSuggestions).some((k) => !handledSuggestionKeys.has(k)));
+
+  function handleDraftLoaded(newDraft: ReportDraftResponse) {
+    setDraft(newDraft);
+    setHandledSuggestionKeys(new Set());
+  }
+
+  function handleSuggestionHandled(key: string) {
+    setHandledSuggestionKeys((prev) => new Set(prev).add(key));
+  }
 
   async function handleSubmit() {
     setSubmitting(true);
@@ -144,7 +164,24 @@ export function WeeklyReportView({
         </Card>
       )}
 
-      <MetricTable key={`main-${report.id}`} rows={mainRows} drilldown={drilldown} editable={editable} />
+      <DraftAssistant
+        reportId={report.id}
+        editable={editable}
+        hasSuggestions={hasPendingSuggestions}
+        onDraftLoaded={handleDraftLoaded}
+        onApplyAll={() => setApplyAllSignal((n) => n + 1)}
+      />
+
+      <MetricTable
+        key={`main-${report.id}`}
+        rows={mainRows}
+        drilldown={drilldown}
+        editable={editable}
+        suggestions={commentSuggestions}
+        handledKeys={handledSuggestionKeys}
+        applyAllSignal={applyAllSignal}
+        onSuggestionHandled={handleSuggestionHandled}
+      />
 
       <div>
         <h2 className="mb-2 text-base font-medium text-text-primary">Активність за тиждень</h2>
@@ -159,7 +196,14 @@ export function WeeklyReportView({
 
       <WeeklyTasksSection reportId={report.id} authorId={report.author_id} tasks={tasks} editable={editable} />
 
-      <WorkSummarySection report={report} editable={editable} />
+      <WorkSummarySection
+        report={report}
+        editable={editable}
+        suggestions={workSuggestions}
+        handledKeys={handledSuggestionKeys}
+        applyAllSignal={applyAllSignal}
+        onSuggestionHandled={handleSuggestionHandled}
+      />
 
       <div>
         <h2 className="mb-2 text-base font-medium text-text-primary">Історія своїх звітів</h2>
