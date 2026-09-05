@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { formatDate } from "@/lib/format";
 
 export type ScoreTrendPoint = {
@@ -23,6 +23,7 @@ export function ScoreTrendChart({
   className?: string;
 }) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const gradientId = useId();
 
   const scores = points.map((p) => p.score ?? 0);
   const dataMin = Math.min(...scores);
@@ -89,15 +90,28 @@ export function ScoreTrendChart({
           </text>
         )}
 
-        <path d={areaPath} fill="var(--color-info)" fillOpacity={0.16} stroke="none" />
-        <path d={linePath} fill="none" stroke="var(--color-info)" strokeWidth={2} />
+        <defs>
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--info)" stopOpacity={0.35} />
+            <stop offset="100%" stopColor="var(--info)" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <path d={areaPath} fill={`url(#${gradientId})`} stroke="none" />
+        <path
+          d={linePath}
+          fill="none"
+          stroke="var(--info)"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
         {coords.map((c, i) => (
           <g key={i}>
             <circle
               cx={c.x}
               cy={c.y}
               r={hoverIndex === i ? 4 : 3}
-              fill="var(--color-info)"
+              fill="var(--info)"
               stroke="var(--color-surface-2)"
               strokeWidth={1.5}
             />

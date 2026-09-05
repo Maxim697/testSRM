@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
-import { KpiCard } from "@/components/ui/kpi-card";
+import { KpiRow } from "@/components/ui/kpi-row";
 import { ScoreboardTable } from "@/components/scoreboard/scoreboard-table";
 import { getEnrichedTraders } from "@/lib/trader-metrics";
 import { createClient } from "@/lib/supabase/server";
@@ -49,12 +49,14 @@ export default async function ScoreboardPage() {
         <EmptyState title="Даних поки немає" description="У портфелі ще немає трейдерів." />
       ) : (
         <>
-          <div className="grid grid-cols-4 gap-3">
-            <KpiCard label="Середній score" value={avgScore.toString()} />
-            <KpiCard label="Green / Amber / Red" value={`${greenCount} / ${amberCount} / ${redCount}`} />
-            <KpiCard label="Вище 50 балів" value={above50.toString()} />
-            <KpiCard label="Всього трейдерів" value={traders.length.toString()} />
-          </div>
+          <KpiRow
+            items={[
+              { label: "Середній score", value: avgScore.toString() },
+              { label: "Green / Amber / Red", value: `${greenCount} / ${amberCount} / ${redCount}` },
+              { label: "Вище 50 балів", value: above50.toString() },
+              { label: "Всього трейдерів", value: traders.length.toString() },
+            ]}
+          />
 
           <ScoreboardTable rows={ranked} />
         </>

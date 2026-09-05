@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
-import { KpiCard } from "@/components/ui/kpi-card";
+import { KpiRow } from "@/components/ui/kpi-row";
 import { RiskList } from "@/components/churn/risk-list";
 import { InactiveTradersTable } from "@/components/churn/inactive-traders-table";
 import { getEnrichedTraders } from "@/lib/trader-metrics";
@@ -27,13 +27,23 @@ export default async function ChurnRiskPage() {
     <>
       <PageHeader title="Churn / Ризик" description="Скоринг ризику відтоку по портфелю" />
 
-      <div className="grid grid-cols-5 gap-3">
-        <KpiCard label={`${RISK_LEVEL_LABELS.low} ризик`} value={levelCounts.low.toString()} />
-        <KpiCard label={`${RISK_LEVEL_LABELS.medium} ризик`} value={levelCounts.medium.toString()} status="warning" />
-        <KpiCard label={`${RISK_LEVEL_LABELS.high} ризик`} value={levelCounts.high.toString()} status="negative" />
-        <KpiCard label={`${RISK_LEVEL_LABELS.critical} ризик`} value={levelCounts.critical.toString()} status="negative" />
-        <KpiCard label="Депозит під ризиком" value={formatNumber(depositAtRisk)} status={depositAtRisk > 0 ? "negative" : undefined} />
-      </div>
+      <KpiRow
+        items={[
+          {
+            label: "Депозит під ризиком",
+            value: formatNumber(depositAtRisk),
+            status: depositAtRisk > 0 ? "negative" : "neutral",
+          },
+          {
+            label: `${RISK_LEVEL_LABELS.critical} ризик`,
+            value: levelCounts.critical.toString(),
+            status: "negative",
+          },
+          { label: `${RISK_LEVEL_LABELS.high} ризик`, value: levelCounts.high.toString(), status: "negative" },
+          { label: `${RISK_LEVEL_LABELS.medium} ризик`, value: levelCounts.medium.toString(), status: "warning" },
+          { label: `${RISK_LEVEL_LABELS.low} ризик`, value: levelCounts.low.toString(), status: "positive" },
+        ]}
+      />
 
       <div>
         <h2 className="mb-2 text-base font-medium text-text-primary">Трейдери за рівнем ризику</h2>

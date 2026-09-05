@@ -66,6 +66,9 @@
   --color-accent-platform-bg: var(--accent-platform-bg);
 
   --color-focus-ring: var(--focus-ring);
+
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
 }
 
 html,
@@ -103,5 +106,98 @@ body {
 
 .h-row {
   height: var(--row-height);
+}
+
+/* ==========================================================================
+   Scrollbars — thin, theme-aware, everywhere (sidebar, tables, modals, page)
+   ========================================================================== */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+/* ==========================================================================
+   Glass — top layers only: header, sidebar, modals, dropdowns, tooltips,
+   popovers. Never applied to tables, KPI cards, or charts.
+   ========================================================================== */
+
+/* backdrop-blur-lg (Tailwind's own utility) is applied alongside this class
+   at each call site — a hand-written backdrop-filter here was silently
+   dropped by the CSS build, but Tailwind's own utility compiles fine. */
+.glass {
+  background: var(--glass-bg);
+  border-top: 1px solid var(--glass-border);
+  border-left: 1px solid var(--glass-border);
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   Motion — consistent, quick transitions on interactive elements; a gentle
+   lift on hover for buttons; a soft shimmer for loading skeletons.
+   ========================================================================== */
+
+a,
+button,
+input,
+select,
+textarea,
+[role="button"],
+[role="option"],
+[role="combobox"] {
+  transition:
+    background-color var(--transition-fast) ease,
+    border-color var(--transition-fast) ease,
+    color var(--transition-fast) ease,
+    opacity var(--transition-fast) ease,
+    transform var(--transition-fast) ease,
+    box-shadow var(--transition-fast) ease;
+}
+
+.btn-lift:hover {
+  transform: translateY(-1px);
+}
+.btn-lift:active {
+  transform: translateY(0);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-surface-3) 30%,
+    var(--color-border-strong) 50%,
+    var(--color-surface-3) 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
 }
 

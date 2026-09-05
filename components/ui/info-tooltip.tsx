@@ -18,7 +18,7 @@ export function InfoTooltip({ text }: { text: string }) {
         i
       </span>
       {open && (
-        <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1.5 w-56 -translate-x-1/2 rounded-control border border-border bg-surface-3 p-2 text-xs font-normal normal-case text-text-secondary">
+        <span className="glass backdrop-blur-lg pointer-events-none absolute bottom-full left-1/2 z-10 mb-1.5 w-56 -translate-x-1/2 rounded-control p-2 text-xs font-normal normal-case text-text-secondary">
           {text}
         </span>
       )}

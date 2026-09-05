@@ -137,6 +137,7 @@ export function ManagersTable({ managers }: { managers: ManagerSummary[] }) {
         data={managers}
         rowKey={(m) => m.id}
         rowClassName={(m) => (flagsFor(m).length > 0 ? "bg-warning-bg" : undefined)}
+        rowAccent={(m) => (flagsFor(m).length > 0 ? "var(--color-warning)" : undefined)}
       />
       <ManagerTradersModal manager={selected} onClose={() => setSelected(null)} />
     </>

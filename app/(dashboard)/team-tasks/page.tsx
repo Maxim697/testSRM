@@ -26,12 +26,12 @@ export default async function TeamTasksPage() {
   const [tasksRes, managersRes, tradersRes] = await Promise.all([
     supabase.from("tasks").select(TASK_WITH_RELATIONS_SELECT).order("due_date", { ascending: true }),
     supabase.from("profiles").select("id, full_name, telegram, role").eq("role", "manager"),
-    supabase.from("traders").select("id, code, manager_id").order("code"),
+    supabase.from("traders").select("id, code, manager_id, tier").order("code"),
   ]);
 
   const tasks = (tasksRes.data ?? []) as unknown as TaskWithRelations[];
   const managers = (managersRes.data ?? []) as Profile[];
-  const traders = (tradersRes.data ?? []) as Pick<Trader, "id" | "code" | "manager_id">[];
+  const traders = (tradersRes.data ?? []) as Pick<Trader, "id" | "code" | "manager_id" | "tier">[];
 
   return (
     <>

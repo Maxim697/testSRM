@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Select } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { KpiCard } from "@/components/ui/kpi-card";
+import { KpiRow } from "@/components/ui/kpi-row";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
 import { DualLineChart } from "@/components/ui/dual-line-chart";
@@ -85,17 +85,19 @@ export function TraderDetailedView({
         />
       ) : (
         <>
-          <div className="grid grid-cols-5 gap-3">
-            <KpiCard label="Score" value={selected.score?.toString() ?? "—"} delta={scoreDelta(selected.score_delta)} />
-            <KpiCard label="CR" value={formatPercent(selected.cr)} delta={percentDelta(selected.crDelta)} />
-            <KpiCard
-              label="Оборот за тиждень"
-              value={formatNumber(selected.turnover_week)}
-              delta={percentDelta(selected.turnover_delta)}
-            />
-            <KpiCard label="SLA IN" value={selected.sla_in ?? "—"} />
-            <KpiCard label="SLA OUT" value={selected.sla_out ?? "—"} />
-          </div>
+          <KpiRow
+            items={[
+              {
+                label: "Оборот за тиждень",
+                value: formatNumber(selected.turnover_week),
+                delta: percentDelta(selected.turnover_delta),
+              },
+              { label: "Score", value: selected.score?.toString() ?? "—", delta: scoreDelta(selected.score_delta) },
+              { label: "CR", value: formatPercent(selected.cr), delta: percentDelta(selected.crDelta) },
+              { label: "SLA IN", value: selected.sla_in ?? "—" },
+              { label: "SLA OUT", value: selected.sla_out ?? "—" },
+            ]}
+          />
 
           <Card>
             <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">

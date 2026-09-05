@@ -22,13 +22,14 @@
   --border: #2c2c3a;
   --border-strong: #3a3a4c;
 
-  /* Semantic */
+  /* Semantic — status backgrounds at ~20% so chips read as saturated color,
+     not a tint */
   --positive: #2fbf6e;
-  --positive-bg: rgba(47, 191, 110, 0.14);
+  --positive-bg: rgba(47, 191, 110, 0.2);
   --negative: #ef4a5e;
-  --negative-bg: rgba(239, 74, 94, 0.14);
+  --negative-bg: rgba(239, 74, 94, 0.2);
   --warning: #e8a339;
-  --warning-bg: rgba(232, 163, 57, 0.14);
+  --warning-bg: rgba(232, 163, 57, 0.2);
   --info: #3b8ff0;
   --info-bg: rgba(59, 143, 240, 0.14);
 
@@ -58,8 +59,21 @@
   --accent-platform: #33b8c4;
   --accent-platform-bg: rgba(51, 184, 196, 0.15);
 
-  /* Focus ring */
-  --focus-ring: #3b8ff0;
+  /* Focus ring — follows the current section accent (see --info override in
+     SectionAccentScope), so it re-tints along with links/primary actions */
+  --focus-ring: var(--info);
+
+  /* Glass — top layers only (header, sidebar, modals, popovers, tooltips).
+     Never used on tables, KPI cards or charts — those stay fully opaque. */
+  --glass-bg: rgba(18, 18, 26, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.09);
+
+  /* Scrollbar */
+  --scrollbar-thumb: var(--border-strong);
+  --scrollbar-thumb-hover: #4a4a60;
+
+  /* Motion */
+  --transition-fast: 150ms;
 
   /* Layout */
   --sidebar-width: 220px;
@@ -80,11 +94,11 @@
   --border-strong: rgba(20, 23, 28, 0.24);
 
   --positive: #1f9d57;
-  --positive-bg: rgba(31, 157, 87, 0.12);
+  --positive-bg: rgba(31, 157, 87, 0.16);
   --negative: #d8394c;
-  --negative-bg: rgba(216, 57, 76, 0.12);
+  --negative-bg: rgba(216, 57, 76, 0.16);
   --warning: #b97f1e;
-  --warning-bg: rgba(185, 127, 30, 0.12);
+  --warning-bg: rgba(185, 127, 30, 0.16);
   --info: #2b74d1;
   --info-bg: rgba(43, 116, 209, 0.12);
 
@@ -111,5 +125,9 @@
   --accent-platform: #1f96a1;
   --accent-platform-bg: rgba(31, 150, 161, 0.12);
 
-  --focus-ring: #2b74d1;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(20, 23, 28, 0.1);
+
+  --scrollbar-thumb: var(--border-strong);
+  --scrollbar-thumb-hover: #9099a6;
 }

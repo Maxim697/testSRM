@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tier } from "@/components/ui/tier";
 import { Button } from "@/components/ui/button";
-import { KpiCard } from "@/components/ui/kpi-card";
+import { KpiRow } from "@/components/ui/kpi-row";
 import { Tabs } from "@/components/ui/tabs";
 import { ScoreTrendChart } from "@/components/ui/score-trend-chart";
 import { HistoryTab } from "@/components/trader/history-tab";
@@ -131,25 +131,29 @@ export function TraderDetailView({
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-3">
-        <KpiCard
-          label="Оборот за тиждень"
-          value={formatNumber(trader.turnover_week)}
-          delta={percentDelta(trader.turnover_delta)}
-        />
-        <KpiCard
-          label="CR"
-          value={formatPercent(trader.cr)}
-          delta={
-            crDelta === null
-              ? undefined
-              : { value: `${crDelta > 0 ? "+" : ""}${crDelta}пп`, direction: crDelta > 0 ? "up" : crDelta < 0 ? "down" : "flat" }
-          }
-        />
-        <KpiCard label="Score" value={trader.score?.toString() ?? "—"} delta={scoreDelta(trader.score_delta)} />
-        <KpiCard label="SLA IN" value={trader.sla_in ?? "—"} />
-        <KpiCard label="SLA OUT" value={trader.sla_out ?? "—"} />
-      </div>
+      <KpiRow
+        items={[
+          {
+            label: "Оборот за тиждень",
+            value: formatNumber(trader.turnover_week),
+            delta: percentDelta(trader.turnover_delta),
+          },
+          {
+            label: "CR",
+            value: formatPercent(trader.cr),
+            delta:
+              crDelta === null
+                ? undefined
+                : {
+                    value: `${crDelta > 0 ? "+" : ""}${crDelta}пп`,
+                    direction: crDelta > 0 ? "up" : crDelta < 0 ? "down" : "flat",
+                  },
+          },
+          { label: "Score", value: trader.score?.toString() ?? "—", delta: scoreDelta(trader.score_delta) },
+          { label: "SLA IN", value: trader.sla_in ?? "—" },
+          { label: "SLA OUT", value: trader.sla_out ?? "—" },
+        ]}
+      />
 
       <Card className="flex h-72 flex-col">
         <div className="mb-2 shrink-0 text-xs font-medium uppercase tracking-wide text-text-muted">

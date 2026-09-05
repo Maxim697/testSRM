@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
-import { KpiCard } from "@/components/ui/kpi-card";
+import { KpiRow } from "@/components/ui/kpi-row";
 import { Card } from "@/components/ui/card";
 import { TrendChart } from "@/components/ui/trend-chart";
 import { StackedBarChart } from "@/components/ui/stacked-bar-chart";
@@ -46,12 +46,14 @@ export default async function WeeklyKpiPage() {
     <>
       <PageHeader title="Weekly KPI" description="Ключові показники за тиждень" />
 
-      <div className="grid grid-cols-4 gap-3">
-        <KpiCard label="Сумарний оборот" value={formatNumber(last.turnoverTotal)} delta={deltaBadge(turnoverDelta)} />
-        <KpiCard label="Середній CR" value={formatPercent(last.crAvg, 1)} delta={deltaBadge(crDelta, "пп")} />
-        <KpiCard label="Середній score" value={last.scoreAvg.toString()} delta={deltaBadge(scoreDelta)} />
-        <KpiCard label="Активних трейдерів" value={last.activeCount.toString()} delta={deltaBadge(activeDelta)} />
-      </div>
+      <KpiRow
+        items={[
+          { label: "Сумарний оборот", value: formatNumber(last.turnoverTotal), delta: deltaBadge(turnoverDelta) },
+          { label: "Середній CR", value: formatPercent(last.crAvg, 1), delta: deltaBadge(crDelta, "пп") },
+          { label: "Середній score", value: last.scoreAvg.toString(), delta: deltaBadge(scoreDelta) },
+          { label: "Активних трейдерів", value: last.activeCount.toString(), delta: deltaBadge(activeDelta) },
+        ]}
+      />
 
       <div className="grid grid-cols-2 gap-3">
         <Card>

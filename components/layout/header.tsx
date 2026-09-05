@@ -14,7 +14,7 @@ export function Header({ profile }: { profile: Profile }) {
   const overrideTitle = usePageTitle();
 
   return (
-    <header className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-surface-1 px-4">
+    <header className="glass backdrop-blur-lg sticky top-0 z-20 flex h-12 shrink-0 items-center justify-between border-b border-border px-4">
       <div className="flex items-center gap-2.5">
         {match && (
           <span

@@ -12,7 +12,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
 };
 
 const BASE_CLASSES =
-  "inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-control px-3 text-base font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50";
+  "btn-lift inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-control px-3 text-base font-medium disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;

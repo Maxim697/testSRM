@@ -280,6 +280,13 @@ export function PortfolioTable({
             ? "bg-negative-bg"
             : undefined
         }
+        rowAccent={(t) =>
+          t.risk.level === "critical" || t.risk.level === "high"
+            ? "var(--color-negative)"
+            : t.risk.level === "medium"
+              ? "var(--color-warning)"
+              : undefined
+        }
       />
     </div>
   );

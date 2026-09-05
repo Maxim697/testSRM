@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
-import { KpiCard } from "@/components/ui/kpi-card";
+import { KpiRow } from "@/components/ui/kpi-row";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RiskBadge } from "@/components/risk/risk-badge";
@@ -46,20 +46,22 @@ export default async function MyDayPage() {
     <>
       <PageHeader title="Мій день" description="Завдання та пріоритети на сьогодні" />
 
-      <div className="grid grid-cols-4 gap-3">
-        <KpiCard label="Трейдерів у портфелі" value={traders.length.toString()} />
-        <KpiCard
-          label="Потребують уваги"
-          value={attentionList.length.toString()}
-          status={attentionList.length > 0 ? "warning" : undefined}
-        />
-        <KpiCard label="Завдань у роботі" value={myInProgressCount.toString()} />
-        <KpiCard
-          label="Прострочено"
-          value={myOverdueCount.toString()}
-          status={myOverdueCount > 0 ? "negative" : undefined}
-        />
-      </div>
+      <KpiRow
+        items={[
+          { label: "Трейдерів у портфелі", value: traders.length.toString() },
+          {
+            label: "Потребують уваги",
+            value: attentionList.length.toString(),
+            status: attentionList.length > 0 ? "warning" : "neutral",
+          },
+          { label: "Завдань у роботі", value: myInProgressCount.toString() },
+          {
+            label: "Прострочено",
+            value: myOverdueCount.toString(),
+            status: myOverdueCount > 0 ? "negative" : "neutral",
+          },
+        ]}
+      />
 
       <div>
         <h2 className="mb-2 text-base font-medium text-text-primary">Потребують уваги сьогодні</h2>

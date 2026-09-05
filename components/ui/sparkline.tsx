@@ -2,7 +2,7 @@ const WIDTH = 84;
 const HEIGHT = 28;
 const PAD = 3;
 
-export function Sparkline({ values, color = "var(--color-info)" }: { values: (number | null)[]; color?: string }) {
+export function Sparkline({ values, color = "var(--info)" }: { values: (number | null)[]; color?: string }) {
   const clean = values.map((v) => v ?? 0);
   const min = Math.min(...clean);
   const max = Math.max(...clean);
@@ -22,7 +22,7 @@ export function Sparkline({ values, color = "var(--color-info)" }: { values: (nu
 
   return (
     <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} width={WIDTH} height={HEIGHT} className="inline-block align-middle">
-      <path d={path} fill="none" stroke={color} strokeWidth={1.5} />
+      <path d={path} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
       {last && <circle cx={last.x} cy={last.y} r={1.8} fill={color} />}
     </svg>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { formatDate, formatNumber, formatPercent } from "@/lib/format";
 
 export type TrendPoint = { weekStart: string; value: number };
@@ -17,7 +17,7 @@ function formatValue(value: number, format: "number" | "percent"): string {
 export function TrendChart({
   points,
   variant = "line",
-  color = "var(--color-info)",
+  color = "var(--info)",
   format = "number",
 }: {
   points: TrendPoint[];
@@ -26,6 +26,7 @@ export function TrendChart({
   format?: "number" | "percent";
 }) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const gradientId = useId();
 
   const values = points.map((p) => p.value);
   const min = Math.min(...values, 0);
@@ -57,6 +58,12 @@ export function TrendChart({
         style={{ height: HEIGHT }}
         onMouseLeave={() => setHoverIndex(null)}
       >
+        <defs>
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity={0.35} />
+            <stop offset="100%" stopColor={color} stopOpacity={0} />
+          </linearGradient>
+        </defs>
         <line
           x1={PAD_X}
           y1={PAD_Y + innerH}
@@ -65,8 +72,8 @@ export function TrendChart({
           stroke="var(--color-border)"
           strokeWidth={1}
         />
-        {areaPath && <path d={areaPath} fill={color} fillOpacity={0.16} stroke="none" />}
-        <path d={linePath} fill="none" stroke={color} strokeWidth={2} />
+        {areaPath && <path d={areaPath} fill={`url(#${gradientId})`} stroke="none" />}
+        <path d={linePath} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
         {coords.map((c, i) => (
           <g key={i}>
             <circle

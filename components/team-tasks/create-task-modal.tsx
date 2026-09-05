@@ -4,6 +4,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { TraderSelect } from "@/components/ui/trader-select";
 import { DateInput } from "@/components/ui/date-input";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
@@ -25,7 +26,7 @@ export function CreateTaskModal({
   open: boolean;
   onClose: () => void;
   managers: Profile[];
-  traders: Pick<Trader, "id" | "code" | "manager_id">[];
+  traders: Pick<Trader, "id" | "code" | "manager_id" | "tier">[];
   currentUserId: string;
   onCreated: (task: TaskWithRelations) => void;
 }) {
@@ -172,14 +173,7 @@ export function CreateTaskModal({
           </div>
           <div>
             <label className="mb-1.5 block text-xs text-text-secondary">Трейдер (необов&apos;язково)</label>
-            <Select value={traderId} onChange={(e) => setTraderId(e.target.value)}>
-              <option value="">Без трейдера</option>
-              {traderOptions.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.code}
-                </option>
-              ))}
-            </Select>
+            <TraderSelect value={traderId} onChange={setTraderId} options={traderOptions} />
           </div>
         </div>
 

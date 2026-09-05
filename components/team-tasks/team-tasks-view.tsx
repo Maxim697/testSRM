@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { KpiCard } from "@/components/ui/kpi-card";
+import { KpiRow } from "@/components/ui/kpi-row";
 import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +34,7 @@ export function TeamTasksView({
 }: {
   tasks: TaskWithRelations[];
   managers: Profile[];
-  traders: Pick<Trader, "id" | "code" | "manager_id">[];
+  traders: Pick<Trader, "id" | "code" | "manager_id" | "tier">[];
   currentUserId: string;
 }) {
   const [tasks, setTasks] = useState(initialTasks);
@@ -114,16 +114,18 @@ export function TeamTasksView({
 
   return (
     <div className="flex flex-1 flex-col gap-3">
-      <div className="grid grid-cols-4 gap-3">
-        <KpiCard label="Усього завдань" value={summary.total.toString()} />
-        <KpiCard label="У роботі" value={summary.inProgress.toString()} />
-        <KpiCard label="Виконано" value={summary.done.toString()} />
-        <KpiCard
-          label="Прострочено"
-          value={summary.overdue.toString()}
-          status={summary.overdue > 0 ? "negative" : undefined}
-        />
-      </div>
+      <KpiRow
+        items={[
+          { label: "Усього завдань", value: summary.total.toString() },
+          { label: "У роботі", value: summary.inProgress.toString(), status: "warning" },
+          { label: "Виконано", value: summary.done.toString(), status: "positive" },
+          {
+            label: "Прострочено",
+            value: summary.overdue.toString(),
+            status: summary.overdue > 0 ? "negative" : "neutral",
+          },
+        ]}
+      />
 
       <div className="flex items-center justify-between gap-3">
         <div className="grid flex-1 grid-cols-3 gap-3">
@@ -161,6 +163,7 @@ export function TeamTasksView({
           data={filtered}
           rowKey={(t) => t.id}
           rowClassName={(t) => (isOverdue(t) ? "bg-negative-bg" : undefined)}
+          rowAccent={(t) => (isOverdue(t) ? "var(--color-negative)" : undefined)}
         />
       )}
 

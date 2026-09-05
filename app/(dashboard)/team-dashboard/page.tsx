@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
-import { KpiCard } from "@/components/ui/kpi-card";
+import { KpiRow } from "@/components/ui/kpi-row";
 import { Card } from "@/components/ui/card";
 import { TrendChart } from "@/components/ui/trend-chart";
 import { ManagersTable } from "@/components/team-dashboard/managers-table";
@@ -39,30 +39,32 @@ export default async function TeamDashboardPage() {
     <>
       <PageHeader title="Дашборд команди" description="Загальна картина по всій команді" />
 
-      <div className="grid grid-cols-6 gap-3">
-        <KpiCard label="Трейдерів у роботі" value={data.kpi.tradersInWork.toString()} />
-        <KpiCard
-          label="Оборот за тиждень"
-          value={formatNumber(data.kpi.turnoverTotal)}
-          delta={deltaBadge(data.kpi.turnoverDelta)}
-        />
-        <KpiCard label="Середній CR" value={formatPercent(data.kpi.crAvg, 1)} />
-        <KpiCard
-          label="У зоні ризику"
-          value={data.kpi.riskCount.toString()}
-          status={data.kpi.riskCount > 0 ? "warning" : undefined}
-        />
-        <KpiCard
-          label="Звітів на розгляді"
-          value={data.kpi.reportsPending.toString()}
-          status={data.kpi.reportsPending > 0 ? "warning" : undefined}
-        />
-        <KpiCard
-          label="Прострочених завдань"
-          value={data.kpi.overdueTasks.toString()}
-          status={data.kpi.overdueTasks > 0 ? "negative" : undefined}
-        />
-      </div>
+      <KpiRow
+        items={[
+          {
+            label: "Оборот за тиждень",
+            value: formatNumber(data.kpi.turnoverTotal),
+            delta: deltaBadge(data.kpi.turnoverDelta),
+          },
+          { label: "Трейдерів у роботі", value: data.kpi.tradersInWork.toString() },
+          { label: "Середній CR", value: formatPercent(data.kpi.crAvg, 1) },
+          {
+            label: "У зоні ризику",
+            value: data.kpi.riskCount.toString(),
+            status: data.kpi.riskCount > 0 ? "warning" : "neutral",
+          },
+          {
+            label: "Звітів на розгляді",
+            value: data.kpi.reportsPending.toString(),
+            status: data.kpi.reportsPending > 0 ? "warning" : "neutral",
+          },
+          {
+            label: "Прострочених завдань",
+            value: data.kpi.overdueTasks.toString(),
+            status: data.kpi.overdueTasks > 0 ? "negative" : "neutral",
+          },
+        ]}
+      />
 
       <div>
         <h2 className="mb-2 text-base font-medium text-text-primary">Менеджери</h2>

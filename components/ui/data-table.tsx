@@ -25,12 +25,15 @@ export function DataTable<T>({
   data,
   rowKey,
   rowClassName,
+  rowAccent,
   className,
 }: {
   columns: DataTableColumn<T>[];
   data: T[];
   rowKey: (row: T) => string;
   rowClassName?: (row: T) => string | undefined;
+  /** CSS color for a left accent stripe on problem rows (high risk, overdue, etc.) */
+  rowAccent?: (row: T) => string | undefined;
   className?: string;
 }) {
   const [sort, setSort] = useState<{ key: string; direction: SortDirection } | null>(null);
@@ -84,24 +87,34 @@ export function DataTable<T>({
           </tr>
         </thead>
         <tbody>
-          {sortedData.map((row) => (
-            <tr
-              key={rowKey(row)}
-              className={cn(
-                "h-row border-b border-border last:border-b-0 hover:bg-surface-3",
-                rowClassName?.(row),
-              )}
-            >
-              {columns.map((column) => (
-                <td
-                  key={column.key}
-                  className={cn("px-3 text-text-primary", ALIGN_CLASSES[column.align ?? "left"])}
-                >
-                  {column.accessor(row)}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {sortedData.map((row) => {
+            const accent = rowAccent?.(row);
+            return (
+              <tr
+                key={rowKey(row)}
+                className={cn(
+                  "h-row border-b border-border last:border-b-0 transition-colors duration-150 hover:bg-surface-3",
+                  rowClassName?.(row),
+                )}
+              >
+                {columns.map((column, i) => (
+                  <td
+                    key={column.key}
+                    className={cn(
+                      "px-3 text-text-primary tabular-nums",
+                      i === 0 && accent && "relative",
+                      ALIGN_CLASSES[column.align ?? "left"],
+                    )}
+                  >
+                    {i === 0 && accent && (
+                      <span className="absolute inset-y-0 left-0 w-[3px]" style={{ background: accent }} />
+                    )}
+                    {column.accessor(row)}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

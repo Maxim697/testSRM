@@ -4,9 +4,17 @@ import { cn } from "@/lib/utils";
 type TierVariant = "gold" | "silver" | "bronze";
 
 const VARIANT_CLASSES: Record<TierVariant, string> = {
-  gold: "bg-tier-gold-bg text-tier-gold",
-  silver: "bg-tier-silver-bg text-tier-silver",
-  bronze: "bg-tier-bronze-bg text-tier-bronze",
+  gold: "text-tier-gold border-tier-gold/40",
+  silver: "text-tier-silver border-tier-silver/40",
+  bronze: "text-tier-bronze border-tier-bronze/40",
+};
+
+const VARIANT_GRADIENT: Record<TierVariant, string> = {
+  gold: "linear-gradient(135deg, color-mix(in srgb, var(--color-tier-gold) 30%, transparent), color-mix(in srgb, var(--color-tier-gold) 8%, transparent))",
+  silver:
+    "linear-gradient(135deg, color-mix(in srgb, var(--color-tier-silver) 32%, transparent), color-mix(in srgb, var(--color-tier-silver) 8%, transparent))",
+  bronze:
+    "linear-gradient(135deg, color-mix(in srgb, var(--color-tier-bronze) 30%, transparent), color-mix(in srgb, var(--color-tier-bronze) 8%, transparent))",
 };
 
 const VARIANT_LABELS: Record<TierVariant, string> = {
@@ -23,10 +31,11 @@ export function Tier({
   return (
     <span
       className={cn(
-        "inline-flex h-5 items-center rounded-control px-2 text-xs font-medium leading-none",
+        "inline-flex h-5 items-center rounded-control border px-2 text-xs font-semibold leading-none",
         VARIANT_CLASSES[variant],
         className,
       )}
+      style={{ background: VARIANT_GRADIENT[variant] }}
       {...props}
     >
       {props.children ?? VARIANT_LABELS[variant]}

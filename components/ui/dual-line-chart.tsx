@@ -25,7 +25,7 @@ export function DualLineChart({
   points,
   labelA,
   labelB,
-  colorA = "var(--color-info)",
+  colorA = "var(--info)",
   colorB = "var(--color-series-4)",
 }: {
   points: DualLinePoint[];
@@ -77,8 +77,8 @@ export function DualLineChart({
           stroke="var(--color-border)"
           strokeWidth={1}
         />
-        <path d={pathA} fill="none" stroke={colorA} strokeWidth={2} />
-        <path d={pathB} fill="none" stroke={colorB} strokeWidth={2} />
+        <path d={pathA} fill="none" stroke={colorA} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        <path d={pathB} fill="none" stroke={colorB} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
         {coordsA.map((c, i) => (
           <circle key={`a-${i}`} cx={c.x} cy={c.y} r={hoverIndex === i ? 4 : 3} fill={colorA} stroke="var(--color-surface-2)" strokeWidth={1.5} />
         ))}

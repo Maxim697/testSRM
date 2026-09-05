@@ -35,7 +35,7 @@ export function Modal({
       onClick={onClose}
     >
       <Card
-        className={cn("w-full max-w-md", className)}
+        className={cn("glass backdrop-blur-lg w-full max-w-md", className)}
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
