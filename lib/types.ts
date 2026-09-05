@@ -111,6 +111,10 @@ export type WeeklyReport = {
   reviewer_id: string | null;
   reviewer_comment: string | null;
   created_at: string;
+  work_done: string | null;
+  blockers: string | null;
+  help_needed: string | null;
+  next_week_plan: string | null;
 };
 
 export type WeeklyReportWithAuthor = WeeklyReport & {
@@ -124,5 +128,12 @@ export type WeeklyReportRow = {
   metric_label: string;
   value: string | null;
   delta: string | null;
+  comment: string | null;
+};
+
+export type WeeklyReportTaskNote = {
+  id: string;
+  report_id: string;
+  task_id: string;
   comment: string | null;
 };

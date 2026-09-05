@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_SECTIONS } from "@/lib/nav";
+import { getVisibleNavSections } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { UserCard } from "@/components/layout/user-card";
 import type { Profile } from "@/lib/types";
 
 export function Sidebar({ profile }: { profile: Profile }) {
   const pathname = usePathname();
+  const sections = getVisibleNavSections(profile.role);
 
   return (
     <aside className="flex h-full w-sidebar shrink-0 flex-col border-r border-border bg-surface-1">
@@ -17,7 +18,7 @@ export function Sidebar({ profile }: { profile: Profile }) {
       </div>
 
       <nav className="flex-1 space-y-3 overflow-y-auto px-2 pb-2">
-        {NAV_SECTIONS.map((section) => (
+        {sections.map((section) => (
           <div key={section.key}>
             <div
               className="px-2 text-xs font-medium uppercase tracking-wide"

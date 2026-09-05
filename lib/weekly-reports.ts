@@ -1,8 +1,21 @@
 import { createClient } from "@/lib/supabase/server";
 import { getEnrichedTraders } from "@/lib/trader-metrics";
-import { buildMetricRows } from "@/lib/weekly-report-metrics";
+import { buildActivityRows, buildMetricRows } from "@/lib/weekly-report-metrics";
+import { computeActivityMetrics } from "@/lib/weekly-report-activity";
+import { getWeeklyTasksWithNotesData } from "@/lib/weekly-report-tasks-core";
 import type { WeeklyAggregate } from "@/lib/weekly-metrics";
 import type { WeeklyReport, WeeklyReportRow } from "@/lib/types";
+
+export type { WeeklyTaskWithNote } from "@/lib/weekly-report-tasks-core";
+
+export async function getWeeklyTasksWithNotes(
+  authorId: string,
+  weekStart: string,
+  reportId: string,
+) {
+  const supabase = await createClient();
+  return getWeeklyTasksWithNotesData(supabase, authorId, weekStart, reportId);
+}
 
 export async function getOrCreateWeeklyReport(
   userId: string,
@@ -27,9 +40,10 @@ export async function getOrCreateWeeklyReport(
     return { report: existing as WeeklyReport, rows: (rows ?? []) as WeeklyReportRow[] };
   }
 
-  const [traders, tasksRes] = await Promise.all([
+  const [traders, tasksRes, activity] = await Promise.all([
     getEnrichedTraders(),
     supabase.from("tasks").select("id, status, due_date"),
+    computeActivityMetrics(userId, weekStart),
   ]);
   const today = new Date().toISOString().slice(0, 10);
   const tasks = tasksRes.data ?? [];
@@ -40,7 +54,10 @@ export async function getOrCreateWeeklyReport(
     (t) => t.daysSinceContact !== null && t.daysSinceContact >= 5,
   ).length;
 
-  const computedRows = buildMetricRows(weeks, weekIndex, { overdueTasksCount, noContactCount });
+  const computedRows = [
+    ...buildMetricRows(weeks, weekIndex, { overdueTasksCount, noContactCount }),
+    ...buildActivityRows(activity),
+  ];
 
   const { data: created, error: createError } = await supabase
     .from("weekly_reports")

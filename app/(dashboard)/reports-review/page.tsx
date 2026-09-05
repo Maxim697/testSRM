@@ -25,7 +25,7 @@ export default async function ReportsReviewPage() {
   const [reportsRes, managersRes] = await Promise.all([
     supabase
       .from("weekly_reports")
-      .select("*, author:profiles(full_name)")
+      .select("*, author:profiles!weekly_reports_author_id_fkey(full_name)")
       .order("submitted_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false }),
     supabase.from("profiles").select("id, full_name, telegram, role").eq("role", "manager"),

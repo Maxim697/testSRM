@@ -3,7 +3,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { WeeklyReportView } from "@/components/weekly-report/weekly-report-view";
 import { getWeeklyAggregates } from "@/lib/weekly-metrics";
 import { getCurrentProfile } from "@/lib/current-user";
-import { getOrCreateWeeklyReport } from "@/lib/weekly-reports";
+import { getOrCreateWeeklyReport, getWeeklyTasksWithNotes } from "@/lib/weekly-reports";
+import { buildDrilldown } from "@/lib/weekly-report-drilldown";
 import { createClient } from "@/lib/supabase/server";
 import type { WeeklyReport } from "@/lib/types";
 
@@ -37,11 +38,16 @@ export default async function WeeklyReportPage({
   const { report, rows } = await getOrCreateWeeklyReport(current.userId, weekStart, weekIndex, weeks);
 
   const supabase = await createClient();
-  const { data: historyData } = await supabase
-    .from("weekly_reports")
-    .select("*")
-    .eq("author_id", current.userId)
-    .order("week_start", { ascending: false });
+  const [historyRes, portfolioCountRes, weeklyTasks, drilldown] = await Promise.all([
+    supabase
+      .from("weekly_reports")
+      .select("*")
+      .eq("author_id", current.userId)
+      .order("week_start", { ascending: false }),
+    supabase.from("traders").select("*", { count: "exact", head: true }),
+    getWeeklyTasksWithNotes(current.userId, weekStart, report.id),
+    buildDrilldown(current.userId, weekStart),
+  ]);
 
   return (
     <>
@@ -51,7 +57,10 @@ export default async function WeeklyReportPage({
         selectedWeekStart={weekStart}
         report={report}
         rows={rows}
-        history={(historyData ?? []) as WeeklyReport[]}
+        history={(historyRes.data ?? []) as WeeklyReport[]}
+        portfolioCount={portfolioCountRes.count ?? 0}
+        tasks={weeklyTasks}
+        drilldown={drilldown}
       />
     </>
   );

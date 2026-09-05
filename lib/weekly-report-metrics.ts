@@ -1,4 +1,5 @@
 import type { WeeklyAggregate } from "@/lib/weekly-metrics";
+import type { ActivityMetrics } from "@/lib/weekly-report-activity";
 import { formatNumber, formatPercent } from "@/lib/format";
 
 export type ComputedMetricRow = {
@@ -76,6 +77,35 @@ export function buildMetricRows(
       metric_key: "overdue_tasks",
       metric_label: "Кількість прострочених завдань",
       value: liveMetrics.overdueTasksCount.toString(),
+      delta: "—",
+    },
+  ];
+}
+
+export function buildActivityRows(activity: ActivityMetrics): ComputedMetricRow[] {
+  return [
+    {
+      metric_key: "contacts_count",
+      metric_label: "Кількість контактів з трейдерами",
+      value: activity.contacts_count.toString(),
+      delta: "—",
+    },
+    {
+      metric_key: "tasks_created",
+      metric_label: "Завдань створено",
+      value: activity.tasks_created.toString(),
+      delta: "—",
+    },
+    {
+      metric_key: "tasks_closed",
+      metric_label: "Завдань закрито",
+      value: activity.tasks_closed.toString(),
+      delta: "—",
+    },
+    {
+      metric_key: "zero_contact_traders",
+      metric_label: "Трейдерів без жодного контакту",
+      value: activity.zero_contact_traders.toString(),
       delta: "—",
     },
   ];

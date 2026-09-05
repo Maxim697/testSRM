@@ -4,14 +4,18 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
+import { MetricTable } from "@/components/weekly-report/metric-table";
+import { WorkSummarySection } from "@/components/weekly-report/work-summary-section";
+import { WeeklyTasksSection } from "@/components/weekly-report/weekly-tasks-section";
+import type { DrilldownItem } from "@/components/weekly-report/metric-drilldown-modal";
 import { createClient } from "@/lib/supabase/client";
-import { cn } from "@/lib/utils";
+import { ACTIVITY_METRIC_KEYS } from "@/lib/weekly-report-constants";
 import { formatDate, formatDateTime } from "@/lib/format";
 import type { WeeklyReport, WeeklyReportRow, WeeklyReportStatus } from "@/lib/types";
+import type { WeeklyTaskWithNote } from "@/lib/weekly-reports";
 
 const STATUS_LABELS: Record<WeeklyReportStatus, string> = {
   draft: "Чернетка",
@@ -26,48 +30,10 @@ const STATUS_BADGE: Record<WeeklyReportStatus, "neutral" | "amber" | "green" | "
   returned: "red",
 };
 
-function CommentCell({
-  rowId,
-  initialValue,
-  editable,
-}: {
-  rowId: string;
-  initialValue: string;
-  editable: boolean;
-}) {
-  const [value, setValue] = useState(initialValue);
-  const [saving, setSaving] = useState(false);
-  const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
-
-  async function handleSave() {
-    setSaving(true);
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("weekly_report_rows")
-      .update({ comment: value })
-      .eq("id", rowId);
-    setSaving(false);
-    setStatus(error ? "error" : "saved");
-    if (!error) setTimeout(() => setStatus("idle"), 2000);
-  }
-
-  if (!editable) {
-    return <span className="text-text-secondary">{initialValue || "—"}</span>;
-  }
-
-  return (
-    <div className="flex items-center gap-1.5">
-      <Input
-        placeholder="Причина зростання/падіння..."
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        className={cn("h-7", status === "error" && "border-negative")}
-      />
-      <Button variant="ghost" className="h-7 shrink-0 px-2 text-xs" disabled={saving} onClick={handleSave}>
-        {saving ? "…" : status === "saved" ? "✓" : "OK"}
-      </Button>
-    </div>
-  );
+function addDays(dateStr: string, days: number): string {
+  const d = new Date(dateStr + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
 }
 
 export function WeeklyReportView({
@@ -76,12 +42,18 @@ export function WeeklyReportView({
   report: initialReport,
   rows,
   history,
+  portfolioCount,
+  tasks,
+  drilldown,
 }: {
   weeks: string[];
   selectedWeekStart: string;
   report: WeeklyReport;
   rows: WeeklyReportRow[];
   history: WeeklyReport[];
+  portfolioCount: number;
+  tasks: WeeklyTaskWithNote[];
+  drilldown: Record<string, DrilldownItem[]>;
 }) {
   const router = useRouter();
   const [report, setReport] = useState(initialReport);
@@ -89,6 +61,9 @@ export function WeeklyReportView({
   const [error, setError] = useState<string | null>(null);
 
   const editable = report.status === "draft" || report.status === "returned";
+  const activityKeys: readonly string[] = ACTIVITY_METRIC_KEYS;
+  const mainRows = rows.filter((r) => !activityKeys.includes(r.metric_key));
+  const activityRows = rows.filter((r) => activityKeys.includes(r.metric_key));
 
   async function handleSubmit() {
     setSubmitting(true);
@@ -108,43 +83,6 @@ export function WeeklyReportView({
     }
     setReport(data as WeeklyReport);
   }
-
-  const columns: DataTableColumn<WeeklyReportRow>[] = [
-    { key: "label", header: "Показник", accessor: (r) => r.metric_label },
-    {
-      key: "value",
-      header: "Значення",
-      accessor: (r) => <span className="tabular-nums font-medium">{r.value ?? "—"}</span>,
-      align: "right",
-    },
-    {
-      key: "delta",
-      header: "Δ значення",
-      accessor: (r) => {
-        const isPositive = r.delta?.startsWith("+");
-        const isNegative = r.delta?.startsWith("-");
-        return (
-          <span
-            className={cn(
-              "tabular-nums",
-              isPositive && "text-positive",
-              isNegative && "text-negative",
-              !isPositive && !isNegative && "text-text-muted",
-            )}
-          >
-            {r.delta ?? "—"}
-          </span>
-        );
-      },
-      align: "right",
-    },
-    {
-      key: "comment",
-      header: "Коментар (причини росту/падіння)",
-      accessor: (r) => <CommentCell rowId={r.id} initialValue={r.comment ?? ""} editable={editable} />,
-      width: "320px",
-    },
-  ];
 
   const historyColumns: DataTableColumn<WeeklyReport>[] = [
     { key: "week", header: "Тиждень", accessor: (r) => formatDate(r.week_start), sortValue: (r) => r.week_start },
@@ -191,6 +129,12 @@ export function WeeklyReportView({
 
       {error && <p className="text-sm text-negative">{error}</p>}
 
+      <p className="text-xs text-text-muted">
+        Дані розраховані автоматично на основі {portfolioCount} трейдерів вашого портфеля за
+        період з {formatDate(selectedWeekStart)} по {formatDate(addDays(selectedWeekStart, 6))}.
+        Оновлено: {formatDateTime(report.created_at)}.
+      </p>
+
       {report.status === "returned" && report.reviewer_comment && (
         <Card className="border-negative bg-negative-bg">
           <div className="text-xs font-medium uppercase tracking-wide text-negative">
@@ -200,7 +144,22 @@ export function WeeklyReportView({
         </Card>
       )}
 
-      <DataTable key={report.id} columns={columns} data={rows} rowKey={(r) => r.id} />
+      <MetricTable key={`main-${report.id}`} rows={mainRows} drilldown={drilldown} editable={editable} />
+
+      <div>
+        <h2 className="mb-2 text-base font-medium text-text-primary">Активність за тиждень</h2>
+        <MetricTable
+          key={`activity-${report.id}`}
+          rows={activityRows}
+          drilldown={drilldown}
+          editable={editable}
+          showDelta={false}
+        />
+      </div>
+
+      <WeeklyTasksSection reportId={report.id} tasks={tasks} editable={editable} />
+
+      <WorkSummarySection report={report} editable={editable} />
 
       <div>
         <h2 className="mb-2 text-base font-medium text-text-primary">Історія своїх звітів</h2>

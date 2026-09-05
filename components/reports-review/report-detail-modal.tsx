@@ -5,10 +5,15 @@ import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
+import { MetricTable } from "@/components/weekly-report/metric-table";
+import { WeeklyTasksSection } from "@/components/weekly-report/weekly-tasks-section";
+import type { DrilldownItem } from "@/components/weekly-report/metric-drilldown-modal";
 import { createClient } from "@/lib/supabase/client";
+import { buildDrilldownData } from "@/lib/weekly-report-drilldown-core";
+import { getWeeklyTasksWithNotesData, type WeeklyTaskWithNote } from "@/lib/weekly-report-tasks-core";
+import { ACTIVITY_METRIC_KEYS } from "@/lib/weekly-report-constants";
 import { cn } from "@/lib/utils";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatDateTime } from "@/lib/format";
 import type { WeeklyReportRow, WeeklyReportStatus, WeeklyReportWithAuthor } from "@/lib/types";
 
 const STATUS_LABELS: Record<WeeklyReportStatus, string> = {
@@ -24,6 +29,17 @@ const STATUS_BADGE: Record<WeeklyReportStatus, "neutral" | "amber" | "green" | "
   returned: "red",
 };
 
+function ReadOnlyField({ label, value }: { label: string; value: string | null }) {
+  return (
+    <div>
+      <div className="mb-1 text-xs text-text-secondary">{label}</div>
+      <p className="whitespace-pre-wrap rounded-control border border-border bg-surface-1 p-2.5 text-base text-text-primary">
+        {value || "—"}
+      </p>
+    </div>
+  );
+}
+
 export function ReportDetailModal({
   report,
   currentUserId,
@@ -36,7 +52,10 @@ export function ReportDetailModal({
   onReviewed: (updated: WeeklyReportWithAuthor) => void;
 }) {
   const [rows, setRows] = useState<WeeklyReportRow[]>([]);
-  const [loadingRows, setLoadingRows] = useState(false);
+  const [tasks, setTasks] = useState<WeeklyTaskWithNote[]>([]);
+  const [drilldown, setDrilldown] = useState<Record<string, DrilldownItem[]>>({});
+  const [portfolioCount, setPortfolioCount] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [comment, setComment] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,16 +65,21 @@ export function ReportDetailModal({
     // eslint-disable-next-line react-hooks/set-state-in-effect -- resets the local editor state whenever a different report is opened
     setComment(report.reviewer_comment ?? "");
     setError(null);
-    setLoadingRows(true);
+    setLoading(true);
     const supabase = createClient();
-    supabase
-      .from("weekly_report_rows")
-      .select("*")
-      .eq("report_id", report.id)
-      .then(({ data }) => {
-        setRows((data ?? []) as WeeklyReportRow[]);
-        setLoadingRows(false);
-      });
+
+    Promise.all([
+      supabase.from("weekly_report_rows").select("*").eq("report_id", report.id),
+      getWeeklyTasksWithNotesData(supabase, report.author_id, report.week_start, report.id),
+      buildDrilldownData(supabase, report.author_id, report.week_start),
+      supabase.from("traders").select("*", { count: "exact", head: true }).eq("manager_id", report.author_id),
+    ]).then(([rowsRes, tasksData, drilldownData, countRes]) => {
+      setRows((rowsRes.data ?? []) as WeeklyReportRow[]);
+      setTasks(tasksData);
+      setDrilldown(drilldownData);
+      setPortfolioCount(countRes.count ?? 0);
+      setLoading(false);
+    });
   }, [report]);
 
   async function handleReview(status: "approved" | "returned") {
@@ -72,7 +96,7 @@ export function ReportDetailModal({
         reviewed_at: new Date().toISOString(),
       })
       .eq("id", report.id)
-      .select("*, author:profiles(full_name)")
+      .select("*, author:profiles!weekly_reports_author_id_fkey(full_name)")
       .single();
     setSaving(false);
 
@@ -83,29 +107,16 @@ export function ReportDetailModal({
     onReviewed(data as unknown as WeeklyReportWithAuthor);
   }
 
-  const columns: DataTableColumn<WeeklyReportRow>[] = [
-    { key: "label", header: "Показник", accessor: (r) => r.metric_label },
-    {
-      key: "value",
-      header: "Значення",
-      accessor: (r) => <span className="tabular-nums font-medium">{r.value ?? "—"}</span>,
-      align: "right",
-    },
-    {
-      key: "delta",
-      header: "Δ",
-      accessor: (r) => <span className="tabular-nums">{r.delta ?? "—"}</span>,
-      align: "right",
-    },
-    { key: "comment", header: "Коментар менеджера", accessor: (r) => r.comment || "—" },
-  ];
+  const activityKeys: readonly string[] = ACTIVITY_METRIC_KEYS;
+  const mainRows = rows.filter((r) => !activityKeys.includes(r.metric_key));
+  const activityRows = rows.filter((r) => activityKeys.includes(r.metric_key));
 
   return (
     <Modal
       open={!!report}
       onClose={onClose}
       title={report ? `Звіт: ${report.author?.full_name ?? "—"}` : ""}
-      className="max-w-2xl"
+      className="max-w-3xl"
     >
       {report && (
         <div className="flex flex-col gap-3">
@@ -114,10 +125,32 @@ export function ReportDetailModal({
             <Badge variant={STATUS_BADGE[report.status]}>{STATUS_LABELS[report.status]}</Badge>
           </div>
 
-          {loadingRows ? (
+          {loading ? (
             <p className="text-sm text-text-muted">Завантаження…</p>
           ) : (
-            <DataTable columns={columns} data={rows} rowKey={(r) => r.id} />
+            <div className="flex max-h-[60vh] flex-col gap-3 overflow-y-auto pr-1">
+              <p className="text-xs text-text-muted">
+                Дані розраховані автоматично на основі {portfolioCount} трейдерів портфеля за
+                період з {formatDate(report.week_start)}. Оновлено: {formatDateTime(report.created_at)}.
+              </p>
+
+              <MetricTable rows={mainRows} drilldown={drilldown} editable={false} />
+
+              <div>
+                <h3 className="mb-2 text-sm font-medium text-text-primary">Активність за тиждень</h3>
+                <MetricTable rows={activityRows} drilldown={drilldown} editable={false} showDelta={false} />
+              </div>
+
+              <WeeklyTasksSection reportId={report.id} tasks={tasks} editable={false} />
+
+              <div className="flex flex-col gap-3">
+                <h3 className="text-sm font-medium text-text-primary">Робота за тиждень</h3>
+                <ReadOnlyField label="Що зроблено" value={report.work_done} />
+                <ReadOnlyField label="Проблеми і блокери" value={report.blockers} />
+                <ReadOnlyField label="Потрібна допомога від керівника" value={report.help_needed} />
+                <ReadOnlyField label="Плани на наступний тиждень" value={report.next_week_plan} />
+              </div>
+            </div>
           )}
 
           <div>
