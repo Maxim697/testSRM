@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ShieldIcon } from "@/components/ui/empty-icons";
 import { TransferForm } from "@/components/portfolio-transfer/transfer-form";
 import { getEnrichedTraders } from "@/lib/trader-metrics";
 import { getCurrentProfile } from "@/lib/current-user";
@@ -15,6 +16,7 @@ export default async function PortfolioTransferPage() {
       <>
         <PageHeader title="Передача портфеля" description="Перерозподіл трейдерів між менеджерами" />
         <EmptyState
+          icon={<ShieldIcon />}
           title="Немає доступу"
           description="Цей розділ доступний тільки тім-лідам та адміністраторам."
         />

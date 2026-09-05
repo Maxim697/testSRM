@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AUDIT_ACTIONS, logAudit } from "@/lib/audit-log";
@@ -25,6 +25,13 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("deactivated")) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of a redirect query param on mount
+      setError("Обліковий запис деактивовано. Зверніться до адміністратора.");
+    }
+  }, []);
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
@@ -43,6 +50,19 @@ export default function LoginPage() {
     }
 
     if (signInData.user) {
+      const { data: profileRow } = await supabase
+        .from("profiles")
+        .select("is_active")
+        .eq("id", signInData.user.id)
+        .single();
+
+      if (profileRow && profileRow.is_active === false) {
+        await supabase.auth.signOut();
+        setLoading(false);
+        setError("Обліковий запис деактивовано. Зверніться до адміністратора.");
+        return;
+      }
+
       await logAudit(supabase, {
         actorId: signInData.user.id,
         action: AUDIT_ACTIONS.LOGIN,

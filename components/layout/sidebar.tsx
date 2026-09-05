@@ -7,7 +7,13 @@ import { cn } from "@/lib/utils";
 import { UserCard } from "@/components/layout/user-card";
 import type { Profile } from "@/lib/types";
 
-export function Sidebar({ profile }: { profile: Profile }) {
+export function Sidebar({
+  profile,
+  unreadHrefs,
+}: {
+  profile: Profile;
+  unreadHrefs?: Set<string>;
+}) {
   const pathname = usePathname();
   const sections = getVisibleNavSections(profile.role);
 
@@ -56,7 +62,13 @@ export function Sidebar({ profile }: { profile: Profile }) {
                           : "text-text-secondary hover:bg-surface-2 hover:text-text-primary",
                       )}
                     >
-                      {item.label}
+                      <span className="truncate">{item.label}</span>
+                      {unreadHrefs?.has(item.href) && (
+                        <span
+                          className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full"
+                          style={{ background: `var(--accent-${section.key})` }}
+                        />
+                      )}
                     </Link>
                   </li>
                 );

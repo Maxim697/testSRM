@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ShieldIcon } from "@/components/ui/empty-icons";
 import { KpiRow } from "@/components/ui/kpi-row";
 import { RiskList } from "@/components/churn/risk-list";
 import { InactiveTradersTable } from "@/components/churn/inactive-traders-table";
@@ -53,7 +54,7 @@ export default async function ChurnRiskPage() {
       <div>
         <h2 className="mb-2 text-base font-medium text-text-primary">Неактивні 3+ дні</h2>
         {inactiveTraders.length === 0 ? (
-          <EmptyState title="Немає неактивних" description="Усі трейдери на зв'язку." />
+          <EmptyState icon={<ShieldIcon />} title="Немає неактивних" description="Усі трейдери на зв'язку." />
         ) : (
           <InactiveTradersTable traders={inactiveTraders} currentUserId={current.userId} />
         )}

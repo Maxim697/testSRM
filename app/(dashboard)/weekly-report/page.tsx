@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ChartIcon } from "@/components/ui/empty-icons";
 import { WeeklyReportView } from "@/components/weekly-report/weekly-report-view";
 import { getWeeklyAggregates } from "@/lib/weekly-metrics";
 import { getCurrentProfile } from "@/lib/current-user";
@@ -22,7 +23,11 @@ export default async function WeeklyReportPage({
     return (
       <>
         <PageHeader title="Тижневий звіт" description="Підсумки роботи за тиждень" />
-        <EmptyState title="Даних поки немає" description="Історія по тижнях ще не накопичилась." />
+        <EmptyState
+          icon={<ChartIcon />}
+          title="Даних поки немає"
+          description="Історія по тижнях ще не накопичилась."
+        />
       </>
     );
   }

@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { HistoryIcon } from "@/components/ui/empty-icons";
 import { createClient } from "@/lib/supabase/client";
 import { formatDateTime } from "@/lib/format";
 import type { InteractionKind, InteractionWithAuthor } from "@/lib/types";
@@ -90,7 +91,11 @@ export function HistoryTab({
       </Card>
 
       {interactions.length === 0 ? (
-        <EmptyState title="Ще немає записів" description="Історія взаємодій з трейдером порожня." />
+        <EmptyState
+          icon={<HistoryIcon />}
+          title="Ще немає записів"
+          description="Історія взаємодій з трейдером порожня."
+        />
       ) : (
         <div className="flex flex-col gap-2">
           {interactions.map((item) => (

@@ -5,6 +5,7 @@ export type Profile = {
   full_name: string | null;
   telegram: string | null;
   role: Role;
+  is_active: boolean;
 };
 
 export type TraderTier = "gold" | "silver" | "bronze";
@@ -177,4 +178,15 @@ export type AuditLogEntry = {
 
 export type AuditLogWithActor = AuditLogEntry & {
   actor: { full_name: string | null } | null;
+};
+
+export type NotificationEntry = {
+  id: string;
+  user_id: string;
+  kind: string;
+  title: string;
+  body: string | null;
+  link: string | null;
+  is_read: boolean;
+  created_at: string;
 };

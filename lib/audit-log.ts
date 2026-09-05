@@ -12,6 +12,9 @@ export const AUDIT_ACTIONS = {
   REPORT_REVIEWED: "report_reviewed",
   DRAFT_GENERATED: "draft_generated",
   LOGIN: "login",
+  USER_CREATED: "user_created",
+  USER_DEACTIVATED: "user_deactivated",
+  USER_ACTIVATED: "user_activated",
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
@@ -26,6 +29,9 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   [AUDIT_ACTIONS.REPORT_REVIEWED]: "Розгляд звіту",
   [AUDIT_ACTIONS.DRAFT_GENERATED]: "Генерація чернетки",
   [AUDIT_ACTIONS.LOGIN]: "Вхід у систему",
+  [AUDIT_ACTIONS.USER_CREATED]: "Створення користувача",
+  [AUDIT_ACTIONS.USER_DEACTIVATED]: "Деактивація користувача",
+  [AUDIT_ACTIONS.USER_ACTIVATED]: "Активація користувача",
 };
 
 export const AUDIT_ENTITY_TYPE_LABELS: Record<AuditEntityType, string> = {

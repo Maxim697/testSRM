@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { TASK_WITH_RELATIONS_SELECT } from "@/lib/task-actions";
 import { AUDIT_ACTIONS, logAudit } from "@/lib/audit-log";
+import { NOTIFICATION_KINDS, createNotification } from "@/lib/notifications";
 import type { Profile, TaskKind, TaskPriority, TaskWithRelations, Trader } from "@/lib/types";
 
 const KIND_LABELS: Record<TaskKind, string> = { daily: "Щоденна", weekly: "Щотижнева", monthly: "Щомісячна" };
@@ -99,6 +100,14 @@ export function CreateTaskModal({
       entityId: (data as unknown as TaskWithRelations).id,
       entityLabel: title.trim(),
       newValue: `Виконавець: ${assignee?.full_name ?? "—"}`,
+    });
+
+    await createNotification(supabase, {
+      userId: assigneeId,
+      kind: NOTIFICATION_KINDS.TASK_ASSIGNED,
+      title: "Нове завдання від керівника",
+      body: title.trim(),
+      link: "/my-day",
     });
 
     onCreated(data as unknown as TaskWithRelations);

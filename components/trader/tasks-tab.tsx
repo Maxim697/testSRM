@@ -7,6 +7,7 @@ import { Select } from "@/components/ui/select";
 import { DateInput } from "@/components/ui/date-input";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ListCheckIcon } from "@/components/ui/empty-icons";
 import { createClient } from "@/lib/supabase/client";
 import { TASK_WITH_RELATIONS_SELECT, taskRequiresCommentToClose, updateTaskStatus } from "@/lib/task-actions";
 import { formatDate } from "@/lib/format";
@@ -142,7 +143,11 @@ export function TasksTab({
       </Card>
 
       {tasks.length === 0 ? (
-        <EmptyState title="Немає завдань" description="Для цього трейдера ще не створено жодного завдання." />
+        <EmptyState
+          icon={<ListCheckIcon />}
+          title="Немає завдань"
+          description="Для цього трейдера ще не створено жодного завдання."
+        />
       ) : (
         <div className="flex flex-col gap-2">
           {tasks.map((task) => (

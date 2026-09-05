@@ -7,6 +7,7 @@ import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ListCheckIcon } from "@/components/ui/empty-icons";
 import { CreateTaskModal } from "@/components/team-tasks/create-task-modal";
 import { formatDate } from "@/lib/format";
 import type { Profile, TaskKind, TaskPriority, TaskStatus, TaskWithRelations, Trader } from "@/lib/types";
@@ -156,7 +157,11 @@ export function TeamTasksView({
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState title="Завдань немає" description="Ще не поставлено жодного завдання команді." />
+        <EmptyState
+          icon={<ListCheckIcon />}
+          title="Завдань немає"
+          description="Ще не поставлено жодного завдання команді."
+        />
       ) : (
         <DataTable
           columns={columns}

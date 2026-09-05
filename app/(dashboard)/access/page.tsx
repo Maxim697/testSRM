@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ShieldIcon } from "@/components/ui/empty-icons";
 import { AccessMatrix } from "@/components/access/access-matrix";
 import { UsersTable } from "@/components/access/users-table";
 import { getCurrentProfile } from "@/lib/current-user";
@@ -15,6 +16,7 @@ export default async function AccessPage() {
       <>
         <PageHeader title="Доступи" description="Керування ролями та правами доступу" />
         <EmptyState
+          icon={<ShieldIcon />}
           title="Немає доступу"
           description="Цей розділ доступний тільки тім-лідам та адміністраторам."
         />
@@ -24,7 +26,7 @@ export default async function AccessPage() {
 
   const supabase = await createClient();
   const [usersRes, tradersRes] = await Promise.all([
-    supabase.from("profiles").select("id, full_name, telegram, role").order("full_name"),
+    supabase.from("profiles").select("id, full_name, telegram, role, is_active").order("full_name"),
     supabase.from("traders").select("manager_id"),
   ]);
 

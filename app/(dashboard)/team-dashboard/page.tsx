@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ShieldIcon, UsersIcon, ChartIcon } from "@/components/ui/empty-icons";
 import { KpiRow } from "@/components/ui/kpi-row";
 import { Card } from "@/components/ui/card";
 import { TrendChart } from "@/components/ui/trend-chart";
@@ -26,6 +27,7 @@ export default async function TeamDashboardPage() {
       <>
         <PageHeader title="Дашборд команди" description="Загальна картина по всій команді" />
         <EmptyState
+          icon={<ShieldIcon />}
           title="Немає доступу"
           description="Цей розділ доступний тільки тім-лідам та адміністраторам."
         />
@@ -69,7 +71,7 @@ export default async function TeamDashboardPage() {
       <div>
         <h2 className="mb-2 text-base font-medium text-text-primary">Менеджери</h2>
         {data.managers.length === 0 ? (
-          <EmptyState title="Немає менеджерів" description="У системі ще немає жодного менеджера." />
+          <EmptyState icon={<UsersIcon />} title="Немає менеджерів" description="У системі ще немає жодного менеджера." />
         ) : (
           <ManagersTable managers={data.managers} />
         )}
@@ -96,7 +98,7 @@ export default async function TeamDashboardPage() {
       <div>
         <h2 className="mb-2 text-base font-medium text-text-primary">Динаміка команди</h2>
         {data.weeklyTrend.length === 0 ? (
-          <EmptyState title="Даних поки немає" description="Історія по тижнях ще не накопичилась." />
+          <EmptyState icon={<ChartIcon />} title="Даних поки немає" description="Історія по тижнях ще не накопичилась." />
         ) : (
           <div className="grid grid-cols-2 gap-3">
             <Card>
@@ -127,7 +129,7 @@ export default async function TeamDashboardPage() {
       <div>
         <h2 className="mb-2 text-base font-medium text-text-primary">Потребує уваги</h2>
         {data.topRisk.length === 0 ? (
-          <EmptyState title="Ризиків не виявлено" description="Немає трейдерів у зоні ризику." />
+          <EmptyState icon={<ShieldIcon />} title="Ризиків не виявлено" description="Немає трейдерів у зоні ризику." />
         ) : (
           <TopRiskTable traders={data.topRisk} />
         )}

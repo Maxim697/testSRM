@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format";
 
 export type ScoreTrendPoint = {
@@ -24,6 +25,14 @@ export function ScoreTrendChart({
 }) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const gradientId = useId();
+
+  if (points.length === 0) {
+    return (
+      <div className={cn("flex h-full w-full items-center justify-center text-sm text-text-muted", className)}>
+        Немає даних за цей період
+      </div>
+    );
+  }
 
   const scores = points.map((p) => p.score ?? 0);
   const dataMin = Math.min(...scores);

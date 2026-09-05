@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { DateInput } from "@/components/ui/date-input";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { HistoryIcon } from "@/components/ui/empty-icons";
 import { formatDateTime } from "@/lib/format";
 import { AUDIT_ACTION_LABELS, AUDIT_ENTITY_TYPE_LABELS, type AuditEntityType } from "@/lib/audit-log";
 import type { AuditLogWithActor, Profile } from "@/lib/types";
@@ -146,7 +147,15 @@ export function AuditLogTable({ logs, users }: { logs: AuditLogWithActor[]; user
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState title="Нічого не знайдено" description="Немає записів за обраними фільтрами." />
+        logs.length === 0 ? (
+          <EmptyState
+            icon={<HistoryIcon />}
+            title="Історія змін порожня"
+            description="Тут з'являться дії користувачів у системі."
+          />
+        ) : (
+          <EmptyState title="Нічого не знайдено" description="Немає записів за обраними фільтрами." />
+        )
       ) : (
         <DataTable columns={columns} data={filtered} rowKey={(l) => l.id} />
       )}

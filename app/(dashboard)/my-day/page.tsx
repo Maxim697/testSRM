@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ShieldIcon } from "@/components/ui/empty-icons";
 import { KpiRow } from "@/components/ui/kpi-row";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { getEnrichedTraders } from "@/lib/trader-metrics";
 import { getCurrentProfile } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { TASK_WITH_RELATIONS_SELECT } from "@/lib/task-actions";
+import { notifyCriticalRiskTraders } from "@/lib/risk-notifications";
 import type { TaskWithRelations } from "@/lib/types";
 
 export default async function MyDayPage() {
@@ -26,6 +28,8 @@ export default async function MyDayPage() {
   ]);
 
   const tasks = (tasksRes.data ?? []) as unknown as TaskWithRelations[];
+
+  await notifyCriticalRiskTraders(supabase, current.userId, traders);
 
   const attentionList = traders
     .filter((trader) => trader.risk.level !== "low")
@@ -66,7 +70,11 @@ export default async function MyDayPage() {
       <div>
         <h2 className="mb-2 text-base font-medium text-text-primary">Потребують уваги сьогодні</h2>
         {attentionList.length === 0 ? (
-          <EmptyState title="Все спокійно" description="Немає трейдерів, що потребують уваги." />
+          <EmptyState
+            icon={<ShieldIcon />}
+            title="Все спокійно"
+            description="Немає трейдерів, що потребують уваги."
+          />
         ) : (
           <div className="flex flex-col gap-2">
             {attentionList.map((trader) => (

@@ -11,6 +11,7 @@ import { RiskBadge } from "@/components/risk/risk-badge";
 import { TransferHistoryTable } from "@/components/portfolio-transfer/transfer-history-table";
 import { createClient } from "@/lib/supabase/client";
 import { AUDIT_ACTIONS, logAudit } from "@/lib/audit-log";
+import { NOTIFICATION_KINDS, createNotification } from "@/lib/notifications";
 import { formatNumber } from "@/lib/format";
 import type { EnrichedTrader } from "@/lib/trader-metrics";
 import type { PortfolioTransferWithNames, Profile } from "@/lib/types";
@@ -154,6 +155,14 @@ export function TransferForm({
         }),
       ),
     ]);
+
+    await createNotification(supabase, {
+      userId: toManagerId,
+      kind: NOTIFICATION_KINDS.PORTFOLIO_TRANSFERRED,
+      title: "Вам передано трейдерів",
+      body: `Передано ${traderIds.length} трейдерів від ${fromManagerName}.`,
+      link: "/portfolio",
+    });
 
     setTraders((prev) =>
       prev.map((t) =>

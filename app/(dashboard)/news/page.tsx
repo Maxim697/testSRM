@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { MegaphoneIcon } from "@/components/ui/empty-icons";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { NewsForm } from "@/components/news/news-form";
@@ -35,7 +36,11 @@ export default async function NewsPage() {
       )}
 
       {news.length === 0 ? (
-        <EmptyState title="Новин ще немає" description="Тут з'являться оновлення від команди." />
+        <EmptyState
+          icon={<MegaphoneIcon />}
+          title="Новин ще немає"
+          description="Тут з'являться оновлення від команди."
+        />
       ) : (
         <div className="flex flex-col gap-2">
           {news.map((item) => (

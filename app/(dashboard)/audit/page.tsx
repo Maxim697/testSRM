@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ShieldIcon } from "@/components/ui/empty-icons";
 import { AuditLogTable } from "@/components/audit/audit-log-table";
 import { getCurrentProfile } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
@@ -14,6 +15,7 @@ export default async function AuditPage() {
       <>
         <PageHeader title="Історія змін" description="Аудит дій у системі" />
         <EmptyState
+          icon={<ShieldIcon />}
           title="Немає доступу"
           description="Цей розділ доступний тільки тім-лідам та адміністраторам."
         />

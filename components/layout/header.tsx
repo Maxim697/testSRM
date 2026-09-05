@@ -6,9 +6,10 @@ import { roleLabel } from "@/lib/roles";
 import { usePageTitle } from "@/lib/page-title";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import type { Profile } from "@/lib/types";
+import { NotificationBell } from "@/components/layout/notification-bell";
+import type { NotificationEntry, Profile } from "@/lib/types";
 
-export function Header({ profile }: { profile: Profile }) {
+export function Header({ profile, notifications }: { profile: Profile; notifications: NotificationEntry[] }) {
   const pathname = usePathname();
   const match = findNavItem(pathname);
   const overrideTitle = usePageTitle();
@@ -31,6 +32,7 @@ export function Header({ profile }: { profile: Profile }) {
         <Badge variant="neutral" className="whitespace-nowrap">
           {roleLabel(profile.role)}
         </Badge>
+        <NotificationBell notifications={notifications} />
         <ThemeToggle />
       </div>
     </header>

@@ -6,6 +6,7 @@ import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ListCheckIcon } from "@/components/ui/empty-icons";
 import { createClient } from "@/lib/supabase/client";
 import { taskRequiresCommentToClose, updateTaskStatus } from "@/lib/task-actions";
 import { formatDate } from "@/lib/format";
@@ -145,7 +146,11 @@ export function MyTasksSection({
       <div>
         <h2 className="mb-2 text-base font-medium text-text-primary">Завдання від керівника</h2>
         {fromLead.length === 0 ? (
-          <EmptyState title="Завдань немає" description="Керівник поки не ставив вам завдань на сьогодні." />
+          <EmptyState
+            icon={<ListCheckIcon />}
+            title="Завдань немає"
+            description="Керівник поки не ставив вам завдань на сьогодні."
+          />
         ) : (
           <div className="flex flex-col gap-2">
             {fromLead.map((task) => (
@@ -158,7 +163,11 @@ export function MyTasksSection({
       <div>
         <h2 className="mb-2 text-base font-medium text-text-primary">Мої завдання</h2>
         {own.length === 0 ? (
-          <EmptyState title="Завдань немає" description="На сьогодні для вас немає завдань з дедлайном." />
+          <EmptyState
+            icon={<ListCheckIcon />}
+            title="Завдань немає"
+            description="На сьогодні для вас немає завдань з дедлайном."
+          />
         ) : (
           <div className="flex flex-col gap-2">
             {own.map((task) => (

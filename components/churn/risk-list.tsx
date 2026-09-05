@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tier } from "@/components/ui/tier";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ShieldIcon } from "@/components/ui/empty-icons";
 import { RiskBadge } from "@/components/risk/risk-badge";
 import { RiskFactorList } from "@/components/risk/risk-factor-list";
 import { createClient } from "@/lib/supabase/client";
@@ -113,7 +114,15 @@ export function RiskList({
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState title="Нічого не знайдено" description="Немає трейдерів за обраними фільтрами." />
+        traders.length === 0 ? (
+          <EmptyState
+            icon={<ShieldIcon />}
+            title="Ризиків не виявлено"
+            description="Усі трейдери портфеля перебувають у безпечній зоні."
+          />
+        ) : (
+          <EmptyState title="Нічого не знайдено" description="Немає трейдерів за обраними фільтрами." />
+        )
       ) : (
         <div className="flex flex-col gap-2">
           {filtered.map((trader) => (

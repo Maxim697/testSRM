@@ -10,6 +10,7 @@ import { WeeklyTasksSection } from "@/components/weekly-report/weekly-tasks-sect
 import type { DrilldownItem } from "@/components/weekly-report/metric-drilldown-modal";
 import { createClient } from "@/lib/supabase/client";
 import { AUDIT_ACTIONS, logAudit } from "@/lib/audit-log";
+import { NOTIFICATION_KINDS, createNotification } from "@/lib/notifications";
 import { buildDrilldownData } from "@/lib/weekly-report-drilldown-core";
 import { getWeeklyTasksWithNotesData, type WeeklyTaskWithNote } from "@/lib/weekly-report-tasks-core";
 import { ACTIVITY_METRIC_KEYS } from "@/lib/weekly-report-constants";
@@ -114,6 +115,17 @@ export function ReportDetailModal({
       entityLabel: `Тижневий звіт: ${report.author?.full_name ?? "—"} за ${formatDate(report.week_start)}`,
       oldValue: report.status,
       newValue: status,
+    });
+
+    await createNotification(supabase, {
+      userId: report.author_id,
+      kind: status === "approved" ? NOTIFICATION_KINDS.REPORT_APPROVED : NOTIFICATION_KINDS.REPORT_RETURNED,
+      title: status === "approved" ? "Звіт прийнято" : "Звіт повернено на доопрацювання",
+      body:
+        status === "approved"
+          ? `Тижневий звіт за ${formatDate(report.week_start)} прийнято.`
+          : comment || `Тижневий звіт за ${formatDate(report.week_start)} повернено на доопрацювання.`,
+      link: "/weekly-report",
     });
 
     onReviewed(data as unknown as WeeklyReportWithAuthor);

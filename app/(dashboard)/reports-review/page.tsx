@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { InboxIcon, ShieldIcon } from "@/components/ui/empty-icons";
 import { ReportsReviewList } from "@/components/reports-review/reports-review-list";
 import { getCurrentProfile } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
@@ -14,6 +15,7 @@ export default async function ReportsReviewPage() {
       <>
         <PageHeader title="Перевірка звітів" description="Тижневі звіти менеджерів" />
         <EmptyState
+          icon={<ShieldIcon />}
           title="Немає доступу"
           description="Цей розділ доступний тільки тім-лідам та адміністраторам."
         />
@@ -38,7 +40,11 @@ export default async function ReportsReviewPage() {
     <>
       <PageHeader title="Перевірка звітів" description="Тижневі звіти менеджерів" />
       {reports.length === 0 ? (
-        <EmptyState title="Звітів ще немає" description="Тут з'являться звіти, щойно менеджери їх створять." />
+        <EmptyState
+          icon={<InboxIcon />}
+          title="Звітів ще немає"
+          description="Тут з'являться звіти, щойно менеджери їх створять."
+        />
       ) : (
         <ReportsReviewList reports={reports} managers={managers} currentUserId={current.userId} />
       )}

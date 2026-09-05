@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ShieldIcon } from "@/components/ui/empty-icons";
 import { TeamTasksView } from "@/components/team-tasks/team-tasks-view";
 import { getCurrentProfile } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
@@ -15,6 +16,7 @@ export default async function TeamTasksPage() {
       <>
         <PageHeader title="Завдання команді" description="Постановка та контроль завдань менеджерам" />
         <EmptyState
+          icon={<ShieldIcon />}
           title="Немає доступу"
           description="Цей розділ доступний тільки тім-лідам та адміністраторам."
         />
