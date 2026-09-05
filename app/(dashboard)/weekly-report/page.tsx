@@ -1,23 +1,21 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
-import { WeeklyReportTable } from "@/components/weekly-report/weekly-report-table";
+import { WeeklyReportView } from "@/components/weekly-report/weekly-report-view";
 import { getWeeklyAggregates } from "@/lib/weekly-metrics";
-import { getEnrichedTraders } from "@/lib/trader-metrics";
 import { getCurrentProfile } from "@/lib/current-user";
+import { getOrCreateWeeklyReport } from "@/lib/weekly-reports";
 import { createClient } from "@/lib/supabase/server";
-import type { WeeklyReportComment } from "@/lib/types";
+import type { WeeklyReport } from "@/lib/types";
 
-export default async function WeeklyReportPage() {
+export default async function WeeklyReportPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ week?: string }>;
+}) {
   const current = await getCurrentProfile();
   if (!current) return null;
 
-  const supabase = await createClient();
-  const [weeks, traders, tasksRes, commentsRes] = await Promise.all([
-    getWeeklyAggregates(),
-    getEnrichedTraders(),
-    supabase.from("tasks").select("id, status, due_date"),
-    supabase.from("weekly_report_comments").select("*"),
-  ]);
+  const weeks = await getWeeklyAggregates();
 
   if (weeks.length === 0) {
     return (
@@ -28,21 +26,32 @@ export default async function WeeklyReportPage() {
     );
   }
 
-  const today = new Date().toISOString().slice(0, 10);
-  const tasks = tasksRes.data ?? [];
-  const overdueTasksCount = tasks.filter(
-    (t) => t.status === "overdue" || (t.status !== "done" && t.due_date && t.due_date < today),
-  ).length;
-  const noContactCount = traders.filter((t) => t.daysSinceContact !== null && t.daysSinceContact >= 5).length;
+  const { week: weekParam } = await searchParams;
+  let weekIndex = weeks.length - 1;
+  if (weekParam) {
+    const found = weeks.findIndex((w) => w.weekStart === weekParam);
+    if (found !== -1) weekIndex = found;
+  }
+  const weekStart = weeks[weekIndex]!.weekStart;
+
+  const { report, rows } = await getOrCreateWeeklyReport(current.userId, weekStart, weekIndex, weeks);
+
+  const supabase = await createClient();
+  const { data: historyData } = await supabase
+    .from("weekly_reports")
+    .select("*")
+    .eq("author_id", current.userId)
+    .order("week_start", { ascending: false });
 
   return (
     <>
       <PageHeader title="Тижневий звіт" description="Підсумки роботи за тиждень" />
-      <WeeklyReportTable
-        weeks={weeks}
-        liveMetrics={{ overdueTasksCount, noContactCount }}
-        comments={(commentsRes.data ?? []) as WeeklyReportComment[]}
-        currentUserId={current.userId}
+      <WeeklyReportView
+        weeks={weeks.map((w) => w.weekStart)}
+        selectedWeekStart={weekStart}
+        report={report}
+        rows={rows}
+        history={(historyData ?? []) as WeeklyReport[]}
       />
     </>
   );

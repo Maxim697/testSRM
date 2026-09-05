@@ -98,3 +98,31 @@ export type WeeklyReportComment = {
   author_id: string | null;
   updated_at: string;
 };
+
+export type WeeklyReportStatus = "draft" | "submitted" | "approved" | "returned";
+
+export type WeeklyReport = {
+  id: string;
+  week_start: string;
+  author_id: string;
+  status: WeeklyReportStatus;
+  submitted_at: string | null;
+  reviewed_at: string | null;
+  reviewer_id: string | null;
+  reviewer_comment: string | null;
+  created_at: string;
+};
+
+export type WeeklyReportWithAuthor = WeeklyReport & {
+  author: { full_name: string | null } | null;
+};
+
+export type WeeklyReportRow = {
+  id: string;
+  report_id: string;
+  metric_key: string;
+  metric_label: string;
+  value: string | null;
+  delta: string | null;
+  comment: string | null;
+};

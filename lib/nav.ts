@@ -29,6 +29,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Портфель", href: "/portfolio" },
       { label: "Churn / Ризик", href: "/churn-risk" },
       { label: "Тижневий звіт", href: "/weekly-report" },
+      { label: "Перевірка звітів", href: "/reports-review" },
       { label: "Новини", href: "/news" },
     ],
   },
