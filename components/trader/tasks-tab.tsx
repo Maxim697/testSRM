@@ -6,34 +6,30 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { DateInput } from "@/components/ui/date-input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { createClient } from "@/lib/supabase/client";
 import { formatDate } from "@/lib/format";
 import type { TaskKind, TaskStatus, TaskWithRelations } from "@/lib/types";
 
 const KIND_LABELS: Record<TaskKind, string> = { daily: "Щоденна", weekly: "Щотижнева", monthly: "Щомісячна" };
-const STATUS_LABELS: Record<TaskStatus, string> = {
-  in_progress: "В роботі",
-  done: "Виконано",
-  overdue: "Прострочено",
-};
-const STATUS_BADGE: Record<TaskStatus, "green" | "amber" | "red"> = {
-  in_progress: "amber",
-  done: "green",
-  overdue: "red",
+const STATUS_STRIPE: Record<TaskStatus, string> = {
+  in_progress: "var(--color-warning)",
+  done: "var(--color-positive)",
+  overdue: "var(--color-negative)",
 };
 
 export function TasksTab({
   traderId,
   traderCode,
   tasks,
+  currentUserId,
   onCreated,
   onUpdated,
 }: {
   traderId: string;
   traderCode: string;
   tasks: TaskWithRelations[];
+  currentUserId: string;
   onCreated: (row: TaskWithRelations) => void;
   onUpdated: (row: TaskWithRelations) => void;
 }) {
@@ -56,6 +52,7 @@ export function TasksTab({
         title: title.trim(),
         kind,
         trader_id: traderId,
+        assignee_id: currentUserId,
         due_date: dueDate || null,
         status: "in_progress",
       })
@@ -125,7 +122,11 @@ export function TasksTab({
       ) : (
         <div className="flex flex-col gap-2">
           {tasks.map((task) => (
-            <Card key={task.id} className="flex items-center justify-between gap-3">
+            <Card key={task.id} className="relative flex items-center justify-between gap-3 overflow-hidden pl-4">
+              <span
+                className="absolute inset-y-0 left-0 w-1"
+                style={{ background: STATUS_STRIPE[task.status] }}
+              />
               <div className="min-w-0">
                 <div className="truncate text-base text-text-primary">{task.title}</div>
                 <div className="mt-0.5 flex items-center gap-2 text-xs text-text-muted">
@@ -134,18 +135,15 @@ export function TasksTab({
                   <span>Дедлайн: {formatDate(task.due_date)}</span>
                 </div>
               </div>
-              <div className="flex shrink-0 items-center gap-2">
-                <Badge variant={STATUS_BADGE[task.status]}>{STATUS_LABELS[task.status]}</Badge>
-                <Select
-                  value={task.status}
-                  onChange={(e) => handleStatusChange(task, e.target.value as TaskStatus)}
-                  className="w-36"
-                >
-                  <option value="in_progress">В роботі</option>
-                  <option value="done">Виконано</option>
-                  <option value="overdue">Прострочено</option>
-                </Select>
-              </div>
+              <Select
+                value={task.status}
+                onChange={(e) => handleStatusChange(task, e.target.value as TaskStatus)}
+                className="w-36 shrink-0"
+              >
+                <option value="in_progress">В роботі</option>
+                <option value="done">Виконано</option>
+                <option value="overdue">Прострочено</option>
+              </Select>
             </Card>
           ))}
         </div>

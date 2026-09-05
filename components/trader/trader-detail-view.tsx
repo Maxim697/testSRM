@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tier } from "@/components/ui/tier";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { HistoryTab } from "@/components/trader/history-tab";
 import { TasksTab } from "@/components/trader/tasks-tab";
 import { MetricsTab } from "@/components/trader/metrics-tab";
 import { daysSince, formatNumber, formatPercent, percentDelta, scoreDelta } from "@/lib/format";
+import { useSetPageTitle } from "@/lib/page-title";
 import type {
   InteractionWithAuthor,
   TaskWithRelations,
@@ -41,6 +43,8 @@ export function TraderDetailView({
   const [tab, setTab] = useState("history");
   const [interactions, setInteractions] = useState(initialInteractions);
   const [tasks, setTasks] = useState(initialTasks);
+
+  useSetPageTitle(trader.code);
 
   const daysSinceContact = useMemo(() => {
     const last = interactions[0]?.created_at;
@@ -105,12 +109,14 @@ export function TraderDetailView({
         <KpiCard label="SLA OUT" value={trader.sla_out ?? "—"} />
       </div>
 
-      <div className="rounded-card border border-border bg-surface-2 p-4">
-        <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
+      <Card className="flex h-72 flex-col">
+        <div className="mb-2 shrink-0 text-xs font-medium uppercase tracking-wide text-text-muted">
           Динаміка Score за 12 тижнів
         </div>
-        <ScoreTrendChart points={weekly.map((w) => ({ weekStart: w.week_start, score: w.score }))} />
-      </div>
+        <div className="min-h-0 flex-1">
+          <ScoreTrendChart points={weekly.map((w) => ({ weekStart: w.week_start, score: w.score }))} />
+        </div>
+      </Card>
 
       <Tabs
         items={[
@@ -135,6 +141,7 @@ export function TraderDetailView({
           traderId={trader.id}
           traderCode={trader.code}
           tasks={tasks}
+          currentUserId={currentUserId}
           onCreated={(row) => setTasks((prev) => [...prev, row])}
           onUpdated={(row) => setTasks((prev) => prev.map((t) => (t.id === row.id ? row : t)))}
         />

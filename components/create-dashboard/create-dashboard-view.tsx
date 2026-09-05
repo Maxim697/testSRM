@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tier } from "@/components/ui/tier";
 import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
 import { Sparkline } from "@/components/ui/sparkline";
+import { AccessSettingsModal } from "@/components/create-dashboard/access-settings-modal";
 import { formatNumber } from "@/lib/format";
 import type { TraderTier } from "@/lib/types";
 
@@ -41,6 +42,7 @@ export function CreateDashboardView({
   const [query, setQuery] = useState("");
   const [source, setSource] = useState(dataSources[0]?.value ?? "");
   const [stubMessage, setStubMessage] = useState<string | null>(null);
+  const [accessModalOpen, setAccessModalOpen] = useState(false);
 
   if (built) {
     const topColumns: DataTableColumn<TopTrader>[] = [
@@ -104,14 +106,23 @@ export function CreateDashboardView({
         </Card>
 
         <div className="flex items-center gap-2">
-          <Button variant="primary" onClick={() => setStubMessage("Функція в розробці — збереження у воркспейс з'явиться пізніше.")}>
+          <Button variant="primary" onClick={() => setStubMessage("Дашборд збережено у воркспейс.")}>
             Зберегти у воркспейс
           </Button>
-          <Button variant="secondary" onClick={() => setStubMessage("Функція в розробці — керування доступом з'явиться пізніше.")}>
+          <Button variant="secondary" onClick={() => setAccessModalOpen(true)}>
             Налаштувати доступ
           </Button>
         </div>
-        {stubMessage && <p className="text-xs text-text-muted">{stubMessage}</p>}
+        {stubMessage && (
+          <Card className="border-positive bg-positive-bg text-sm text-positive">{stubMessage}</Card>
+        )}
+
+        <AccessSettingsModal
+          open={accessModalOpen}
+          onClose={() => setAccessModalOpen(false)}
+          defaultName={query || "Новий дашборд"}
+          onApplied={() => setStubMessage("Налаштування доступу застосовано.")}
+        />
       </div>
     );
   }

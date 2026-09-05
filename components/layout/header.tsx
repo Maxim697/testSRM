@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { findNavItem } from "@/lib/nav";
 import { roleLabel } from "@/lib/roles";
+import { usePageTitle } from "@/lib/page-title";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import type { Profile } from "@/lib/types";
@@ -10,6 +11,7 @@ import type { Profile } from "@/lib/types";
 export function Header({ profile }: { profile: Profile }) {
   const pathname = usePathname();
   const match = findNavItem(pathname);
+  const overrideTitle = usePageTitle();
 
   return (
     <header className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-surface-1 px-4">
@@ -21,7 +23,7 @@ export function Header({ profile }: { profile: Profile }) {
           />
         )}
         <h2 className="whitespace-nowrap text-lg font-medium text-text-primary">
-          {match?.item.label ?? "CRM"}
+          {overrideTitle ?? match?.item.label ?? "CRM"}
         </h2>
       </div>
 

@@ -9,47 +9,88 @@ export type ScoreTrendPoint = {
 };
 
 const WIDTH = 720;
-const HEIGHT = 180;
-const PAD_X = 12;
-const PAD_Y = 16;
+const HEIGHT = 240;
+const PAD_LEFT = 32;
+const PAD_RIGHT = 12;
+const PAD_TOP = 16;
+const PAD_BOTTOM = 24;
 
-export function ScoreTrendChart({ points }: { points: ScoreTrendPoint[] }) {
+export function ScoreTrendChart({
+  points,
+  className,
+}: {
+  points: ScoreTrendPoint[];
+  className?: string;
+}) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   const scores = points.map((p) => p.score ?? 0);
-  const min = Math.min(...scores, 0);
-  const max = Math.max(...scores, 100);
-  const range = max - min || 1;
+  const dataMin = Math.min(...scores);
+  const dataMax = Math.max(...scores);
+  const range = dataMax - dataMin || 1;
+  const padding = Math.max(range * 0.15, 2);
+  const min = Math.max(0, Math.floor(dataMin - padding));
+  const max = Math.ceil(dataMax + padding);
+  const scaledRange = max - min || 1;
 
-  const innerW = WIDTH - PAD_X * 2;
-  const innerH = HEIGHT - PAD_Y * 2;
+  const innerW = WIDTH - PAD_LEFT - PAD_RIGHT;
+  const innerH = HEIGHT - PAD_TOP - PAD_BOTTOM;
 
   const coords = points.map((p, i) => {
-    const x = PAD_X + (points.length === 1 ? innerW / 2 : (innerW * i) / (points.length - 1));
-    const y = PAD_Y + innerH - (innerH * ((p.score ?? min) - min)) / range;
+    const x = PAD_LEFT + (points.length === 1 ? innerW / 2 : (innerW * i) / (points.length - 1));
+    const y = PAD_TOP + innerH - (innerH * ((p.score ?? min) - min)) / scaledRange;
     return { x, y, point: p };
   });
 
-  const path = coords.map((c, i) => `${i === 0 ? "M" : "L"}${c.x},${c.y}`).join(" ");
+  const linePath = coords.map((c, i) => `${i === 0 ? "M" : "L"}${c.x},${c.y}`).join(" ");
+  const areaPath =
+    coords.length > 0
+      ? `${linePath} L${coords[coords.length - 1]!.x},${PAD_TOP + innerH} L${coords[0]!.x},${PAD_TOP + innerH} Z`
+      : "";
+
   const hovered = hoverIndex !== null ? coords[hoverIndex] : null;
+  const firstLabel = points[0]?.weekStart;
+  const lastLabel = points[points.length - 1]?.weekStart;
 
   return (
-    <div className="relative">
+    <div className={className ?? "relative h-full w-full"}>
       <svg
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        className="w-full"
-        style={{ height: HEIGHT }}
+        preserveAspectRatio="none"
+        className="h-full w-full"
         onMouseLeave={() => setHoverIndex(null)}
       >
+        {/* Y-axis gridlines + labels */}
+        <line x1={PAD_LEFT} y1={PAD_TOP} x2={WIDTH - PAD_RIGHT} y2={PAD_TOP} stroke="var(--color-border)" strokeWidth={1} />
         <line
-          x1={PAD_X}
-          y1={PAD_Y + innerH}
-          x2={WIDTH - PAD_X}
-          y2={PAD_Y + innerH}
+          x1={PAD_LEFT}
+          y1={PAD_TOP + innerH}
+          x2={WIDTH - PAD_RIGHT}
+          y2={PAD_TOP + innerH}
           stroke="var(--color-border)"
           strokeWidth={1}
         />
-        <path d={path} fill="none" stroke="var(--color-info)" strokeWidth={2} />
+        <text x={PAD_LEFT - 6} y={PAD_TOP + 4} textAnchor="end" fontSize={11} fill="var(--color-text-muted)">
+          {max}
+        </text>
+        <text x={PAD_LEFT - 6} y={PAD_TOP + innerH + 4} textAnchor="end" fontSize={11} fill="var(--color-text-muted)">
+          {min}
+        </text>
+
+        {/* X-axis labels */}
+        {firstLabel && (
+          <text x={PAD_LEFT} y={HEIGHT - 6} textAnchor="start" fontSize={11} fill="var(--color-text-muted)">
+            {formatDate(firstLabel)}
+          </text>
+        )}
+        {lastLabel && (
+          <text x={WIDTH - PAD_RIGHT} y={HEIGHT - 6} textAnchor="end" fontSize={11} fill="var(--color-text-muted)">
+            {formatDate(lastLabel)}
+          </text>
+        )}
+
+        <path d={areaPath} fill="var(--color-info)" fillOpacity={0.16} stroke="none" />
+        <path d={linePath} fill="none" stroke="var(--color-info)" strokeWidth={2} />
         {coords.map((c, i) => (
           <g key={i}>
             <circle
@@ -73,7 +114,7 @@ export function ScoreTrendChart({ points }: { points: ScoreTrendPoint[] }) {
       </svg>
       {hovered && (
         <div
-          className="pointer-events-none absolute rounded-control border border-border bg-surface-3 px-2 py-1 text-xs text-text-primary shadow-none"
+          className="pointer-events-none absolute rounded-control border border-border bg-surface-3 px-2 py-1 text-xs text-text-primary"
           style={{
             left: `${(hovered.x / WIDTH) * 100}%`,
             top: 0,

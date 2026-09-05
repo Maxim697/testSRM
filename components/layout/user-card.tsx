@@ -24,7 +24,7 @@ export function UserCard({ profile }: { profile: Profile }) {
           {getInitials(profile.full_name)}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="truncate text-base font-medium text-text-primary">
+          <div className="text-sm font-medium leading-tight text-text-primary">
             {profile.full_name ?? "Без імені"}
           </div>
           <div className="truncate text-xs text-text-secondary">

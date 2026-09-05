@@ -7,7 +7,9 @@ import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tier } from "@/components/ui/tier";
+import { createClient } from "@/lib/supabase/client";
 import type { EnrichedTrader } from "@/lib/trader-metrics";
+import type { Profile } from "@/lib/types";
 import { formatNumber, formatPercent } from "@/lib/format";
 
 const STATUS_LABELS: Record<string, string> = { green: "Green", amber: "Amber", red: "Red" };
@@ -28,7 +30,16 @@ function deltaClass(value: number | null) {
   return value > 0 ? "text-positive" : "text-negative";
 }
 
-export function PortfolioTable({ traders }: { traders: EnrichedTrader[] }) {
+export function PortfolioTable({
+  traders: initialTraders,
+  allManagers,
+  canReassign,
+}: {
+  traders: EnrichedTrader[];
+  allManagers: Profile[];
+  canReassign: boolean;
+}) {
+  const [traders, setTraders] = useState(initialTraders);
   const [managerFilter, setManagerFilter] = useState("");
   const [tierFilter, setTierFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -51,6 +62,18 @@ export function PortfolioTable({ traders }: { traders: EnrichedTrader[] }) {
       return true;
     });
   }, [traders, managerFilter, tierFilter, statusFilter, search]);
+
+  async function handleManagerChange(traderId: string, managerId: string) {
+    const newManager = allManagers.find((m) => m.id === managerId) ?? null;
+    setTraders((prev) =>
+      prev.map((t) =>
+        t.id === traderId ? { ...t, manager_id: managerId, manager: { full_name: newManager?.full_name ?? null } } : t,
+      ),
+    );
+
+    const supabase = createClient();
+    await supabase.from("traders").update({ manager_id: managerId }).eq("id", traderId);
+  }
 
   const columns: DataTableColumn<EnrichedTrader>[] = [
     {
@@ -167,7 +190,25 @@ export function PortfolioTable({ traders }: { traders: EnrichedTrader[] }) {
     {
       key: "manager",
       header: "Менеджер",
-      accessor: (t) => t.manager?.full_name ?? "—",
+      accessor: (t) =>
+        canReassign ? (
+          <Select
+            value={t.manager_id ?? ""}
+            onChange={(e) => handleManagerChange(t.id, e.target.value)}
+            className="w-40"
+          >
+            <option value="" disabled>
+              Без менеджера
+            </option>
+            {allManagers.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.full_name ?? "Без імені"}
+              </option>
+            ))}
+          </Select>
+        ) : (
+          (t.manager?.full_name ?? "—")
+        ),
       sortValue: (t) => t.manager?.full_name ?? "",
     },
   ];

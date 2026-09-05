@@ -23,18 +23,29 @@ export default async function AccessPage() {
   }
 
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("profiles")
-    .select("id, full_name, telegram, role")
-    .order("full_name");
+  const [usersRes, tradersRes] = await Promise.all([
+    supabase.from("profiles").select("id, full_name, telegram, role").order("full_name"),
+    supabase.from("traders").select("manager_id"),
+  ]);
 
-  const users = (data ?? []) as Profile[];
+  const users = (usersRes.data ?? []) as Profile[];
+
+  const traderCountByManager = new Map<string, number>();
+  for (const row of tradersRes.data ?? []) {
+    if (!row.manager_id) continue;
+    traderCountByManager.set(row.manager_id, (traderCountByManager.get(row.manager_id) ?? 0) + 1);
+  }
 
   return (
     <>
       <PageHeader title="Доступи" description="Керування ролями та правами доступу" />
       <AccessMatrix />
-      <UsersTable users={users} />
+      <UsersTable
+        users={users}
+        traderCounts={Object.fromEntries(traderCountByManager)}
+        currentUserId={current.userId}
+        currentUserRole={current.profile.role}
+      />
     </>
   );
 }
