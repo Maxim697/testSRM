@@ -148,6 +148,68 @@ body {
 }
 
 /* ==========================================================================
+   Circuit background — real vector PCB artwork (see pcb-source.ts), tiled
+   twice: once dark as the resting board, once bright and revealed only
+   through an SVG mask made of moving soft-edged lights. Because the mask
+   can only ever reveal pixels the artwork actually painted, a light always
+   reads as travelling along a real trace — the gaps between traces never
+   light up, with no need for an extracted centerline path.
+   ========================================================================== */
+
+.pcb-tile-base-use {
+  fill: var(--circuit-trace);
+}
+.pcb-tile-glow-use {
+  fill: var(--circuit-glow);
+}
+
+[data-fx="moderate"] .pcb-glow-layer {
+  opacity: 0.6;
+}
+
+@keyframes pcb-light-travel {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  94% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+.pcb-light {
+  opacity: 0;
+  animation-name: pcb-light-travel;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes pcb-ripple-expand {
+  0% {
+    r: 4px;
+    stroke-width: 14px;
+    stroke-opacity: 0.9;
+  }
+  100% {
+    r: 260px;
+    stroke-width: 2px;
+    stroke-opacity: 0;
+  }
+}
+
+.pcb-ripple {
+  stroke: var(--circuit-glow-strong);
+  animation: pcb-ripple-expand 0.8s ease-out forwards;
+}
+
+/* ==========================================================================
    PCB corner brackets — two opposite corners get a glowing L-shaped tick,
    the rest of the outline is a dashed (not solid) line. Shared by cards,
    tables and glass surfaces so it's one visual language everywhere.
