@@ -3,28 +3,30 @@
 import { useEffect, useRef } from "react";
 import { useEffectsIntensity } from "@/components/effects-provider";
 import { CIRCUIT_PULSE_EVENT, type CircuitPulseDetail } from "@/lib/circuit-pulse-event";
-import { PCB_MARKUP, PCB_TILE_H, PCB_TILE_W } from "@/components/background/pcb-source";
-import { PCB_EDGES } from "@/components/background/pcb-graph";
+import { generatePcbGraph, mulberry32, type PcbGraph } from "@/components/background/pcb-generate";
 
 /* ==========================================================================
-   Real vector PCB artwork (CC0, see pcb-source.ts) tiled dimly as the
-   background. Each comet walks one real edge (pcb-graph.ts) start to end.
+   One procedurally generated circuit-board graph, sized exactly to the
+   canvas — no tiling, no repeated artwork, no seams. See pcb-generate.ts
+   for how the graph itself is built and guaranteed connected.
 
    The comet's entire life is governed by exactly ONE rule: it is created
-   off-screen, and destroyed the instant it reaches the far end of its edge
-   (a dead end — a pad, a via, wherever that trace's real geometry stops).
-   There is no other timer, animation, or condition anywhere in this file
-   that creates or destroys a comet. No lifespan, no arrival retraction, no
-   flash duration, no chance-based continuation onto another edge.
+   off-screen (on a stub edge whose far end is marked null in the graph),
+   and destroyed the instant it reaches another such null end — a real
+   dead end inside the graph, or the screen edge again. There is no other
+   timer, animation, or condition anywhere in this file that creates or
+   destroys a comet. While traveling it may cross several edges through the
+   graph's junctions, but it always moves forward along a real, connected
+   path — never past a boundary the graph itself doesn't have.
    ========================================================================== */
 
 type Pt = { x: number; y: number };
 
-const PCB_SCALE = 0.22;
 const TARGET_FRAME_MS = 1000 / 30;
 
 const COMET_COUNT_FULL = 12;
 const COMET_COUNT_MODERATE = 6;
+const MAX_HOPS = 60; // safety cap against a comet cycling forever in a loop-heavy pocket
 
 const TAIL_LEN = 140; // px
 const TAIL_SEGMENTS = 40;
@@ -132,30 +134,17 @@ function drawTail(
   }
 }
 
-function mulberry32(seed: number) {
-  let a = seed;
-  return function random() {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+type EdgeGeometry = { points: Pt[]; cumLen: number[]; totalLen: number; width: number };
 
-// Only edges with a verified real pad/via ending (see pcb-graph.ts) ever
-// get a comet — the rest end at an arbitrary tracer cutoff with nothing to
-// crash into, so nothing travels on them.
-const TRAVELABLE_EDGE_IDS: number[] = PCB_EDGES.filter((e) => e.hasRealEnd).map((e) => e.id);
-
-type EdgeInstance = { points: Pt[]; cumLen: number[]; totalLen: number; width: number };
-
-function buildEdgeInstance(edgeId: number, offX: number, offY: number): EdgeInstance {
-  const edge = PCB_EDGES[edgeId]!;
-  const points = edge.points.map(([x, y]) => ({ x: x * PCB_SCALE + offX, y: y * PCB_SCALE + offY }));
+/** A graph edge walked in one direction: dir 1 follows its own point order
+ * (fromNodeId -> toNodeId), dir -1 walks it reversed. */
+function edgeGeometry(graph: PcbGraph, edgeId: number, dir: 1 | -1): EdgeGeometry {
+  const edge = graph.edges[edgeId]!;
+  const raw = dir === 1 ? edge.points : edge.points.slice().reverse();
+  const points = raw.map(([x, y]) => ({ x, y }));
   const cumLen = [0];
   for (let i = 1; i < points.length; i++) cumLen.push(cumLen[i - 1]! + dist(points[i - 1]!, points[i]!));
-  return { points, cumLen, totalLen: cumLen[cumLen.length - 1] ?? 0, width: Math.max(edge.width * PCB_SCALE, 1.3) };
+  return { points, cumLen, totalLen: cumLen[cumLen.length - 1] ?? 0, width: Math.max(edge.width, 1.3) };
 }
 
 type Comet = {
@@ -163,43 +152,14 @@ type Comet = {
   cumLen: number[];
   totalLen: number;
   width: number;
-  traveled: number; // px along points, 0..totalLen
+  traveled: number; // px along points, 0..totalLen, for the CURRENT edge only
+  edgeId: number;
+  dir: 1 | -1;
+  hopsLeft: number;
   speed: number; // px/sec
   brightness: number;
   hue: "green" | "cyan";
 };
-
-/** The only way a comet is created: pick a random edge/tile instance and a
- * random starting position along it that happens to fall outside the
- * current viewport, so it always enters visibly from off-screen. Travel is
- * always forward (increasing arc-length) toward that edge's own far end —
- * a dead end, full stop. */
-function spawnComet(rand: () => number, tilesX: number, tilesY: number, width: number, height: number): Comet | null {
-  if (TRAVELABLE_EDGE_IDS.length === 0) return null;
-  const margin = 30;
-  for (let attempt = 0; attempt < 12; attempt++) {
-    const edgeId = TRAVELABLE_EDGE_IDS[Math.floor(rand() * TRAVELABLE_EDGE_IDS.length)]!;
-    const offX = Math.floor(rand() * tilesX) * PCB_TILE_W * PCB_SCALE;
-    const offY = Math.floor(rand() * tilesY) * PCB_TILE_H * PCB_SCALE;
-    const inst = buildEdgeInstance(edgeId, offX, offY);
-    if (inst.totalLen < 40) continue;
-    const startS = rand() * inst.totalLen * 0.85;
-    const p = interpAt(inst.points, inst.cumLen, startS);
-    const offscreen = p.x < -margin || p.x > width + margin || p.y < -margin || p.y > height + margin;
-    if (!offscreen) continue;
-    return {
-      points: inst.points,
-      cumLen: inst.cumLen,
-      totalLen: inst.totalLen,
-      width: inst.width,
-      traveled: startS,
-      speed: 40 + rand() * 80,
-      brightness: 0.4 + rand() * 0.6,
-      hue: rand() < 0.6 ? "green" : "cyan",
-    };
-  }
-  return null;
-}
 
 export function CircuitBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -216,18 +176,18 @@ export function CircuitBackground() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let bgPattern: CanvasPattern | null = null;
     let comets: Comet[] = [];
     const rand = mulberry32(Date.now() & 0xffffffff);
+    const boardSeed = Date.now() & 0xffffffff;
     let rafId = 0;
     let lastFrame = 0;
     let lastDrawWall = Date.now();
     let running = true;
     let dpr = 1;
-    let tilesX = 1;
-    let tilesY = 1;
-    let viewW = 0;
-    let viewH = 0;
+
+    let graph: PcbGraph = { nodes: [], edges: [], adjacency: new Map() };
+    let exitEdgeIds: number[] = [];
+    let board: HTMLCanvasElement | null = null;
 
     function currentPalette() {
       const styles = getComputedStyle(document.documentElement);
@@ -237,37 +197,38 @@ export function CircuitBackground() {
       };
     }
 
-    // Builds the tiled background pattern from the (async, data-URI) SVG
-    // image. This must NEVER be a prerequisite for sizing the canvas or the
-    // comet grid — if this image is ever slow or fails to load, resize()
-    // still has to have already run, or the canvas is stuck at the browser's
-    // default 300x150 and every comet's off-screen check is computed against
-    // a zero-sized viewport (which is what caused comets to vanish entirely
-    // except for a stray one clipped into a corner).
-    function buildBgPattern() {
-      if (!ctx) return;
-      const palette = currentPalette();
-      const fill = rgba(palette.glow, 0.05);
-      const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${PCB_TILE_W}" height="${PCB_TILE_H}" viewBox="0 0 ${PCB_TILE_W} ${PCB_TILE_H}"><g fill="${fill}">${PCB_MARKUP}</g></svg>`;
-      const img = new Image();
-      img.onload = () => {
-        const tileW = Math.max(1, Math.round(PCB_TILE_W * PCB_SCALE));
-        const tileH = Math.max(1, Math.round(PCB_TILE_H * PCB_SCALE));
-        const tileCanvas = document.createElement("canvas");
-        tileCanvas.width = tileW;
-        tileCanvas.height = tileH;
-        const tctx = tileCanvas.getContext("2d");
-        if (tctx) {
-          tctx.drawImage(img, 0, 0, tileW, tileH);
-          bgPattern = ctx.createPattern(tileCanvas, "repeat");
+    // Renders the (static) generated board once into an off-screen canvas at
+    // full resolution, so every animation frame only has to blit it, not
+    // re-stroke a thousand traces.
+    function buildBoard(width: number, height: number) {
+      const glow = currentPalette().glow;
+      const off = document.createElement("canvas");
+      off.width = Math.max(1, Math.round(width * dpr));
+      off.height = Math.max(1, Math.round(height * dpr));
+      const octx = off.getContext("2d");
+      if (octx) {
+        octx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        octx.strokeStyle = rgba(glow, 0.08);
+        octx.lineCap = "round";
+        for (const edge of graph.edges) {
+          octx.lineWidth = Math.max(edge.width, 1.3);
+          octx.beginPath();
+          octx.moveTo(edge.points[0]![0], edge.points[0]![1]);
+          octx.lineTo(edge.points[1]![0], edge.points[1]![1]);
+          octx.stroke();
         }
-        drawFrame(0);
-      };
-      img.onerror = () => {
-        // No background pattern this session, but the comet grid (already
-        // sized by resize(), called independently) keeps animating fine.
-      };
-      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgStr);
+      }
+      board = off;
+    }
+
+    function regenerateGraph(width: number, height: number) {
+      graph = generatePcbGraph(width, height, boardSeed);
+      exitEdgeIds = graph.edges.filter((e) => e.toNodeId === null).map((e) => e.id);
+      buildBoard(width, height);
+      // The old graph's edges no longer exist in any comparable form —
+      // mid-flight comets can't be meaningfully carried across a full
+      // regeneration, so the grid restarts clean.
+      comets = [];
     }
 
     function resize() {
@@ -284,14 +245,63 @@ export function CircuitBackground() {
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      viewW = width;
-      viewH = height;
-      tilesX = Math.ceil(width / (PCB_TILE_W * PCB_SCALE)) + 1;
-      tilesY = Math.ceil(height / (PCB_TILE_H * PCB_SCALE)) + 1;
-      // A resize only ever ADDS comets (up to the target count) — it must
-      // never remove one that's mid-flight, since off-screen-to-dead-end
-      // is the only life cycle that exists.
+      regenerateGraph(width, height);
       drawFrame(0);
+    }
+
+    /** The only way a comet is created: pick a random off-screen stub edge
+     * (the graph's own null-ended edges) and start right at its far,
+     * off-canvas point, traveling inward. */
+    function spawnComet(): Comet | null {
+      if (exitEdgeIds.length === 0) return null;
+      const edgeId = exitEdgeIds[Math.floor(rand() * exitEdgeIds.length)]!;
+      const geo = edgeGeometry(graph, edgeId, -1); // -1: walk from the null (off-screen) end toward the real node
+      if (geo.totalLen < 1) return null;
+      return {
+        points: geo.points,
+        cumLen: geo.cumLen,
+        totalLen: geo.totalLen,
+        width: geo.width,
+        traveled: 0,
+        edgeId,
+        dir: -1,
+        hopsLeft: MAX_HOPS,
+        speed: 40 + rand() * 80,
+        brightness: 0.4 + rand() * 0.6,
+        hue: rand() < 0.6 ? "green" : "cyan",
+      };
+    }
+
+    /** Advances a comet by dtSec, hopping across graph junctions as needed.
+     * Returns false the instant it runs off the graph's edge (a real dead
+     * end, or back out past the screen) — the only removal condition. */
+    function advanceComet(comet: Comet, dtSec: number): boolean {
+      let remaining = comet.traveled + comet.speed * dtSec;
+      while (remaining >= comet.totalLen) {
+        const overshoot = remaining - comet.totalLen;
+        const edge = graph.edges[comet.edgeId]!;
+        const reachedNodeId = comet.dir === 1 ? edge.toNodeId : edge.fromNodeId;
+        if (reachedNodeId === null) return false; // dead end, full stop
+        if (comet.hopsLeft <= 0) return false;
+        comet.hopsLeft--;
+        const incident = graph.adjacency.get(reachedNodeId) ?? [];
+        const options = incident.filter((eid) => eid !== comet.edgeId);
+        const pool = options.length > 0 ? options : incident;
+        if (pool.length === 0) return false; // isolated node, shouldn't happen but stop cleanly
+        const nextEdgeId = pool[Math.floor(rand() * pool.length)]!;
+        const nextEdge = graph.edges[nextEdgeId]!;
+        const nextDir: 1 | -1 = nextEdge.fromNodeId === reachedNodeId ? 1 : -1;
+        const geo = edgeGeometry(graph, nextEdgeId, nextDir);
+        comet.edgeId = nextEdgeId;
+        comet.dir = nextDir;
+        comet.points = geo.points;
+        comet.cumLen = geo.cumLen;
+        comet.totalLen = geo.totalLen;
+        comet.width = geo.width;
+        remaining = overshoot;
+      }
+      comet.traveled = remaining;
+      return true;
     }
 
     function drawFrame(dtMs: number) {
@@ -300,10 +310,7 @@ export function CircuitBackground() {
       const width = canvas.width / dpr;
       const height = canvas.height / dpr;
       ctx.clearRect(0, 0, width, height);
-      if (bgPattern) {
-        ctx.fillStyle = bgPattern;
-        ctx.fillRect(0, 0, width, height);
-      }
+      if (board) ctx.drawImage(board, 0, 0, width, height);
 
       if (intensityRef.current === "off") return;
 
@@ -311,13 +318,12 @@ export function CircuitBackground() {
       const dt = Math.min(dtMs, 80) / 1000;
       const palette = currentPalette();
 
-      // Advance. The ONLY removal condition: traveled has reached totalLen
-      // (the edge's own dead end). Nothing else in this loop can drop a
-      // comet.
+      // Advance (and possibly hop) every comet. The ONLY removal condition:
+      // advanceComet returns false because it reached a real dead end or
+      // exited back off-screen. Nothing else in this loop can drop a comet.
       const nextComets: Comet[] = [];
       for (const comet of comets) {
-        comet.traveled += comet.speed * dt;
-        if (comet.traveled < comet.totalLen) nextComets.push(comet);
+        if (advanceComet(comet, dt)) nextComets.push(comet);
       }
       comets = nextComets;
 
@@ -337,7 +343,7 @@ export function CircuitBackground() {
 
       const targetCount = moderate ? COMET_COUNT_MODERATE : COMET_COUNT_FULL;
       if (comets.length < targetCount) {
-        const c = spawnComet(rand, tilesX, tilesY, viewW, viewH);
+        const c = spawnComet();
         if (c) comets.push(c);
       }
     }
@@ -373,48 +379,42 @@ export function CircuitBackground() {
     function handleBurst(event: Event) {
       if (intensityRef.current === "off") return;
       const detail = (event as CustomEvent<CircuitPulseDetail>).detail;
-      if (!detail || TRAVELABLE_EDGE_IDS.length === 0) return;
-      const tileScreenW = PCB_TILE_W * PCB_SCALE;
-      const tileScreenH = PCB_TILE_H * PCB_SCALE;
-      const tx = Math.max(0, Math.min(tilesX - 1, Math.floor(detail.x / tileScreenW)));
-      const ty = Math.max(0, Math.min(tilesY - 1, Math.floor(detail.y / tileScreenH)));
-      const offX = tx * tileScreenW;
-      const offY = ty * tileScreenH;
+      if (!detail || graph.edges.length === 0) return;
 
       let bestEdgeId = -1;
       let bestS = 0;
       let bestDistSq = Infinity;
-      for (const ei of TRAVELABLE_EDGE_IDS) {
-        const inst = buildEdgeInstance(ei, offX, offY);
-        for (let i = 1; i < inst.points.length; i++) {
-          const a = inst.points[i - 1]!;
-          const b = inst.points[i]!;
-          const dx = b.x - a.x;
-          const dy = b.y - a.y;
-          const lenSq = dx * dx + dy * dy || 1;
-          const t = Math.max(0, Math.min(1, ((detail.x - a.x) * dx + (detail.y - a.y) * dy) / lenSq));
-          const cx = a.x + dx * t;
-          const cy = a.y + dy * t;
-          const ddx = detail.x - cx;
-          const ddy = detail.y - cy;
-          const distSq = ddx * ddx + ddy * ddy;
-          if (distSq < bestDistSq) {
-            bestDistSq = distSq;
-            bestEdgeId = ei;
-            bestS = inst.cumLen[i - 1]! + t * Math.sqrt(lenSq);
-          }
+      for (const edge of graph.edges) {
+        const [ax, ay] = edge.points[0]!;
+        const [bx, by] = edge.points[1]!;
+        const dx = bx - ax;
+        const dy = by - ay;
+        const lenSq = dx * dx + dy * dy || 1;
+        const t = Math.max(0, Math.min(1, ((detail.x - ax) * dx + (detail.y - ay) * dy) / lenSq));
+        const cx = ax + dx * t;
+        const cy = ay + dy * t;
+        const ddx = detail.x - cx;
+        const ddy = detail.y - cy;
+        const distSq = ddx * ddx + ddy * ddy;
+        if (distSq < bestDistSq) {
+          bestDistSq = distSq;
+          bestEdgeId = edge.id;
+          bestS = t * Math.sqrt(lenSq);
         }
       }
       if (bestEdgeId < 0) return;
-      const inst = buildEdgeInstance(bestEdgeId, offX, offY);
+      const geo = edgeGeometry(graph, bestEdgeId, 1);
       const burstCount = 3 + Math.floor(rand() * 3);
       for (let i = 0; i < burstCount; i++) {
         comets.push({
-          points: inst.points,
-          cumLen: inst.cumLen,
-          totalLen: inst.totalLen,
-          width: inst.width,
+          points: geo.points,
+          cumLen: geo.cumLen,
+          totalLen: geo.totalLen,
+          width: geo.width,
           traveled: Math.max(0, bestS - rand() * 25),
+          edgeId: bestEdgeId,
+          dir: 1,
+          hopsLeft: MAX_HOPS,
           speed: 100 + rand() * 80,
           brightness: 0.4 + rand() * 0.6,
           hue: rand() < 0.6 ? "green" : "cyan",
@@ -430,15 +430,14 @@ export function CircuitBackground() {
 
     // Watchdog: browsers can throttle or altogether stop scheduling
     // requestAnimationFrame for a tab (background-tab power saving, a
-    // discarded/frozen tab waking back up, etc.) without ever firing a
-    // visibilitychange we can react to — the loop just goes quiet forever.
+    // discarded/frozen tab waking back up, etc.) with no visibilitychange
+    // fired for us to react to — the loop just goes quiet forever.
     // Separately, window.innerWidth/innerHeight can occasionally read 0 for
-    // one tick right when resize() runs (a transient layout state), which
-    // leaves the canvas stuck at the browser's tiny 300x150 default forever
-    // since nothing else ever re-triggers resize() on its own. setInterval
-    // isn't throttled the way rAF is, so once a second this both re-sizes
-    // the canvas if it doesn't match the real window anymore and
-    // force-restarts the rAF chain if no frame has actually been drawn
+    // one tick right when resize() runs, leaving the canvas (and graph)
+    // stuck at a stale size forever since nothing else retries it.
+    // setInterval isn't throttled the way rAF is, so once a second this
+    // both re-generates the board if it no longer matches the real window
+    // and force-restarts the rAF chain if no frame has actually been drawn
     // recently while the tab is visible.
     const watchdog = window.setInterval(() => {
       if (document.hidden || !canvas) return;
@@ -456,10 +455,7 @@ export function CircuitBackground() {
       }
     }, 1000);
 
-    // Size the canvas and comet grid right away, synchronously — this must
-    // not wait on the background image (see buildBgPattern above).
     resize();
-    buildBgPattern();
     rafId = requestAnimationFrame(loop);
     document.addEventListener("visibilitychange", handleVisibility);
     window.addEventListener("resize", handleResize);

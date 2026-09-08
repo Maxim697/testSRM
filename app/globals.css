@@ -149,12 +149,11 @@ body {
 
 /* ==========================================================================
    Circuit background — rendered entirely on <canvas> now (see
-   circuit-background.tsx): the real vector PCB artwork (pcb-source.ts)
-   tiled dimly as the resting board, with pulses drawn as strokes along
-   real traced routes (pcb-routes.ts, extracted from the artwork's own
-   pixels). No CSS classes are needed for the moving parts — the canvas
-   draws everything itself — only the light-theme hiding rule above applies
-   to it.
+   circuit-background.tsx): one procedurally generated, fully connected
+   trace graph sized exactly to the viewport (pcb-generate.ts) — no tiled
+   artwork, no repeats. No CSS classes are needed for the moving parts —
+   the canvas draws everything itself — only the light-theme hiding rule
+   above applies to it.
    ========================================================================== */
 
 /* ==========================================================================
