@@ -4,26 +4,187 @@ import { useEffect, useRef } from "react";
 import { useEffectsIntensity } from "@/components/effects-provider";
 import { CIRCUIT_PULSE_EVENT, type CircuitPulseDetail } from "@/lib/circuit-pulse-event";
 
-type Node = { id: number; x: number; y: number; gx: number; gy: number; isChip?: boolean };
-type Edge = { a: number; b: number; via: boolean };
-type Chip = { x: number; y: number; w: number; h: number };
+/* ==========================================================================
+   Geometry primitives — every trace is built from horizontal, vertical and
+   45° segments only (8-way compass grid), so the board reads as an actual
+   routed PCB rather than a point cloud with straight edges to nowhere.
+   ========================================================================== */
 
-type Pulse = {
-  path: number[]; // node ids
-  segment: number; // index into path — current edge is path[segment] -> path[segment+1]
-  progress: number; // 0..1 along current segment
-  speed: number; // px / sec
-  hue: "green" | "cyan";
-  trail: number[]; // recently fully-traversed node ids, most recent last
-  bright: number; // 0..1 overall brightness multiplier (bursts fade faster)
-  decay: number; // per-second brightness decay for burst pulses (0 = none)
+type Pt = { x: number; y: number };
+
+const GRID = 8;
+const SQ = Math.SQRT1_2;
+const DIR_VECS: Pt[] = [
+  { x: 1, y: 0 },
+  { x: SQ, y: SQ },
+  { x: 0, y: 1 },
+  { x: -SQ, y: SQ },
+  { x: -1, y: 0 },
+  { x: -SQ, y: -SQ },
+  { x: 0, y: -1 },
+  { x: SQ, y: -SQ },
+];
+
+function snap(v: number, grid: number): number {
+  return Math.round(v / grid) * grid;
+}
+function clampNum(v: number, lo: number, hi: number): number {
+  return Math.max(lo, Math.min(hi, v));
+}
+function addV(a: Pt, b: Pt): Pt {
+  return { x: a.x + b.x, y: a.y + b.y };
+}
+function subV(a: Pt, b: Pt): Pt {
+  return { x: a.x - b.x, y: a.y - b.y };
+}
+function scaleV(a: Pt, k: number): Pt {
+  return { x: a.x * k, y: a.y * k };
+}
+function unitV(a: Pt): Pt {
+  const l = Math.hypot(a.x, a.y) || 1;
+  return { x: a.x / l, y: a.y / l };
+}
+function distPt(a: Pt, b: Pt): number {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+function leftNormal(d: Pt): Pt {
+  return { x: d.y, y: -d.x };
+}
+function angleToDirIdx(dx: number, dy: number): number {
+  const idx = Math.round(Math.atan2(dy, dx) / (Math.PI / 4));
+  return ((idx % 8) + 8) % 8;
+}
+
+/** Turtle-walks a path of H/V/45° segments toward an optional target,
+ * turning by at most 90° per step so bends stay plausible for a trace. */
+function buildSpine(rand: () => number, start: Pt, startDirIdx: number, target: Pt | null, maxLen: number): Pt[] {
+  const pts: Pt[] = [{ ...start }];
+  let cur = { ...start };
+  let dirIdx = startDirIdx;
+  let travelled = 0;
+  let iterations = 0;
+  while (travelled < maxLen && iterations < 70) {
+    iterations++;
+    const runLen = GRID * (2 + Math.floor(rand() * 6));
+    const d = DIR_VECS[dirIdx]!;
+    const next = { x: cur.x + d.x * runLen, y: cur.y + d.y * runLen };
+    pts.push(next);
+    cur = next;
+    travelled += runLen;
+    if (target) {
+      if (distPt(cur, target) < GRID * 3) {
+        pts.push({ ...target });
+        break;
+      }
+      const desired = angleToDirIdx(target.x - cur.x, target.y - cur.y);
+      let diff = (desired - dirIdx + 8) % 8;
+      if (diff > 4) diff -= 8;
+      const step = diff === 0 ? 0 : diff > 0 ? 1 : -1;
+      const magnitude = Math.min(Math.abs(diff), rand() < 0.6 ? 1 : 2);
+      dirIdx = (((dirIdx + step * magnitude) % 8) + 8) % 8;
+    } else {
+      const r = rand();
+      if (r < 0.85) {
+        if (r >= 0.55) dirIdx = (((dirIdx + (rand() < 0.5 ? 1 : -1)) % 8) + 8) % 8;
+      } else {
+        dirIdx = (((dirIdx + (rand() < 0.5 ? 2 : -2)) % 8) + 8) % 8;
+      }
+    }
+  }
+  return pts;
+}
+
+/** Offsets a spine into a parallel lane using a bevel join at each corner —
+ * for a 90° turn this naturally produces two 45° cut edges, matching real
+ * PCB trace corners; for straight runs it's a simple perpendicular shift. */
+function offsetSpine(spine: Pt[], offsetDist: number): Pt[] {
+  if (Math.abs(offsetDist) < 0.01) return spine.map((p) => ({ ...p }));
+  const out: Pt[] = [];
+  for (let i = 0; i < spine.length; i++) {
+    const cur = spine[i]!;
+    if (i === 0) {
+      const d = unitV(subV(spine[i + 1] ?? cur, cur));
+      out.push(addV(cur, scaleV(leftNormal(d), offsetDist)));
+    } else if (i === spine.length - 1) {
+      const d = unitV(subV(cur, spine[i - 1] ?? cur));
+      out.push(addV(cur, scaleV(leftNormal(d), offsetDist)));
+    } else {
+      const dIn = unitV(subV(cur, spine[i - 1]!));
+      const dOut = unitV(subV(spine[i + 1]!, cur));
+      const nIn = leftNormal(dIn);
+      const nOut = leftNormal(dOut);
+      if (Math.hypot(nIn.x - nOut.x, nIn.y - nOut.y) < 0.02) {
+        out.push(addV(cur, scaleV(nIn, offsetDist)));
+      } else {
+        out.push(addV(cur, scaleV(nIn, offsetDist)));
+        out.push(addV(cur, scaleV(nOut, offsetDist)));
+      }
+    }
+  }
+  return out;
+}
+
+function rectsOverlap(
+  a: { x: number; y: number; w: number; h: number },
+  b: { x: number; y: number; w: number; h: number },
+  margin: number,
+): boolean {
+  return !(
+    a.x + a.w + margin < b.x ||
+    b.x + b.w + margin < a.x ||
+    a.y + a.h + margin < b.y ||
+    b.y + b.h + margin < a.y
+  );
+}
+
+function roundRectPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+/* ==========================================================================
+   Board data model
+   ========================================================================== */
+
+type Track = {
+  points: Pt[];
+  cumLen: number[];
+  totalLen: number;
+  width: number;
+  startAnchor: string;
+  endAnchor: string;
 };
 
-const CELL = 58;
-const NODE_PROB = 0.6;
-const ORTHO_EDGE_PROB = 0.52;
-const DIAGONAL_EDGE_PROB = 0.22;
-const VIA_PROB = 0.35;
+type ChipEdge = { anchorId: string; point: Pt; dirIdx: number; pins: Pt[] };
+type Chip = { x: number; y: number; w: number; h: number; edges: ChipEdge[] };
+type Connector = { anchorId: string; point: Pt; dirIdx: number; pins: Pt[] };
+type PadSmall = { x: number; y: number; square: boolean };
+type PadLarge = { x: number; y: number; w: number; h: number };
+type Via = { x: number; y: number };
+
+type Board = {
+  width: number;
+  height: number;
+  tracks: Track[];
+  chips: Chip[];
+  connectors: Connector[];
+  padsSmall: PadSmall[];
+  padsLarge: PadLarge[];
+  vias: Via[];
+  junctions: Map<string, number[]>;
+  anchorPoints: Map<string, Pt>;
+};
+
+function makeTrack(points: Pt[], width: number, startAnchor: string, endAnchor: string): Track {
+  const cumLen = [0];
+  for (let i = 1; i < points.length; i++) cumLen.push(cumLen[i - 1]! + distPt(points[i - 1]!, points[i]!));
+  return { points, cumLen, totalLen: cumLen[cumLen.length - 1] ?? 0, width, startAnchor, endAnchor };
+}
 
 function mulberry32(seed: number) {
   let a = seed;
@@ -36,164 +197,357 @@ function mulberry32(seed: number) {
   };
 }
 
-function buildBoard(width: number, height: number, rand: () => number) {
-  const cols = Math.ceil(width / CELL) + 2;
-  const rows = Math.ceil(height / CELL) + 2;
-  const nodes: Node[] = [];
-  const nodeAt = new Map<string, number>(); // "gx,gy" -> node id
-  const adjacency = new Map<number, number[]>();
-  const edges: Edge[] = [];
+function buildBoard(width: number, height: number, rand: () => number): Board {
+  const chips: Chip[] = [];
+  const connectors: Connector[] = [];
+  const padsSmall: PadSmall[] = [];
+  const padsLarge: PadLarge[] = [];
+  const vias: Via[] = [];
+  const tracks: Track[] = [];
+  const junctions = new Map<string, number[]>();
+  const anchorPoints = new Map<string, Pt>();
+  let deadendSeq = 0;
 
-  let id = 0;
-  for (let gy = 0; gy < rows; gy++) {
-    for (let gx = 0; gx < cols; gx++) {
-      if (rand() > NODE_PROB) continue;
-      const jitter = CELL * 0.16;
-      const x = gx * CELL + (rand() * 2 - 1) * jitter;
-      const y = gy * CELL + (rand() * 2 - 1) * jitter;
-      nodes.push({ id, x, y, gx, gy });
-      nodeAt.set(`${gx},${gy}`, id);
-      adjacency.set(id, []);
-      id++;
+  function addJunction(id: string, trackIdx: number) {
+    const arr = junctions.get(id);
+    if (arr) arr.push(trackIdx);
+    else junctions.set(id, [trackIdx]);
+  }
+
+  const placedRects: { x: number; y: number; w: number; h: number }[] = [];
+
+  const chipCount = clampNum(Math.round((width * height) / 65000), 5, 18);
+  for (let i = 0; i < chipCount; i++) {
+    for (let attempt = 0; attempt < 14; attempt++) {
+      const w = snap(40 + rand() * 80, GRID);
+      const h = snap(40 + rand() * 80, GRID);
+      const x = snap(24 + rand() * Math.max(1, width - w - 48), GRID);
+      const y = snap(24 + rand() * Math.max(1, height - h - 48), GRID);
+      const rect = { x, y, w, h };
+      if (placedRects.some((r) => rectsOverlap(rect, r, 36))) continue;
+      placedRects.push(rect);
+
+      const vertical = rand() < 0.5;
+      const edges: ChipEdge[] = [];
+      const pinPitch = 10;
+      function makeEdge(anchorId: string, point: Pt, dirIdx: number, count: number, pinAt: (p: number) => Pt) {
+        const pins: Pt[] = [];
+        for (let p = 0; p < count; p++) pins.push(pinAt(p));
+        edges.push({ anchorId, point, dirIdx, pins });
+        anchorPoints.set(anchorId, point);
+      }
+      if (vertical) {
+        const count = clampNum(Math.floor(h / pinPitch) - 1, 2, 8);
+        makeEdge(`chip${i}_l`, { x, y: y + h / 2 }, 4, count, (p) => ({ x, y: y + (h * (p + 1)) / (count + 1) }));
+        makeEdge(`chip${i}_r`, { x: x + w, y: y + h / 2 }, 0, count, (p) => ({
+          x: x + w,
+          y: y + (h * (p + 1)) / (count + 1),
+        }));
+      } else {
+        const count = clampNum(Math.floor(w / pinPitch) - 1, 2, 8);
+        makeEdge(`chip${i}_t`, { x: x + w / 2, y }, 6, count, (p) => ({ x: x + (w * (p + 1)) / (count + 1), y }));
+        makeEdge(`chip${i}_b`, { x: x + w / 2, y: y + h }, 2, count, (p) => ({
+          x: x + (w * (p + 1)) / (count + 1),
+          y: y + h,
+        }));
+      }
+      chips.push({ x, y, w, h, edges });
+      break;
     }
   }
 
-  function link(aId: number, bId: number) {
-    adjacency.get(aId)!.push(bId);
-    adjacency.get(bId)!.push(aId);
-    edges.push({ a: aId, b: bId, via: rand() < VIA_PROB });
+  const connectorCount = clampNum(Math.round((width * height) / 160000), 2, 8);
+  for (let i = 0; i < connectorCount; i++) {
+    const x = snap(30 + rand() * Math.max(1, width - 60), GRID);
+    const y = snap(30 + rand() * Math.max(1, height - 60), GRID);
+    const horizontal = rand() < 0.5;
+    const count = 2 + Math.floor(rand() * 5);
+    const pitch = 9;
+    const dirIdx = horizontal ? (rand() < 0.5 ? 6 : 2) : rand() < 0.5 ? 0 : 4;
+    const pins: Pt[] = [];
+    for (let p = 0; p < count; p++) pins.push(horizontal ? { x: x + p * pitch, y } : { x, y: y + p * pitch });
+    const anchorId = `conn${i}`;
+    const point = horizontal
+      ? { x: x + ((count - 1) * pitch) / 2, y }
+      : { x, y: y + ((count - 1) * pitch) / 2 };
+    connectors.push({ anchorId, point, dirIdx, pins });
+    anchorPoints.set(anchorId, point);
   }
 
-  for (const node of nodes) {
-    const east = nodeAt.get(`${node.gx + 1},${node.gy}`);
-    const south = nodeAt.get(`${node.gx},${node.gy + 1}`);
-    const southEast = nodeAt.get(`${node.gx + 1},${node.gy + 1}`);
-    const southWest = nodeAt.get(`${node.gx - 1},${node.gy + 1}`);
-    if (east !== undefined && rand() < ORTHO_EDGE_PROB) link(node.id, east);
-    if (south !== undefined && rand() < ORTHO_EDGE_PROB) link(node.id, south);
-    if (southEast !== undefined && rand() < DIAGONAL_EDGE_PROB) link(node.id, southEast);
-    if (southWest !== undefined && rand() < DIAGONAL_EDGE_PROB) link(node.id, southWest);
+  const padLargeCount = clampNum(Math.round((width * height) / 260000), 1, 5);
+  for (let i = 0; i < padLargeCount; i++) {
+    const w = snap(28 + rand() * 40, GRID);
+    const h = snap(20 + rand() * 30, GRID);
+    const x = snap(30 + rand() * Math.max(1, width - w - 60), GRID);
+    const y = snap(30 + rand() * Math.max(1, height - h - 60), GRID);
+    const anchorId = `pad${i}`;
+    padsLarge.push({ x, y, w, h });
+    anchorPoints.set(anchorId, { x: x + w / 2, y: y + h / 2 });
   }
 
-  // Chips: a handful of rectangular blocks dropped onto the grid, purely
-  // decorative (pulses flash them via proximity, they aren't graph nodes).
-  const chips: Chip[] = [];
-  const chipCount = Math.max(3, Math.round((cols * rows) / 90));
-  for (let i = 0; i < chipCount; i++) {
-    const gx = Math.floor(rand() * (cols - 4));
-    const gy = Math.floor(rand() * (rows - 3));
-    const w = (2 + Math.floor(rand() * 2)) * CELL * 0.72;
-    const h = (2 + Math.floor(rand() * 2)) * CELL * 0.72;
-    chips.push({ x: gx * CELL, y: gy * CELL, w, h });
+  type Source = { anchorId: string; point: Pt; dirIdx: number; count: number };
+  const sources: Source[] = [];
+  for (const c of chips) for (const e of c.edges) sources.push({ anchorId: e.anchorId, point: e.point, dirIdx: e.dirIdx, count: e.pins.length });
+  for (const c of connectors) sources.push({ anchorId: c.anchorId, point: c.point, dirIdx: c.dirIdx, count: c.pins.length });
+
+  const destPool: { anchorId: string; point: Pt }[] = [];
+  for (const c of chips) for (const e of c.edges) destPool.push({ anchorId: e.anchorId, point: e.point });
+  for (const c of connectors) destPool.push({ anchorId: c.anchorId, point: c.point });
+  for (let i = 0; i < padsLarge.length; i++) destPool.push({ anchorId: `pad${i}`, point: anchorPoints.get(`pad${i}`)! });
+
+  function randomDeadend(near: Pt, dirIdx: number): { anchorId: string; point: Pt } {
+    const d = DIR_VECS[dirIdx]!;
+    const len = GRID * (6 + Math.floor(rand() * 14));
+    const point = {
+      x: clampNum(near.x + d.x * len, 12, width - 12),
+      y: clampNum(near.y + d.y * len, 12, height - 12),
+    };
+    const anchorId = `dead${deadendSeq++}`;
+    anchorPoints.set(anchorId, point);
+    return { anchorId, point };
   }
 
-  return { nodes, adjacency, edges, chips, width, height };
+  function routeBundle(source: Source) {
+    const K = clampNum(source.count, 3, 6);
+    const gap = 8 + rand() * 8;
+    let dest = destPool.length > 0 ? destPool[Math.floor(rand() * destPool.length)]! : null;
+    if (!dest || dest.anchorId === source.anchorId || rand() < 0.35) {
+      dest = randomDeadend(source.point, source.dirIdx);
+    }
+    const stub = GRID * (1 + Math.floor(rand() * 2));
+    const spineStart = addV(source.point, scaleV(DIR_VECS[source.dirIdx]!, stub));
+    const maxLen = Math.min(Math.max(distPt(spineStart, dest.point) * 1.6, GRID * 20), 2600);
+    const spine = buildSpine(rand, spineStart, source.dirIdx, dest.point, maxLen);
+    for (let k = 0; k < K; k++) {
+      const offset = (k - (K - 1) / 2) * gap;
+      const trackPts = [source.point, ...offsetSpine(spine, offset)];
+      const width = 1 + rand();
+      const track = makeTrack(trackPts, width, source.anchorId, dest.anchorId);
+      const idx = tracks.length;
+      tracks.push(track);
+      addJunction(source.anchorId, idx);
+      addJunction(dest.anchorId, idx);
+      if (rand() < 0.12 && trackPts.length > 2) {
+        const viaIdx = 1 + Math.floor(rand() * (trackPts.length - 2));
+        vias.push({ x: trackPts[viaIdx]!.x, y: trackPts[viaIdx]!.y });
+      }
+    }
+    if (dest.anchorId.startsWith("dead")) padsSmall.push({ x: dest.point.x, y: dest.point.y, square: rand() < 0.5 });
+  }
+
+  for (const s of sources) routeBundle(s);
+
+  const fillerTarget = clampNum(Math.round((width * height) / 90000), 6, 26);
+  for (let i = 0; i < fillerTarget; i++) {
+    const x = snap(20 + rand() * Math.max(1, width - 40), GRID);
+    const y = snap(20 + rand() * Math.max(1, height - 40), GRID);
+    routeBundle({ anchorId: `filler${i}`, point: { x, y }, dirIdx: Math.floor(rand() * 8), count: 3 + Math.floor(rand() * 4) });
+  }
+
+  return { width, height, tracks, chips, connectors, padsSmall, padsLarge, vias, junctions, anchorPoints };
 }
-
-type Board = ReturnType<typeof buildBoard>;
 
 function drawStaticBoard(ctx: CanvasRenderingContext2D, board: Board, traceColor: string) {
   ctx.clearRect(0, 0, board.width, board.height);
   ctx.strokeStyle = traceColor;
-  ctx.lineWidth = 1;
-  ctx.lineCap = "round";
-
-  ctx.beginPath();
-  for (const edge of board.edges) {
-    const a = board.nodes[edge.a]!;
-    const b = board.nodes[edge.b]!;
-    ctx.moveTo(a.x, a.y);
-    ctx.lineTo(b.x, b.y);
-  }
-  ctx.stroke();
-
-  // vias
   ctx.fillStyle = traceColor;
-  for (const edge of board.edges) {
-    if (!edge.via) continue;
-    const a = board.nodes[edge.a]!;
-    const b = board.nodes[edge.b]!;
-    const mx = (a.x + b.x) / 2;
-    const my = (a.y + b.y) / 2;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  for (const t of board.tracks) {
+    ctx.lineWidth = t.width;
     ctx.beginPath();
-    ctx.arc(mx, my, 1.6, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.moveTo(t.points[0]!.x, t.points[0]!.y);
+    for (let i = 1; i < t.points.length; i++) ctx.lineTo(t.points[i]!.x, t.points[i]!.y);
+    ctx.stroke();
   }
 
-  // pads
-  for (const node of board.nodes) {
+  for (const v of board.vias) {
     ctx.beginPath();
-    ctx.arc(node.x, node.y, 1.4, 0, Math.PI * 2);
+    ctx.arc(v.x, v.y, 2.6, 0, Math.PI * 2);
     ctx.fill();
   }
+  ctx.fillStyle = "rgba(2,4,3,0.65)";
+  for (const v of board.vias) {
+    ctx.beginPath();
+    ctx.arc(v.x, v.y, 0.9, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = traceColor;
 
-  // chips
+  for (const p of board.padsSmall) {
+    if (p.square) ctx.fillRect(p.x - 2.5, p.y - 2.5, 5, 5);
+    else {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 2.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  for (const pad of board.padsLarge) roundRectPath(ctx, pad.x, pad.y, pad.w, pad.h, 3);
+  if (board.padsLarge.length > 0) ctx.fill();
+
+  ctx.lineWidth = 1;
   for (const chip of board.chips) {
     ctx.strokeRect(chip.x, chip.y, chip.w, chip.h);
-    const pinCount = 3;
-    for (let i = 1; i <= pinCount; i++) {
-      const px = chip.x + (chip.w * i) / (pinCount + 1);
+    for (const edge of chip.edges) {
+      const d = DIR_VECS[edge.dirIdx]!;
+      for (const pin of edge.pins) {
+        ctx.beginPath();
+        ctx.moveTo(pin.x, pin.y);
+        ctx.lineTo(pin.x + d.x * 6, pin.y + d.y * 6);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(pin.x, pin.y, 1.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  for (const conn of board.connectors) {
+    const d = DIR_VECS[conn.dirIdx]!;
+    for (const pin of conn.pins) {
       ctx.beginPath();
-      ctx.moveTo(px, chip.y);
-      ctx.lineTo(px, chip.y - 5);
-      ctx.moveTo(px, chip.y + chip.h);
-      ctx.lineTo(px, chip.y + chip.h + 5);
+      ctx.moveTo(pin.x, pin.y);
+      ctx.lineTo(pin.x + d.x * 7, pin.y + d.y * 7);
       ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(pin.x, pin.y, 1.6, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
 }
 
-function pickPath(board: Board, rand: () => number, startId: number | null, hops: number): number[] {
-  const nodeIds = board.nodes.map((n) => n.id);
-  if (nodeIds.length === 0) return [];
-  let current = startId ?? nodeIds[Math.floor(rand() * nodeIds.length)]!;
-  const path = [current];
-  let previous = -1;
-  for (let i = 0; i < hops; i++) {
-    const neighbors = board.adjacency.get(current) ?? [];
-    if (neighbors.length === 0) break;
-    const candidates = neighbors.filter((n) => n !== previous);
-    const pool = candidates.length > 0 ? candidates : neighbors;
-    const next = pool[Math.floor(rand() * pool.length)]!;
-    path.push(next);
-    previous = current;
-    current = next;
+/* ==========================================================================
+   Pulse routing — a pulse walks the exact points of one or more tracks
+   stitched end-to-end at shared component anchors, so it always follows
+   real trace geometry (bends included) and never cuts across empty space.
+   ========================================================================== */
+
+function findSegIndex(cum: number[], s: number): number {
+  if (s <= cum[0]!) return 0;
+  const last = cum.length - 1;
+  if (s >= cum[last]!) return Math.max(0, last - 1);
+  let lo = 0;
+  let hi = last;
+  while (lo < hi - 1) {
+    const mid = (lo + hi) >> 1;
+    if (cum[mid]! <= s) lo = mid;
+    else hi = mid;
   }
-  return path;
+  return lo;
+}
+function interpAt(pts: Pt[], cum: number[], s: number): Pt {
+  const i = findSegIndex(cum, s);
+  const a = pts[i]!;
+  const b = pts[i + 1] ?? a;
+  const segLen = (cum[i + 1] ?? cum[i]!) - cum[i]! || 1;
+  const t = clampNum((s - cum[i]!) / segLen, 0, 1);
+  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
 }
 
-function spawnPulse(board: Board, rand: () => number, startId: number | null = null, burst = false): Pulse | null {
-  const hops = burst ? 2 + Math.floor(rand() * 3) : 6 + Math.floor(rand() * 10);
-  const path = pickPath(board, rand, startId, hops);
-  if (path.length < 2) return null;
+type Pulse = {
+  pts: Pt[];
+  cum: number[];
+  total: number;
+  hopOffsets: { anchorId: string; atS: number }[];
+  traveled: number;
+  trailLen: number;
+  speed: number;
+  hue: "green" | "cyan";
+  bright: number;
+  decay: number;
+};
+
+function buildPulsePath(board: Board, rand: () => number, opts: { startTrackIdx?: number; forceForward?: boolean; burst?: boolean }) {
+  if (board.tracks.length === 0) return null;
+  const hops = opts.burst ? 1 + Math.floor(rand() * 2) : 3 + Math.floor(rand() * 4);
+  const startTrackIdx = opts.startTrackIdx ?? Math.floor(rand() * board.tracks.length);
+  const startTrack = board.tracks[startTrackIdx];
+  if (!startTrack || startTrack.points.length < 2) return null;
+
+  const forward = opts.forceForward ?? rand() < 0.5;
+  let pts = forward ? startTrack.points.slice() : startTrack.points.slice().reverse();
+  const usedTracks = new Set<number>([startTrackIdx]);
+  let currentAnchor = forward ? startTrack.endAnchor : startTrack.startAnchor;
+  const hopOffsets: { anchorId: string; atS: number }[] = [];
+  let accLen = startTrack.totalLen;
+
+  for (let h = 0; h < hops; h++) {
+    const candidates = (board.junctions.get(currentAnchor) ?? []).filter((idx) => !usedTracks.has(idx));
+    if (candidates.length === 0) break;
+    const nextIdx = candidates[Math.floor(rand() * candidates.length)]!;
+    usedTracks.add(nextIdx);
+    const nextTrack = board.tracks[nextIdx]!;
+    const nextForward = nextTrack.startAnchor === currentAnchor;
+    const nextPts = nextForward ? nextTrack.points : nextTrack.points.slice().reverse();
+    hopOffsets.push({ anchorId: currentAnchor, atS: accLen });
+    pts = pts.concat(nextPts.slice(1));
+    accLen += nextTrack.totalLen;
+    currentAnchor = nextForward ? nextTrack.endAnchor : nextTrack.startAnchor;
+  }
+
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1]! + distPt(pts[i - 1]!, pts[i]!));
+  return { pts, cum, total: cum[cum.length - 1] ?? 0, hopOffsets };
+}
+
+function spawnPulse(
+  board: Board,
+  rand: () => number,
+  opts: { startTrackIdx?: number; forceForward?: boolean; burst?: boolean } = {},
+): Pulse | null {
+  const built = buildPulsePath(board, rand, opts);
+  if (!built || built.total <= 1) return null;
+  const burst = opts.burst ?? false;
   return {
-    path,
-    segment: 0,
-    progress: 0,
-    speed: burst ? 260 + rand() * 160 : 70 + rand() * 110,
+    pts: built.pts,
+    cum: built.cum,
+    total: built.total,
+    hopOffsets: built.hopOffsets,
+    traveled: 0,
+    trailLen: 60 + rand() * 60,
+    speed: burst ? 220 + rand() * 160 : 55 + rand() * 90,
     hue: rand() < 0.6 ? "green" : "cyan",
-    trail: [],
     bright: 1,
     decay: burst ? 0.9 + rand() * 0.6 : 0,
   };
 }
 
-function nearestNode(board: Board, x: number, y: number): number | null {
-  let bestId: number | null = null;
-  let bestDist = Infinity;
-  for (const node of board.nodes) {
-    const dx = node.x - x;
-    const dy = node.y - y;
-    const dist = dx * dx + dy * dy;
-    if (dist < bestDist) {
-      bestDist = dist;
-      bestId = node.id;
+function pointSegDist(px: number, py: number, a: Pt, b: Pt, cumA: number) {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const lenSq = dx * dx + dy * dy || 1;
+  let t = ((px - a.x) * dx + (py - a.y) * dy) / lenSq;
+  t = clampNum(t, 0, 1);
+  const cx = a.x + dx * t;
+  const cy = a.y + dy * t;
+  const ddx = px - cx;
+  const ddy = py - cy;
+  return { distSq: ddx * ddx + ddy * ddy, s: cumA + t * Math.sqrt(lenSq) };
+}
+
+function nearestTrackPosition(board: Board, x: number, y: number): { trackIdx: number; s: number } | null {
+  let best: { trackIdx: number; s: number } | null = null;
+  let bestDistSq = Infinity;
+  for (let ti = 0; ti < board.tracks.length; ti++) {
+    const t = board.tracks[ti]!;
+    for (let i = 1; i < t.points.length; i++) {
+      const { distSq, s } = pointSegDist(x, y, t.points[i - 1]!, t.points[i]!, t.cumLen[i - 1]!);
+      if (distSq < bestDistSq) {
+        bestDistSq = distSq;
+        best = { trackIdx: ti, s };
+      }
     }
   }
-  return bestId;
+  return best;
 }
 
 const TARGET_FRAME_MS = 1000 / 30;
+
+/* ==========================================================================
+   Component
+   ========================================================================== */
 
 export function CircuitBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -219,7 +573,7 @@ export function CircuitBackground() {
     let lastSpawn = 0;
     let running = true;
     let dpr = 1;
-    const flashes = new Map<number, number>(); // node id -> flash strength 0..1
+    const flashes = new Map<string, number>();
 
     function currentPalette() {
       const styles = getComputedStyle(document.documentElement);
@@ -235,7 +589,6 @@ export function CircuitBackground() {
       const width = window.innerWidth;
       const height = window.innerHeight;
       if (width <= 0 || height <= 0) {
-        // viewport not sized yet (e.g. mid-navigation in an embedded preview) — try again next frame
         requestAnimationFrame(rebuild);
         return;
       }
@@ -256,7 +609,7 @@ export function CircuitBackground() {
 
       pulses = [];
       flashes.clear();
-      const count = intensityRef.current === "moderate" ? 2 : 5;
+      const count = intensityRef.current === "moderate" ? 3 : 6;
       for (let i = 0; i < count; i++) {
         const p = spawnPulse(board, rand);
         if (p) pulses.push(p);
@@ -275,117 +628,91 @@ export function CircuitBackground() {
       ctx.clearRect(0, 0, width, height);
       ctx.drawImage(staticCanvas, 0, 0);
 
-      const off = intensityRef.current === "off";
-      if (off) return;
+      if (intensityRef.current === "off") return;
 
       const moderate = intensityRef.current === "moderate";
       const glowScale = moderate ? 0.55 : 1;
       const dt = Math.min(dtMs, 80) / 1000;
 
       ctx.globalCompositeOperation = "lighter";
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
 
       for (const pulse of pulses) {
-        const a = board.nodes[pulse.path[pulse.segment]!]!;
-        const b = board.nodes[pulse.path[pulse.segment + 1]!]!;
-        const segLen = Math.hypot(b.x - a.x, b.y - a.y) || 1;
-        pulse.progress += (pulse.speed * dt) / segLen;
-
+        const prevTraveled = pulse.traveled;
+        pulse.traveled += pulse.speed * dt;
         if (pulse.decay > 0) pulse.bright = Math.max(0, pulse.bright - pulse.decay * dt);
 
-        while (pulse.progress >= 1) {
-          pulse.progress -= 1;
-          pulse.segment += 1;
-          const passedNode = pulse.path[pulse.segment];
-          if (passedNode !== undefined) {
-            flashes.set(passedNode, 1);
-            pulse.trail.push(passedNode);
-            if (pulse.trail.length > 4) pulse.trail.shift();
-          }
-          if (pulse.segment >= pulse.path.length - 1) break;
+        for (const hop of pulse.hopOffsets) {
+          if (prevTraveled < hop.atS && pulse.traveled >= hop.atS) flashes.set(hop.anchorId, 1);
         }
 
-        if (pulse.segment >= pulse.path.length - 1 || pulse.bright <= 0.02) continue;
+        if (pulse.traveled >= pulse.total || pulse.bright <= 0.02) continue;
 
-        const na = board.nodes[pulse.path[pulse.segment]!]!;
-        const nb = board.nodes[pulse.path[pulse.segment + 1]!]!;
-        const px = na.x + (nb.x - na.x) * pulse.progress;
-        const py = na.y + (nb.y - na.y) * pulse.progress;
+        const head = interpAt(pulse.pts, pulse.cum, pulse.traveled);
         const color = pulse.hue === "green" ? palette.glow : palette.glowCyan;
 
-        // fading trail behind the pulse head, along the segment already covered
+        // brightening trail along the actual bent trace geometry
+        const trailStart = Math.max(0, pulse.traveled - pulse.trailLen);
+        const startIdx = findSegIndex(pulse.cum, trailStart);
+        const headIdx = findSegIndex(pulse.cum, pulse.traveled);
+        const startPt = interpAt(pulse.pts, pulse.cum, trailStart);
         ctx.strokeStyle = color;
-        ctx.lineWidth = 1.6;
+        ctx.lineWidth = 1.8;
         ctx.globalAlpha = 0.85 * glowScale * pulse.bright;
         ctx.beginPath();
-        ctx.moveTo(na.x, na.y);
-        ctx.lineTo(px, py);
+        ctx.moveTo(startPt.x, startPt.y);
+        for (let i = startIdx + 1; i <= headIdx; i++) ctx.lineTo(pulse.pts[i]!.x, pulse.pts[i]!.y);
+        ctx.lineTo(head.x, head.y);
         ctx.stroke();
 
-        // glow blob
-        const radius = moderate ? 16 : 26;
-        const gradient = ctx.createRadialGradient(px, py, 0, px, py, radius);
+        // glow blob — additive blend over the static layer, so any nearby
+        // trace/pad/chip drawn underneath brightens automatically
+        const radius = moderate ? 32 : 52;
+        const gradient = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, radius);
         gradient.addColorStop(0, color);
         gradient.addColorStop(1, "transparent");
-        ctx.globalAlpha = 0.5 * glowScale * pulse.bright;
+        ctx.globalAlpha = 0.45 * glowScale * pulse.bright;
         ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.arc(px, py, radius, 0, Math.PI * 2);
+        ctx.arc(head.x, head.y, radius, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.globalAlpha = 1 * pulse.bright;
         ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.arc(px, py, 2.2, 0, Math.PI * 2);
+        ctx.arc(head.x, head.y, 2.2, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // node/pad/chip flashes, fading out
+      // junction flashes — a pad/pin/chip edge briefly lighting up as a
+      // pulse actually passes through it
       ctx.globalAlpha = 1;
-      for (const [nodeId, strength] of flashes) {
-        const node = board.nodes[nodeId];
-        if (!node || strength <= 0.02) {
-          flashes.delete(nodeId);
+      for (const [anchorId, strength] of flashes) {
+        const pt = board.anchorPoints.get(anchorId);
+        if (!pt || strength <= 0.02) {
+          flashes.delete(anchorId);
           continue;
         }
-        const radius = 10;
-        const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, radius);
+        const radius = 14;
+        const gradient = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, radius);
         gradient.addColorStop(0, palette.glow);
         gradient.addColorStop(1, "transparent");
-        ctx.globalAlpha = 0.6 * strength * glowScale;
+        ctx.globalAlpha = 0.55 * strength * glowScale;
         ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+        ctx.arc(pt.x, pt.y, radius, 0, Math.PI * 2);
         ctx.fill();
-        flashes.set(nodeId, strength - dt * 1.6);
-      }
-
-      // chip flashes (proximity-based, checked against active pulses)
-      for (const chip of board.chips) {
-        const cx = chip.x + chip.w / 2;
-        const cy = chip.y + chip.h / 2;
-        let lit = 0;
-        for (const pulse of pulses) {
-          const na = board.nodes[pulse.path[pulse.segment]];
-          if (!na) continue;
-          const d = Math.hypot(na.x - cx, na.y - cy);
-          const reach = Math.max(chip.w, chip.h);
-          if (d < reach) lit = Math.max(lit, (1 - d / reach) * pulse.bright);
-        }
-        if (lit > 0.02) {
-          ctx.globalAlpha = 0.35 * lit * glowScale;
-          ctx.strokeStyle = palette.glowCyan;
-          ctx.lineWidth = 1.5;
-          ctx.strokeRect(chip.x, chip.y, chip.w, chip.h);
-        }
+        flashes.set(anchorId, strength - dt * 1.6);
       }
 
       ctx.globalCompositeOperation = "source-over";
       ctx.globalAlpha = 1;
 
-      pulses = pulses.filter((p) => p.segment < p.path.length - 1 && p.bright > 0.02);
+      pulses = pulses.filter((p) => p.traveled < p.total && p.bright > 0.02);
 
-      const targetCount = moderate ? 2 : 5;
-      const spawnGapMs = moderate ? 3200 : 1400;
+      const targetCount = moderate ? 3 : 6;
+      const spawnGapMs = moderate ? 2600 : 900;
       if (pulses.length < targetCount && dtMs > 0) {
         lastSpawn += dtMs;
         if (lastSpawn > spawnGapMs) {
@@ -428,11 +755,13 @@ export function CircuitBackground() {
       if (!board || intensityRef.current === "off") return;
       const detail = (event as CustomEvent<CircuitPulseDetail>).detail;
       if (!detail) return;
-      const startId = nearestNode(board, detail.x, detail.y);
-      if (startId === null) return;
-      const burstCount = 3 + Math.floor(rand() * 2);
+      const nearest = nearestTrackPosition(board, detail.x, detail.y);
+      if (!nearest) return;
+      const track = board.tracks[nearest.trackIdx]!;
+      const forceForward = nearest.s < track.totalLen / 2;
+      const burstCount = 3 + Math.floor(rand() * 3);
       for (let i = 0; i < burstCount; i++) {
-        const p = spawnPulse(board, rand, startId, true);
+        const p = spawnPulse(board, rand, { startTrackIdx: nearest.trackIdx, forceForward, burst: true });
         if (p) pulses.push(p);
       }
     }
