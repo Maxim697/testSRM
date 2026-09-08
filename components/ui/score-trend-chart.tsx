@@ -106,34 +106,17 @@ export function ScoreTrendChart({
           </linearGradient>
         </defs>
         <path d={areaPath} fill={`url(#${gradientId})`} stroke="none" />
-        <path
-          d={linePath}
-          fill="none"
-          stroke="var(--info)"
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ filter: "drop-shadow(0 0 3px var(--info))" }}
-        />
-        {linePath && (
-          <circle
-            r={3}
-            fill="var(--circuit-glow-strong)"
-            className="chart-pulse-dot"
-            style={{ ["--chart-path" as string]: `path("${linePath}")`, filter: "drop-shadow(0 0 4px var(--info))" }}
-          />
-        )}
+        <path d={linePath} fill="none" stroke="var(--info)" strokeWidth={1} strokeLinecap="butt" strokeLinejoin="miter" />
         {coords.map((c, i) => (
           <g key={i}>
-            <circle
-              cx={c.x}
-              cy={c.y}
-              r={hoverIndex === i ? 4 : 3}
-              fill="var(--info)"
-              stroke="var(--color-surface-2)"
+            <rect
+              x={c.x - (hoverIndex === i ? 3.5 : 2.5)}
+              y={c.y - (hoverIndex === i ? 3.5 : 2.5)}
+              width={hoverIndex === i ? 7 : 5}
+              height={hoverIndex === i ? 7 : 5}
+              fill="var(--color-surface-2)"
+              stroke="var(--info)"
               strokeWidth={1.5}
-              className="chart-node"
-              style={{ ["--node-r-base" as string]: "3px", ["--node-r-pulse" as string]: "4px" }}
             />
             <rect
               x={c.x - innerW / points.length / 2}
@@ -148,7 +131,7 @@ export function ScoreTrendChart({
       </svg>
       {hovered && (
         <div
-          className="glass pcb-corners backdrop-blur-lg pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
+          className="glass term-corners backdrop-blur-lg pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
           style={{
             left: `${(hovered.x / WIDTH) * 100}%`,
             top: 0,

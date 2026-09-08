@@ -18,7 +18,7 @@ export function Sidebar({
   const sections = getVisibleNavSections(profile.role);
 
   return (
-    <aside className="glass pcb-corners backdrop-blur-lg flex h-full w-sidebar shrink-0 flex-col overflow-y-auto border-r border-border">
+    <aside className="glass term-corners backdrop-blur-lg flex h-full w-sidebar shrink-0 flex-col overflow-y-auto border-r border-border">
       <div className="flex h-12 shrink-0 items-center px-4">
         <span className="text-lg font-semibold text-text-primary">CRM</span>
       </div>
@@ -40,7 +40,7 @@ export function Sidebar({
                   <li key={item.href} className="relative">
                     {isActive && (
                       <span
-                        className="absolute left-0 top-1 bottom-1 w-0.5 rounded-full"
+                        className="absolute left-0 top-1 bottom-1 w-0.5 "
                         style={{ background: `var(--accent-${section.key})` }}
                       />
                     )}
@@ -65,7 +65,7 @@ export function Sidebar({
                       <span className="truncate">{item.label}</span>
                       {unreadHrefs?.has(item.href) && (
                         <span
-                          className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full"
+                          className="ml-auto h-1.5 w-1.5 shrink-0 "
                           style={{ background: `var(--accent-${section.key})` }}
                         />
                       )}

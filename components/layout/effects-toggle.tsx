@@ -22,18 +22,15 @@ export function EffectsToggle() {
     <button
       type="button"
       onClick={cycle}
-      className="pcb-field flex h-8 items-center gap-1.5 whitespace-nowrap px-3 text-base text-text-secondary hover:text-text-primary"
+      className="term-field flex h-8 items-center gap-1.5 whitespace-nowrap px-3 text-xs uppercase tracking-wide text-text-secondary hover:text-text-primary"
       aria-label="Інтенсивність фонових ефектів"
       title="Інтенсивність фонових ефектів"
     >
       <span
-        className="h-1.5 w-1.5 shrink-0 rounded-full"
-        style={{
-          background: intensity === "off" ? "var(--text-muted)" : "var(--circuit-glow)",
-          boxShadow: intensity === "full" ? "0 0 6px var(--circuit-glow)" : "none",
-        }}
+        className="h-2 w-2 shrink-0"
+        style={{ background: intensity === "off" ? "var(--text-muted)" : "var(--term-glow)" }}
       />
-      {LABELS[intensity]}
+      [{LABELS[intensity]}]
     </button>
   );
 }

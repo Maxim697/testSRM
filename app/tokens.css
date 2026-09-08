@@ -1,93 +1,96 @@
 /*
   Design tokens. Single source of truth for the whole app.
-  Dark theme is the default (:root) and is the primary target of the
-  "circuit board" aesthetic — near-black with neon traces. Light theme
-  overrides the same variables under [data-theme="light"] with the same
-  accent hues adapted to a light surface; the animated circuit canvas and
-  glow-under-content effects are dark-theme only (see circuit-background.tsx
-  and globals.css) since neon-on-white isn't legible.
+
+  Visual direction: an 80s trading-terminal CRT — near-black green-tinted
+  surfaces, phosphor text, four pure accent colors (no pastels, no muted
+  in-between hues), sharp rectangular edges everywhere (radius tokens are
+  0 — see globals.css). Dark is the primary target; light keeps the same
+  structure with ink-on-paper phosphor substitutes since neon-on-white
+  isn't legible.
   Components must never hardcode colors — reference these variables (via
   the Tailwind theme mapping in globals.css) only.
 */
 
 :root {
   /* Surfaces — near-black with a faint green cast, 4 levels */
-  --surface-0: #060a08; /* page background */
-  --surface-1: #0a1210; /* sidebar, header, recessed inputs */
-  --surface-2: #0d1815; /* cards, table containers */
-  --surface-3: #12211c; /* popovers, menus, tooltips, hover/active states */
+  --surface-0: #050a06; /* page background */
+  --surface-1: #080f09; /* sidebar, header, recessed inputs */
+  --surface-2: #0a130b; /* cards, table containers */
+  --surface-3: #101d12; /* popovers, menus, tooltips, hover/active states */
 
-  /* Text */
-  --text-primary: #eafff2;
-  --text-secondary: #9ac4ae;
-  --text-muted: #5c8271;
+  /* Text — muted phosphor green, three brightness steps */
+  --text-primary: #8fe6ab;
+  --text-secondary: #5c9c73;
+  --text-muted: #3a6249;
 
-  /* Borders — thin, but readable against surfaces */
-  --border: #1c352c;
-  --border-strong: #2b4d3f;
+  /* Borders — 1px, in text color at low brightness */
+  --border: rgba(143, 230, 171, 0.22);
+  --border-strong: rgba(143, 230, 171, 0.4);
 
-  /* Semantic — status backgrounds at ~20% so chips read as saturated color,
-     not a tint. Green is primary/positive, cyan is informational/analytics,
-     magenta is critical/negative, amber is warning. */
-  --positive: #2fe58a;
-  --positive-bg: rgba(47, 229, 138, 0.18);
-  --negative: #ff2f9e;
-  --negative-bg: rgba(255, 47, 158, 0.2);
-  --warning: #f2b537;
-  --warning-bg: rgba(242, 181, 55, 0.2);
-  --info: #2fe58a;
-  --info-bg: rgba(47, 229, 138, 0.14);
+  /* Semantic accents — pure, saturated, phosphor-clean. Green = normal/
+     growth, amber = warning, red = critical/falling, cyan = active/links.
+     No pastel tints: *-bg is the same hue at low alpha, not a lighter mix. */
+  --positive: #39ff6e;
+  --positive-bg: rgba(57, 255, 110, 0.14);
+  --negative: #ff3232;
+  --negative-bg: rgba(255, 50, 50, 0.16);
+  --warning: #ffb000;
+  --warning-bg: rgba(255, 176, 0, 0.16);
+  --info: #22e0ff;
+  --info-bg: rgba(34, 224, 255, 0.14);
 
-  /* Data series palette — fixed order, 8 colors, neon-shifted */
-  --series-1: #2fe58a;
-  --series-2: #33e3ff;
-  --series-3: #f2b537;
-  --series-4: #b073ff;
-  --series-5: #ff2f9e;
-  --series-6: #33e3ff;
+  /* Data series palette — fixed order, 8 colors, clean phosphor hues */
+  --series-1: #39ff6e;
+  --series-2: #22e0ff;
+  --series-3: #ffb000;
+  --series-4: #c86bff;
+  --series-5: #ff3232;
+  --series-6: #22e0ff;
   --series-7: #ff8a3d;
-  --series-8: #9fe83e;
+  --series-8: #c8ff3d;
 
-  /* Tier colors */
-  --tier-gold: #f2c94c;
-  --tier-gold-bg: rgba(242, 201, 76, 0.16);
-  --tier-silver: #a8d8c9;
-  --tier-silver-bg: rgba(168, 216, 201, 0.14);
-  --tier-bronze: #e08a52;
-  --tier-bronze-bg: rgba(224, 138, 82, 0.16);
+  /* Tier colors — bracketed text, not chips; kept distinct from the 4
+     semantic accents above */
+  --tier-gold: #ffd23f;
+  --tier-gold-bg: rgba(255, 210, 63, 0.14);
+  --tier-silver: #cfe8dc;
+  --tier-silver-bg: rgba(207, 232, 220, 0.12);
+  --tier-bronze: #ff8c42;
+  --tier-bronze-bg: rgba(255, 140, 66, 0.14);
 
-  /* Section accents — one per nav group */
-  --accent-analytics: #33e3ff;
-  --accent-analytics-bg: rgba(51, 227, 255, 0.15);
-  --accent-crm: #b073ff;
-  --accent-crm-bg: rgba(176, 115, 255, 0.15);
-  --accent-platform: #2fe58a;
-  --accent-platform-bg: rgba(47, 229, 138, 0.15);
+  /* Section accents — kept as a hook for future differentiation, but the
+     terminal palette allows exactly one "active" hue (cyan), so every
+     section currently maps to --info. */
+  --accent-analytics: var(--info);
+  --accent-analytics-bg: var(--info-bg);
+  --accent-crm: var(--info);
+  --accent-crm-bg: var(--info-bg);
+  --accent-platform: var(--info);
+  --accent-platform-bg: var(--info-bg);
 
   /* Focus ring — follows the current section accent (see --info override in
-     SectionAccentScope), so it re-tints along with links/primary actions */
+     SectionAccentScope) */
   --focus-ring: var(--info);
 
-  /* Circuit board — background canvas + glow-through-content effects */
-  --circuit-trace: rgba(47, 229, 138, 0.08);
-  --circuit-glow: #7dffc4;
-  --circuit-glow-cyan: #6df0ff;
-  --circuit-glow-strong: #baffdf;
+  /* Phosphor glow — text-shadow and chart accents */
+  --term-trace: rgba(57, 255, 110, 0.08);
+  --term-glow: #39ff6e;
+  --term-glow-cyan: #22e0ff;
+  --term-glow-strong: #baffce;
 
   /* Glass — top layers only (header, sidebar, modals, popovers, tooltips). */
-  --glass-bg: rgba(6, 12, 10, 0.72);
-  --glass-border: rgba(125, 255, 196, 0.16);
+  --glass-bg: rgba(5, 10, 6, 0.86);
+  --glass-border: rgba(143, 230, 171, 0.22);
 
-  /* Card / table translucency — content sits above the circuit canvas and
-     lets a blurred glow show through, per the "glow under content" effect.
-     -glow is used at fx=full, -solid at fx=moderate/off (see globals.css). */
-  --panel-bg-glow: rgba(11, 20, 17, 0.62);
+  /* Card / table surfaces — solid, no translucency (nothing shows through
+     from behind content anymore). */
+  --panel-bg-glow: var(--surface-2);
   --panel-bg-solid: var(--surface-2);
-  --panel-border: rgba(125, 255, 196, 0.14);
+  --panel-border: var(--border);
 
   /* Scrollbar */
-  --scrollbar-thumb: #1f4536;
-  --scrollbar-thumb-hover: #2fe58a;
+  --scrollbar-thumb: #1c3520;
+  --scrollbar-thumb-hover: #39ff6e;
 
   /* Motion */
   --transition-fast: 150ms;
@@ -101,30 +104,30 @@
   --surface-0: #eef3f0;
   --surface-1: #f5f8f6;
   --surface-2: #ffffff;
-  --surface-3: #ffffff;
+  --surface-3: #e9f1ec;
 
-  --text-primary: #0d1f16;
+  --text-primary: #0d2417;
   --text-secondary: #3d5c4c;
   --text-muted: #7a9787;
 
-  --border: rgba(13, 31, 22, 0.14);
-  --border-strong: rgba(13, 31, 22, 0.26);
+  --border: rgba(13, 36, 23, 0.2);
+  --border-strong: rgba(13, 36, 23, 0.36);
 
-  --positive: #0f9d5c;
-  --positive-bg: rgba(15, 157, 92, 0.16);
-  --negative: #c81f7f;
-  --negative-bg: rgba(200, 31, 127, 0.16);
-  --warning: #a66c14;
-  --warning-bg: rgba(166, 108, 20, 0.16);
-  --info: #0f9d5c;
-  --info-bg: rgba(15, 157, 92, 0.12);
+  --positive: #0d9440;
+  --positive-bg: rgba(13, 148, 64, 0.14);
+  --negative: #c81616;
+  --negative-bg: rgba(200, 22, 22, 0.14);
+  --warning: #a66c00;
+  --warning-bg: rgba(166, 108, 0, 0.14);
+  --info: #0089a8;
+  --info-bg: rgba(0, 137, 168, 0.12);
 
-  --series-1: #0f9d5c;
-  --series-2: #0e93a8;
-  --series-3: #a66c14;
+  --series-1: #0d9440;
+  --series-2: #0089a8;
+  --series-3: #a66c00;
   --series-4: #7a3fd1;
-  --series-5: #c81f7f;
-  --series-6: #0e93a8;
+  --series-5: #c81616;
+  --series-6: #0089a8;
   --series-7: #c9611f;
   --series-8: #5c8f1f;
 
@@ -135,25 +138,25 @@
   --tier-bronze: #97501f;
   --tier-bronze-bg: rgba(151, 80, 31, 0.14);
 
-  --accent-analytics: #0e93a8;
-  --accent-analytics-bg: rgba(14, 147, 168, 0.12);
-  --accent-crm: #7a3fd1;
-  --accent-crm-bg: rgba(122, 63, 209, 0.12);
-  --accent-platform: #0f9d5c;
-  --accent-platform-bg: rgba(15, 157, 92, 0.12);
+  --accent-analytics: var(--info);
+  --accent-analytics-bg: var(--info-bg);
+  --accent-crm: var(--info);
+  --accent-crm-bg: var(--info-bg);
+  --accent-platform: var(--info);
+  --accent-platform-bg: var(--info-bg);
 
-  --circuit-trace: rgba(15, 157, 92, 0.06);
-  --circuit-glow: #0f9d5c;
-  --circuit-glow-cyan: #0e93a8;
-  --circuit-glow-strong: #0c7a49;
+  --term-trace: rgba(13, 148, 64, 0.06);
+  --term-glow: #0d9440;
+  --term-glow-cyan: #0089a8;
+  --term-glow-strong: #0c7a49;
 
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(13, 31, 22, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(13, 36, 23, 0.16);
 
-  --panel-bg-glow: rgba(255, 255, 255, 0.68);
+  --panel-bg-glow: var(--surface-2);
   --panel-bg-solid: var(--surface-2);
-  --panel-border: rgba(13, 31, 22, 0.1);
+  --panel-border: var(--border);
 
   --scrollbar-thumb: var(--border-strong);
-  --scrollbar-thumb-hover: #0f9d5c;
+  --scrollbar-thumb-hover: #0d9440;
 }

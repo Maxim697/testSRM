@@ -47,13 +47,7 @@ export function RiskDistributionChart({ counts }: { counts: Record<RiskLevel, nu
               height={h}
               fill={LEVEL_COLORS[level]}
               opacity={opacity}
-              rx={3}
-              className={level === "critical" ? "chart-bar-glow" : undefined}
-              style={{
-                filter: `drop-shadow(0 0 4px ${LEVEL_COLORS[level]})`,
-                ["--pulse-color" as string]: LEVEL_COLORS[level],
-                ["--pulse-duration" as string]: level === "critical" ? "1s" : "2.8s",
-              }}
+              className={level === "critical" ? "term-bar-pulse" : undefined}
             />
             <text x={x + barWidth / 2} y={y - 6} textAnchor="middle" fontSize={12} fill="var(--color-text-primary)" fontWeight={600}>
               {value}

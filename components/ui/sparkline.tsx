@@ -22,24 +22,9 @@ export function Sparkline({ values, color = "var(--info)" }: { values: (number |
 
   return (
     <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} width={WIDTH} height={HEIGHT} className="inline-block align-middle">
-      <path
-        d={path}
-        fill="none"
-        stroke={color}
-        strokeWidth={1.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        style={{ filter: `drop-shadow(0 0 2px ${color})` }}
-      />
+      <path d={path} fill="none" stroke={color} strokeWidth={1} strokeLinecap="butt" strokeLinejoin="miter" />
       {last && (
-        <circle
-          cx={last.x}
-          cy={last.y}
-          r={1.8}
-          fill={color}
-          className="chart-node"
-          style={{ ["--node-r-base" as string]: "1.8px", ["--node-r-pulse" as string]: "2.6px" }}
-        />
+        <rect x={last.x - 1.8} y={last.y - 1.8} width={3.6} height={3.6} fill="var(--color-surface-2)" stroke={color} strokeWidth={1.2} />
       )}
     </svg>
   );

@@ -5,6 +5,7 @@ import { findNavItem } from "@/lib/nav";
 import { roleLabel } from "@/lib/roles";
 import { usePageTitle } from "@/lib/page-title";
 import { Badge } from "@/components/ui/badge";
+import { Typewriter } from "@/components/ui/typewriter";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { EffectsToggle } from "@/components/layout/effects-toggle";
 import { NotificationBell } from "@/components/layout/notification-bell";
@@ -20,13 +21,16 @@ export function Header({ profile, notifications }: { profile: Profile; notificat
       <div className="flex items-center gap-2.5">
         {match && (
           <span
-            className="h-2 w-2 rounded-full"
+            className="h-2 w-2 "
             style={{ background: `var(--accent-${match.section.key})` }}
           />
         )}
-        <h2 className="whitespace-nowrap text-lg font-medium text-text-primary">
-          {overrideTitle ?? match?.item.label ?? "CRM"}
-        </h2>
+        <Typewriter
+          key={pathname}
+          as="h2"
+          text={overrideTitle ?? match?.item.label ?? "CRM"}
+          className="term-heading whitespace-nowrap text-lg font-medium text-text-primary"
+        />
       </div>
 
       <div className="flex shrink-0 items-center gap-3">

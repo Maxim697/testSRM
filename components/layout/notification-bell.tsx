@@ -66,18 +66,18 @@ export function NotificationBell({ notifications: initial }: { notifications: No
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="pcb-field relative flex h-8 w-8 items-center justify-center text-text-secondary transition-colors hover:text-text-primary"
+        className="term-field relative flex h-8 w-8 items-center justify-center text-text-secondary transition-colors hover:text-text-primary"
         aria-label="Сповіщення"
       >
         <BellIcon />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-info px-1 text-[10px] font-semibold leading-none text-white">
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center  bg-info px-1 text-[10px] font-semibold leading-none text-white">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
       {open && (
-        <div className="glass pcb-corners backdrop-blur-lg absolute right-0 top-full z-30 mt-1.5 w-80 rounded-control p-2">
+        <div className="glass term-corners backdrop-blur-lg absolute right-0 top-full z-30 mt-1.5 w-80 rounded-control p-2">
           <div className="mb-1 flex items-center justify-between px-1">
             <span className="text-xs font-medium uppercase tracking-wide text-text-muted">Сповіщення</span>
             {unreadCount > 0 && (
@@ -105,7 +105,7 @@ export function NotificationBell({ notifications: initial }: { notifications: No
                   )}
                 >
                   <span className="flex w-full items-center gap-1.5">
-                    {!n.is_read && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-info" />}
+                    {!n.is_read && <span className="h-1.5 w-1.5 shrink-0  bg-info" />}
                     <span className="truncate text-sm font-medium text-text-primary">{n.title}</span>
                   </span>
                   {n.body && <span className="line-clamp-2 text-xs text-text-secondary">{n.body}</span>}

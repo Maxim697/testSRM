@@ -136,7 +136,7 @@ export function UsersTable({
       header: "Користувач",
       accessor: (u) => (
         <div className={cn("flex items-center gap-2.5", !u.is_active && "opacity-50")}>
-          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-3 text-xs font-medium text-text-primary">
+          <div className="flex h-6 w-6 shrink-0 items-center justify-center  bg-surface-3 text-xs font-medium text-text-primary">
             {getInitials(u.full_name)}
           </div>
           <span className="text-text-primary">{u.full_name ?? "Без імені"}</span>

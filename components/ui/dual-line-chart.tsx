@@ -55,11 +55,11 @@ export function DualLineChart({
     <div className="relative">
       <div className="mb-2 flex items-center gap-4 text-xs text-text-secondary">
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full" style={{ background: colorA }} />
+          <span className="h-2 w-2 " style={{ background: colorA }} />
           {labelA}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full" style={{ background: colorB }} />
+          <span className="h-2 w-2 " style={{ background: colorB }} />
           {labelB}
         </span>
       </div>
@@ -77,64 +77,34 @@ export function DualLineChart({
           y2={PAD_Y + innerH}
           strokeWidth={1}
         />
-        <path
-          d={pathA}
-          fill="none"
-          stroke={colorA}
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ filter: `drop-shadow(0 0 3px ${colorA})` }}
-        />
-        <path
-          d={pathB}
-          fill="none"
-          stroke={colorB}
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ filter: `drop-shadow(0 0 3px ${colorB})` }}
-        />
-        {pathA && (
-          <circle
-            r={3}
-            fill="var(--circuit-glow-strong)"
-            className="chart-pulse-dot"
-            style={{ ["--chart-path" as string]: `path("${pathA}")`, ["--pulse-duration" as string]: "3.2s", filter: `drop-shadow(0 0 4px ${colorA})` }}
-          />
-        )}
-        {pathB && (
-          <circle
-            r={3}
-            fill="var(--circuit-glow-strong)"
-            className="chart-pulse-dot"
-            style={{ ["--chart-path" as string]: `path("${pathB}")`, ["--pulse-duration" as string]: "4.1s", filter: `drop-shadow(0 0 4px ${colorB})` }}
-          />
-        )}
-        {coordsA.map((c, i) => (
-          <circle
-            key={`a-${i}`}
-            cx={c.x}
-            cy={c.y}
-            r={hoverIndex === i ? 4 : 3}
-            fill={colorA}
-            stroke="var(--color-surface-2)"
-            strokeWidth={1.5}
-            className="chart-node"
-          />
-        ))}
-        {coordsB.map((c, i) => (
-          <circle
-            key={`b-${i}`}
-            cx={c.x}
-            cy={c.y}
-            r={hoverIndex === i ? 4 : 3}
-            fill={colorB}
-            stroke="var(--color-surface-2)"
-            strokeWidth={1.5}
-            className="chart-node"
-          />
-        ))}
+        <path d={pathA} fill="none" stroke={colorA} strokeWidth={1} strokeLinecap="butt" strokeLinejoin="miter" />
+        <path d={pathB} fill="none" stroke={colorB} strokeWidth={1} strokeLinecap="butt" strokeLinejoin="miter" />
+        {coordsA.map((c, i) => {
+          const s = hoverIndex === i ? 3.5 : 2.5;
+          return (
+            <rect
+              key={`a-${i}`}
+              x={c.x - s}
+              y={c.y - s}
+              width={s * 2}
+              height={s * 2}
+              fill="var(--color-surface-2)"
+              stroke={colorA}
+              strokeWidth={1.5}
+            />
+          );
+        })}
+        {coordsB.map((c, i) => {
+          const s = hoverIndex === i ? 4.5 : 3.5;
+          return (
+            <path
+              key={`b-${i}`}
+              d={`M${c.x - s},${c.y - s} L${c.x + s},${c.y + s} M${c.x + s},${c.y - s} L${c.x - s},${c.y + s}`}
+              stroke={colorB}
+              strokeWidth={1.5}
+            />
+          );
+        })}
         {coordsA.map((c, i) => (
           <rect
             key={`hit-${i}`}
@@ -149,7 +119,7 @@ export function DualLineChart({
       </svg>
       {hoveredWeek && hoveredX !== null && (
         <div
-          className="glass pcb-corners backdrop-blur-lg pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
+          className="glass term-corners backdrop-blur-lg pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
           style={{ left: `${(hoveredX / WIDTH) * 100}%`, top: 0, transform: "translate(-50%, -110%)" }}
         >
           <div className="text-text-muted">{formatDate(hoveredWeek.weekStart)}</div>

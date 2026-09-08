@@ -53,7 +53,6 @@ export function StatusByManagerChart({ points }: { points: ManagerStatusPoint[] 
                     width={barWidth}
                     height={h}
                     fill={seg.color}
-                    style={{ filter: `drop-shadow(0 0 3px ${seg.color})` }}
                   />
                 );
               })}
@@ -81,13 +80,13 @@ export function StatusByManagerChart({ points }: { points: ManagerStatusPoint[] 
       </svg>
       <div className="flex items-center gap-4 text-xs text-text-secondary">
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-positive" /> Green
+          <span className="h-2 w-2  bg-positive" /> Green
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-warning" /> Amber
+          <span className="h-2 w-2  bg-warning" /> Amber
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-negative" /> Red
+          <span className="h-2 w-2  bg-negative" /> Red
         </span>
       </div>
     </div>

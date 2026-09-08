@@ -91,7 +91,7 @@ export function WeeklyTasksSection({
         accessor: (t) => (
           <div className="relative pl-3">
             <span
-              className="absolute inset-y-0 left-0 w-0.5 rounded-full"
+              className="absolute inset-y-0 left-0 w-0.5 "
               style={{ background: STATUS_STRIPE[t.status] }}
             />
             <div className="text-text-primary">{t.title}</div>

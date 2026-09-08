@@ -67,7 +67,6 @@ export function StackedBarChart({ points }: { points: StackedBarPoint[] }) {
                     height={h}
                     fill={seg.color}
                     opacity={hoverIndex === i ? 1 : 0.85}
-                    style={{ filter: `drop-shadow(0 0 3px ${seg.color})` }}
                   />
                 );
               })}
@@ -85,7 +84,7 @@ export function StackedBarChart({ points }: { points: StackedBarPoint[] }) {
       </svg>
       {hovered && hoverIndex !== null && (
         <div
-          className="glass pcb-corners backdrop-blur-lg pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
+          className="glass term-corners backdrop-blur-lg pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
           style={{
             left: `${((PAD_X + slot * hoverIndex + slot / 2) / WIDTH) * 100}%`,
             top: 0,

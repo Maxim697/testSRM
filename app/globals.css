@@ -2,25 +2,26 @@
 @import "./tokens.css";
 
 @theme inline {
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-jetbrains-mono);
   --font-mono: var(--font-jetbrains-mono);
 
-  /* Type scale: 11 / 12 / 13 / 15 / 20 / 28 */
+  /* Type scale: 11 / 12 / 13 / 16 / 22 — every size, tight 1.35 line-height */
   --text-xs: 11px;
-  --text-xs--line-height: 1.5;
+  --text-xs--line-height: 1.35;
   --text-sm: 12px;
-  --text-sm--line-height: 1.5;
+  --text-sm--line-height: 1.35;
   --text-base: 13px;
-  --text-base--line-height: 1.5;
-  --text-lg: 15px;
-  --text-lg--line-height: 1.4;
-  --text-xl: 20px;
-  --text-xl--line-height: 1.3;
-  --text-2xl: 28px;
-  --text-2xl--line-height: 1.2;
+  --text-base--line-height: 1.35;
+  --text-lg: 16px;
+  --text-lg--line-height: 1.35;
+  --text-xl: 22px;
+  --text-xl--line-height: 1.35;
+  --text-2xl: 22px;
+  --text-2xl--line-height: 1.35;
 
-  --radius-control: 8px;
-  --radius-card: 12px;
+  /* Trading-terminal look: hard rectangular edges everywhere */
+  --radius-control: 0px;
+  --radius-card: 0px;
 
   --color-surface-0: var(--surface-0);
   --color-surface-1: var(--surface-1);
@@ -80,15 +81,8 @@ body {
 body {
   background: var(--color-surface-0);
   color: var(--color-text-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Numbers and technical labels read as monospace — nearly everything
-   numeric in this app already carries .tabular-nums, so this one rule
-   covers KPI values, table cells, chart labels, etc. with no per-component
-   changes needed. */
-.tabular-nums {
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 * {
@@ -118,24 +112,28 @@ body {
 }
 
 /* ==========================================================================
-   Circuit board theme — intensity gating.
-   fx="full" (default): full canvas pulses, glow-under-content panels.
-   fx="moderate": circuit-background.tsx reads --fx itself for pulse rate/
-     count; here we only turn off the glow-under-content translucency.
-   fx="off": every CSS animation in the app is disabled; the background
-     canvas draws one static frame (handled in circuit-background.tsx).
+   Section headings and field labels — the two recurring typographic
+   patterns of the terminal look: caps + wide tracking.
    ========================================================================== */
 
-:root {
-  --panel-bg-active: var(--panel-bg-glow);
-  --panel-blur: 26px;
+.term-heading {
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
 }
 
-:root[data-fx="moderate"],
-:root[data-fx="off"] {
-  --panel-bg-active: var(--panel-bg-solid);
-  --panel-blur: 0px;
+.term-label {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
 }
+
+/* ==========================================================================
+   Effects intensity — three positions (see effects-provider.tsx).
+   full: scanlines + screen flicker + phosphor text glow + typing animation.
+   moderate: text glow only — scanlines, flicker and typing are switched off.
+   off: every CSS animation in the app is disabled (typography + palette only).
+   ========================================================================== */
 
 [data-fx="off"] *,
 [data-fx="off"] *::before,
@@ -143,227 +141,188 @@ body {
   animation: none !important;
 }
 
-[data-theme="light"] .circuit-canvas {
-  opacity: 0;
+:root:not([data-fx="off"]) body {
+  text-shadow: 0 0 4px color-mix(in srgb, currentColor 20%, transparent);
+}
+
+@keyframes term-flicker {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(0.98);
+  }
+}
+
+:root[data-fx="full"] body {
+  animation: term-flicker 4s ease-in-out infinite;
+}
+
+/* Scanlines — a fixed overlay above the entire interface, including
+   modals. Step 3px, 3% opacity, as thin and as unobtrusive as the spec for
+   an eight-hour shift demands. */
+:root[data-fx="full"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0px,
+    rgba(0, 0, 0, 0.35) 1px,
+    transparent 1px,
+    transparent 3px
+  );
 }
 
 /* ==========================================================================
-   Circuit background — rendered entirely on <canvas> now (see
-   circuit-background.tsx): one procedurally generated, fully connected
-   trace graph sized exactly to the viewport (pcb-generate.ts) — no tiled
-   artwork, no repeats. No CSS classes are needed for the moving parts —
-   the canvas draws everything itself — only the light-theme hiding rule
-   above applies to it.
+   Corner ticks — two opposite corners get a short L-shaped stroke, like a
+   technical drawing or a targeting reticle. Shared by cards, tables and
+   glass surfaces so it's one visual language everywhere.
    ========================================================================== */
 
-/* ==========================================================================
-   PCB corner brackets — two opposite corners get a glowing L-shaped tick,
-   the rest of the outline is a dashed (not solid) line. Shared by cards,
-   tables and glass surfaces so it's one visual language everywhere.
-   ========================================================================== */
-
-.pcb-corners {
+.term-corners {
   position: relative;
 }
-.pcb-corners::before,
-.pcb-corners::after {
+.term-corners::before,
+.term-corners::after {
   content: "";
   position: absolute;
-  width: 10px;
-  height: 10px;
-  border-color: var(--circuit-glow);
+  width: 9px;
+  height: 9px;
+  border-color: var(--term-glow);
   border-style: solid;
-  opacity: 0.75;
+  opacity: 0.7;
   pointer-events: none;
 }
-.pcb-corners::before {
+.term-corners::before {
   top: -1px;
   left: -1px;
   border-width: 1.5px 0 0 1.5px;
 }
-.pcb-corners::after {
+.term-corners::after {
   bottom: -1px;
   right: -1px;
   border-width: 0 1.5px 1.5px 0;
 }
 
 /* ==========================================================================
-   Panels — cards, KPI cards, table containers. Translucent + blurred at
-   fx=full so the circuit canvas glows through; opaque at moderate/off.
+   Panels — cards, KPI cards, table containers. Solid, sharp-edged, one
+   border weight everywhere.
    ========================================================================== */
 
-.pcb-panel {
-  background-color: var(--panel-bg-active);
-  backdrop-filter: blur(var(--panel-blur));
-  -webkit-backdrop-filter: blur(var(--panel-blur));
-  border: 1px dashed var(--panel-border);
+.term-panel {
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--panel-border);
 }
 
-/* text inside panels stays fully opaque with a dark halo for contrast
-   against whatever glow passes underneath */
-.pcb-panel h1,
-.pcb-panel h2,
-.pcb-panel h3,
-.pcb-panel .tabular-nums,
-.pcb-panel td,
-.pcb-panel th {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+.term-panel h1,
+.term-panel h2,
+.term-panel h3 {
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+/* Every panel heading reads as a terminal line: a marker, then the label. */
+.term-panel > h1:first-child::before,
+.term-panel > h2:first-child::before,
+.term-panel > h3:first-child::before,
+.term-panel > div:first-child > h1:first-child::before,
+.term-panel > div:first-child > h2:first-child::before,
+.term-panel > div:first-child > h3:first-child::before {
+  content: "▸ ";
+  color: var(--term-glow);
 }
 
 /* ==========================================================================
-   Fields — inputs, date inputs, selects: cut corners, glow border on focus.
+   Fields — inputs, date inputs, selects: rectangular, border brightens on
+   focus, block-shaped caret (caret-shape is a progressive enhancement —
+   unsupported browsers just keep their normal thin caret).
    ========================================================================== */
 
-.pcb-field {
-  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+.term-field {
   background-color: var(--color-surface-1);
   border: 1px solid var(--color-border);
+  caret-color: var(--term-glow);
+  caret-shape: block;
 }
-.pcb-field:focus,
-.pcb-field:focus-visible,
-.pcb-field[aria-expanded="true"] {
+.term-field:focus,
+.term-field:focus-visible,
+.term-field[aria-expanded="true"] {
   outline: none;
-  border-color: var(--circuit-glow);
-  box-shadow:
-    0 0 0 1px var(--circuit-glow),
-    0 0 10px rgba(125, 255, 196, 0.35);
+  border-color: var(--term-glow);
+  box-shadow: 0 0 0 1px var(--term-glow);
 }
 
 /* ==========================================================================
-   Buttons — contact pads: cut corners, faint trace texture, glowing border
-   and a dot that runs the perimeter on hover.
+   Buttons — flat rectangular pads: a marker glyph before the label,
+   background fills solid with the button's own color on hover and the
+   label inverts, per spec.
    ========================================================================== */
 
-.pcb-button {
+.term-button {
   position: relative;
-  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
-  border: 1px solid var(--color-border-strong);
-  overflow: visible;
 }
-.pcb-button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(
-    45deg,
-    currentColor 0,
-    currentColor 1px,
-    transparent 1px,
-    transparent 7px
-  );
-  opacity: 0.05;
-  pointer-events: none;
+.term-button::before {
+  content: "›";
+  margin-right: 0.5em;
+  opacity: 0.85;
 }
-.pcb-button::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 4px;
-  margin: -2px 0 0 -2px;
-  border-radius: 50%;
-  background: var(--circuit-glow);
-  box-shadow: 0 0 6px 1px var(--circuit-glow);
-  opacity: 0;
-  offset-path: border-box;
-  offset-distance: 0%;
-  pointer-events: none;
-}
-.pcb-button:hover {
-  border-color: var(--circuit-glow);
-  box-shadow: 0 0 10px rgba(125, 255, 196, 0.4);
-}
-.pcb-button:hover::after {
-  opacity: 1;
-  animation: pcb-perimeter 2.4s linear infinite;
-}
-.pcb-button:disabled:hover {
-  border-color: var(--color-border-strong);
-  box-shadow: none;
-}
-.pcb-button:disabled:hover::after {
-  opacity: 0;
-}
-
-@keyframes pcb-perimeter {
-  to {
-    offset-distance: 100%;
-  }
+.term-button:disabled {
+  opacity: 0.5;
 }
 
 /* ==========================================================================
-   Status pulse — badges / risk indicators glow with an intensity that
-   scales with severity.
+   Status pulse — bracketed status text glows with an intensity that scales
+   with severity, via text-shadow rather than a box (there's no chip box to
+   glow anymore).
    ========================================================================== */
 
-@keyframes pcb-pulse-glow {
+@keyframes term-text-pulse {
   0%,
   100% {
-    box-shadow: 0 0 2px 0 var(--pulse-color, transparent);
+    text-shadow: 0 0 2px var(--pulse-color, transparent);
   }
   50% {
-    box-shadow: 0 0 8px 1px var(--pulse-color, transparent);
+    text-shadow:
+      0 0 6px var(--pulse-color, transparent),
+      0 0 10px var(--pulse-color, transparent);
   }
 }
 
-.pcb-pulse {
-  animation: pcb-pulse-glow var(--pulse-duration, 2.4s) ease-in-out infinite;
+.term-pulse {
+  animation: term-text-pulse var(--pulse-duration, 2.4s) ease-in-out infinite;
+}
+
+/* Same idea for SVG shapes (text-shadow doesn't apply there) — a plain
+ * opacity pulse for the one or two most urgent chart elements. */
+@keyframes term-bar-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+.term-bar-pulse {
+  animation: term-bar-pulse 1s ease-in-out infinite;
 }
 
 /* ==========================================================================
-   Charts — glowing lines (via drop-shadow set inline per series color),
-   pulsing nodes, and a traveling pulse dot riding the line's own path.
+   Charts — thin unshaded lines, no smoothing, dashed grid, square/cross
+   node markers. No glow, no traveling dots: data should read calmly.
    ========================================================================== */
 
 .chart-grid-line {
   stroke: var(--color-border);
-  filter: drop-shadow(0 0 1.5px var(--circuit-trace));
-}
-
-.chart-node {
-  animation: pcb-node-pulse var(--pulse-duration, 2.6s) ease-in-out infinite;
-}
-
-@keyframes pcb-node-pulse {
-  0%,
-  100% {
-    r: var(--node-r-base, 3px);
-  }
-  50% {
-    r: var(--node-r-pulse, 4.5px);
-  }
-}
-
-.chart-pulse-dot {
-  offset-path: var(--chart-path);
-  offset-rotate: 0deg;
-  animation: pcb-chart-travel var(--pulse-duration, 3.5s) linear infinite;
-}
-
-@keyframes pcb-chart-travel {
-  0% {
-    offset-distance: 0%;
-    opacity: 0;
-  }
-  6% {
-    opacity: 1;
-  }
-  94% {
-    opacity: 1;
-  }
-  100% {
-    offset-distance: 100%;
-    opacity: 0;
-  }
-}
-
-.chart-bar-glow {
-  animation: pcb-pulse-glow var(--pulse-duration, 2.8s) ease-in-out infinite;
+  stroke-dasharray: 2 3;
 }
 
 /* ==========================================================================
-   Scrollbars — thin, theme-aware, everywhere (sidebar, tables, modals, page)
+   Scrollbars — thin, rectangular, theme-aware, everywhere.
    ========================================================================== */
 
 * {
@@ -382,14 +341,12 @@ body {
 
 *::-webkit-scrollbar-thumb {
   background-color: var(--scrollbar-thumb);
-  border-radius: 999px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
+  border-radius: 0;
+  border: 1px solid var(--color-surface-0);
 }
 
 *::-webkit-scrollbar-thumb:hover {
   background-color: var(--scrollbar-thumb-hover);
-  box-shadow: 0 0 6px var(--scrollbar-thumb-hover);
 }
 
 /* ==========================================================================
@@ -406,14 +363,14 @@ body {
   border-left: 1px solid var(--glass-border);
   box-shadow: none;
 }
-.glass.pcb-corners::before,
-.glass.pcb-corners::after {
+.glass.term-corners::before,
+.glass.term-corners::after {
   opacity: 0.55;
 }
 
 /* ==========================================================================
-   Motion — consistent, quick transitions on interactive elements; a gentle
-   lift on hover for buttons; a soft shimmer for loading skeletons.
+   Motion — quick, flat transitions on interactive elements (no hover lift —
+   the terminal look stays two-dimensional).
    ========================================================================== */
 
 a,
@@ -429,35 +386,65 @@ textarea,
     border-color var(--transition-fast) ease,
     color var(--transition-fast) ease,
     opacity var(--transition-fast) ease,
-    transform var(--transition-fast) ease,
     box-shadow var(--transition-fast) ease;
 }
 
-.btn-lift:hover {
-  transform: translateY(-1px);
-}
-.btn-lift:active {
-  transform: translateY(0);
-}
+/* ==========================================================================
+   Skeletons — blinking blocks filling in like a terminal line printing,
+   not a smooth shimmer sweep.
+   ========================================================================== */
 
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
+@keyframes term-block-blink {
+  0%,
   100% {
-    background-position: 200% 0;
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.55;
   }
 }
 
-.skeleton-shimmer {
-  background-color: var(--color-surface-3);
-  background-image: linear-gradient(
-    100deg,
-    transparent 30%,
-    color-mix(in srgb, var(--circuit-glow) 45%, transparent) 50%,
-    transparent 70%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.6s ease-in-out infinite;
+.term-skeleton {
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  color: var(--term-glow);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.term-skeleton > span {
+  animation: term-block-blink 1.1s ease-in-out infinite;
 }
 
+/* ==========================================================================
+   Typing animation — KPI values, table numbers, and page titles "print"
+   themselves in; the caret blinks only while a line is still typing.
+   ========================================================================== */
+
+.term-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1em;
+  margin-left: 1px;
+  background: var(--term-glow);
+  vertical-align: text-bottom;
+  animation: term-caret-blink 1s step-end infinite;
+}
+
+@keyframes term-caret-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Block-shaped blinking caret in a focused field, alongside caret-shape
+   above (progressive enhancement for browsers that support it). */
+.term-field:focus {
+  caret-color: var(--term-glow);
+}

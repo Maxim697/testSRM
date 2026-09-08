@@ -4,25 +4,30 @@ import { cn } from "@/lib/utils";
 type BadgeVariant = "green" | "amber" | "red" | "neutral";
 
 const VARIANT_CLASSES: Record<BadgeVariant, string> = {
-  green: "pcb-pulse bg-positive-bg text-positive border-positive/35 [--pulse-color:var(--positive)] [--pulse-duration:3s]",
-  amber: "pcb-pulse bg-warning-bg text-warning border-warning/35 [--pulse-color:var(--warning)] [--pulse-duration:2.4s]",
-  red: "pcb-pulse bg-negative-bg text-negative border-negative/35 [--pulse-color:var(--negative)] [--pulse-duration:1.6s]",
-  neutral: "bg-surface-3 text-text-secondary border-transparent",
+  green: "term-pulse text-positive [--pulse-color:var(--positive)] [--pulse-duration:3s]",
+  amber: "term-pulse text-warning [--pulse-color:var(--warning)] [--pulse-duration:2.4s]",
+  red: "term-pulse text-negative [--pulse-color:var(--negative)] [--pulse-duration:1.6s]",
+  neutral: "text-text-secondary",
 };
 
+/** Status text in brackets, uppercase, in the status color — no chip, no
+ * background, no rounding: [ACTIVE], [PENDING], [OVERDUE]. */
 export function Badge({
   variant = "neutral",
   className,
+  children,
   ...props
 }: HTMLAttributes<HTMLSpanElement> & { variant?: BadgeVariant }) {
   return (
     <span
       className={cn(
-        "inline-flex h-5 items-center whitespace-nowrap rounded-control border px-2 text-xs font-medium leading-none",
+        "inline-flex items-center whitespace-nowrap text-xs font-medium uppercase tracking-wide",
         VARIANT_CLASSES[variant],
         className,
       )}
       {...props}
-    />
+    >
+      [{children}]
+    </span>
   );
 }

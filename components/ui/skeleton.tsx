@@ -1,11 +1,22 @@
-import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-export function Skeleton({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+/** A loading placeholder that reads as a terminal line printing itself in:
+ * a row of block characters, each blinking on its own slight delay. `chars`
+ * sets how many blocks wide it is. */
+export function Skeleton({
+  chars = 12,
+  className,
+}: {
+  chars?: number;
+  className?: string;
+}) {
   return (
-    <div
-      className={cn("skeleton-shimmer rounded-control", className)}
-      {...props}
-    />
+    <span className={cn("term-skeleton", className)} aria-hidden="true">
+      {Array.from({ length: chars }, (_, i) => (
+        <span key={i} style={{ animationDelay: `${(i % 6) * 0.12}s` }}>
+          ▓
+        </span>
+      ))}
+    </span>
   );
 }

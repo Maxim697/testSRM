@@ -62,10 +62,10 @@ export function DataTable<T>({
   }
 
   return (
-    <div className={cn("pcb-panel pcb-corners overflow-x-auto rounded-card", className)}>
+    <div className={cn("term-panel term-corners overflow-x-auto rounded-card", className)}>
       <table className="w-full border-collapse text-base">
         <thead>
-          <tr className="h-row border-b border-border">
+          <tr className="h-row border-b border-dashed border-border">
             {columns.map((column) => {
               const isSorted = sort?.key === column.key;
               return (
@@ -93,7 +93,7 @@ export function DataTable<T>({
               <tr
                 key={rowKey(row)}
                 className={cn(
-                  "h-row border-b border-border last:border-b-0 transition-colors duration-150 hover:bg-surface-3",
+                  "group h-row border-b border-dashed border-border last:border-b-0 transition-colors duration-150 hover:bg-surface-3",
                   rowClassName?.(row),
                 )}
               >
@@ -102,12 +102,20 @@ export function DataTable<T>({
                     key={column.key}
                     className={cn(
                       "px-3 text-text-primary tabular-nums",
-                      i === 0 && accent && "relative",
+                      i === 0 && "relative",
                       ALIGN_CLASSES[column.align ?? "left"],
                     )}
                   >
                     {i === 0 && accent && (
                       <span className="absolute inset-y-0 left-0 w-[3px]" style={{ background: accent }} />
+                    )}
+                    {i === 0 && (
+                      <span
+                        className="mr-1 inline-block w-2.5 text-info opacity-0 transition-opacity group-hover:opacity-100"
+                        aria-hidden="true"
+                      >
+                        ▸
+                      </span>
                     )}
                     {column.accessor(row)}
                   </td>

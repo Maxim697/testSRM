@@ -1,50 +1,32 @@
-"use client";
-
-import type { MouseEvent, ButtonHTMLAttributes } from "react";
+import type { ButtonHTMLAttributes } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { emitCircuitPulse } from "@/lib/circuit-pulse-event";
 
 type ButtonVariant = "primary" | "secondary" | "ghost";
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: "bg-info text-white hover:opacity-90",
+  primary: "border border-info text-info hover:bg-info hover:text-surface-0",
   secondary:
-    "bg-surface-3 text-text-primary border border-border hover:border-border-strong",
-  ghost: "text-text-secondary hover:bg-surface-3 hover:text-text-primary",
+    "border border-border-strong text-text-primary hover:bg-text-primary hover:text-surface-0",
+  ghost: "border border-transparent text-text-secondary hover:bg-text-secondary hover:text-surface-0",
 };
 
 const BASE_CLASSES =
-  "pcb-button btn-lift inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap px-3 text-base font-medium disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0";
+  "term-button inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap px-3 text-base font-medium disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-current";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
   href?: string;
 };
 
-export function Button({ variant = "primary", className, href, onClick, ...props }: ButtonProps) {
+export function Button({ variant = "primary", className, href, ...props }: ButtonProps) {
   if (href) {
     return (
-      <Link
-        href={href}
-        className={cn(BASE_CLASSES, VARIANT_CLASSES[variant], className)}
-        onClick={(e) => emitCircuitPulse(e.clientX, e.clientY)}
-      >
+      <Link href={href} className={cn(BASE_CLASSES, VARIANT_CLASSES[variant], className)}>
         {props.children}
       </Link>
     );
   }
 
-  function handleClick(e: MouseEvent<HTMLButtonElement>) {
-    emitCircuitPulse(e.clientX, e.clientY);
-    onClick?.(e);
-  }
-
-  return (
-    <button
-      className={cn(BASE_CLASSES, VARIANT_CLASSES[variant], className)}
-      onClick={handleClick}
-      {...props}
-    />
-  );
+  return <button className={cn(BASE_CLASSES, VARIANT_CLASSES[variant], className)} {...props} />;
 }
