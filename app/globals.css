@@ -193,12 +193,12 @@ body {
 
 @keyframes pcb-ripple-expand {
   0% {
-    r: 4px;
-    stroke-width: 14px;
+    r: 6px;
+    stroke-width: 16px;
     stroke-opacity: 0.9;
   }
   100% {
-    r: 260px;
+    r: 600px;
     stroke-width: 2px;
     stroke-opacity: 0;
   }

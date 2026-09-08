@@ -18,9 +18,15 @@ import { PCB_ROUTES } from "@/components/background/pcb-routes";
 type Light = { id: number; routeIndex: number; duration: number; delay: number; length: number; thickness: number };
 type Ripple = { id: number; x: number; y: number };
 
-const LIGHT_POOL_SIZE = 8;
+const LIGHT_POOL_SIZE = 10;
 const LIGHT_COUNT_FULL = 7;
 const LIGHT_COUNT_MODERATE = 4;
+
+/** The board is drawn at this fraction of its native size so ~150-200
+ * traces fit across a screen width (median trace is ~10 native units
+ * wide, measured directly off the artwork's pixels — see the tracing
+ * session that generated pcb-routes.ts), instead of ~20 at native scale. */
+const PCB_SCALE = 0.22;
 
 function buildLightPool(): Light[] {
   return Array.from({ length: LIGHT_POOL_SIZE }, (_, i) => {
@@ -30,8 +36,10 @@ function buildLightPool(): Light[] {
       routeIndex: i % PCB_ROUTES.length,
       duration,
       delay: -Math.random() * duration, // negative delay: start already mid-flight, staggered
-      length: 200 + Math.random() * 200,
-      thickness: 18 + Math.random() * 16,
+      // native units — at PCB_SCALE these render as ~150-250px long and
+      // at most as thick as a single trace (median trace width ~10 native)
+      length: 680 + Math.random() * 440,
+      thickness: 6 + Math.random() * 4,
     };
   });
 }
@@ -62,8 +70,14 @@ export function CircuitBackground() {
       const detail = (event as CustomEvent<CircuitPulseDetail>).detail;
       if (!detail) return;
       const id = rippleSeq.current++;
-      const x = ((detail.x % PCB_TILE_W) + PCB_TILE_W) % PCB_TILE_W;
-      const y = ((detail.y % PCB_TILE_H) + PCB_TILE_H) % PCB_TILE_H;
+      // click coords are screen px; wrap into one on-screen tile, then back
+      // into the pattern's native (pre-PCB_SCALE) coordinate space
+      const tileScreenW = PCB_TILE_W * PCB_SCALE;
+      const tileScreenH = PCB_TILE_H * PCB_SCALE;
+      const localX = ((detail.x % tileScreenW) + tileScreenW) % tileScreenW;
+      const localY = ((detail.y % tileScreenH) + tileScreenH) % tileScreenH;
+      const x = localX / PCB_SCALE;
+      const y = localY / PCB_SCALE;
       setRipples((prev) => [...prev, { id, x, y }]);
       window.setTimeout(() => {
         setRipples((prev) => prev.filter((r) => r.id !== id));
@@ -90,7 +104,7 @@ export function CircuitBackground() {
         <g id={PCB_BOARD_ID} dangerouslySetInnerHTML={{ __html: PCB_MARKUP }} />
 
         <filter id="pcb-light-blur" x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur stdDeviation="7" />
+          <feGaussianBlur stdDeviation="2.5" />
         </filter>
 
         <linearGradient id="pcb-light-gradient" x1="0" y1="0" x2="1" y2="0">
@@ -99,14 +113,32 @@ export function CircuitBackground() {
           <stop offset="100%" stopColor="#fff" stopOpacity="1" />
         </linearGradient>
 
-        <pattern id="pcb-tile-base" patternUnits="userSpaceOnUse" width={PCB_TILE_W} height={PCB_TILE_H}>
+        <pattern
+          id="pcb-tile-base"
+          patternUnits="userSpaceOnUse"
+          width={PCB_TILE_W * PCB_SCALE}
+          height={PCB_TILE_H * PCB_SCALE}
+          viewBox={`0 0 ${PCB_TILE_W} ${PCB_TILE_H}`}
+        >
           <use href={`#${PCB_BOARD_ID}`} className="pcb-tile-base-use" />
         </pattern>
-        <pattern id="pcb-tile-glow" patternUnits="userSpaceOnUse" width={PCB_TILE_W} height={PCB_TILE_H}>
+        <pattern
+          id="pcb-tile-glow"
+          patternUnits="userSpaceOnUse"
+          width={PCB_TILE_W * PCB_SCALE}
+          height={PCB_TILE_H * PCB_SCALE}
+          viewBox={`0 0 ${PCB_TILE_W} ${PCB_TILE_H}`}
+        >
           <use href={`#${PCB_BOARD_ID}`} className="pcb-tile-glow-use" />
         </pattern>
 
-        <pattern id="pcb-tile-mask" patternUnits="userSpaceOnUse" width={PCB_TILE_W} height={PCB_TILE_H}>
+        <pattern
+          id="pcb-tile-mask"
+          patternUnits="userSpaceOnUse"
+          width={PCB_TILE_W * PCB_SCALE}
+          height={PCB_TILE_H * PCB_SCALE}
+          viewBox={`0 0 ${PCB_TILE_W} ${PCB_TILE_H}`}
+        >
           <g filter="url(#pcb-light-blur)">
             {lights.map((l) => (
               <g
@@ -130,7 +162,7 @@ export function CircuitBackground() {
               </g>
             ))}
             {ripples.map((r) => (
-              <circle key={r.id} className="pcb-ripple" cx={r.x} cy={r.y} r={4} fill="none" stroke="#fff" />
+              <circle key={r.id} className="pcb-ripple" cx={r.x} cy={r.y} r={6} fill="none" stroke="#fff" />
             ))}
           </g>
         </pattern>
