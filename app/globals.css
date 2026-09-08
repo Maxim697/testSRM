@@ -150,10 +150,13 @@ body {
 /* ==========================================================================
    Circuit background — real vector PCB artwork (see pcb-source.ts), tiled
    twice: once dark as the resting board, once bright and revealed only
-   through an SVG mask made of moving soft-edged lights. Because the mask
-   can only ever reveal pixels the artwork actually painted, a light always
-   reads as travelling along a real trace — the gaps between traces never
-   light up, with no need for an extracted centerline path.
+   through an SVG mask made of moving soft round glow spots. Because the
+   mask can only ever reveal pixels the artwork actually painted, whatever
+   traces a spot currently overlaps light up together and nothing else does
+   — the spot's own shape carries no direction, so unlike a shape riding a
+   bent path (which stays rigid and only reads as scattered short strokes
+   wherever it happens to cross a trace) a round blob always looks correct
+   regardless of its own straight travel line.
    ========================================================================== */
 
 .pcb-tile-base-use {
@@ -167,26 +170,28 @@ body {
   opacity: 0.6;
 }
 
-@keyframes pcb-light-travel {
+@keyframes pcb-blob-travel {
   0% {
-    offset-distance: 0%;
+    cx: var(--blob-x0);
+    cy: var(--blob-y0);
     opacity: 0;
   }
-  6% {
+  8% {
     opacity: 1;
   }
-  94% {
+  92% {
     opacity: 1;
   }
   100% {
-    offset-distance: 100%;
+    cx: var(--blob-x1);
+    cy: var(--blob-y1);
     opacity: 0;
   }
 }
 
-.pcb-light {
+.pcb-blob {
   opacity: 0;
-  animation-name: pcb-light-travel;
+  animation-name: pcb-blob-travel;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }

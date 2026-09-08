@@ -4,42 +4,57 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useEffectsIntensity } from "@/components/effects-provider";
 import { CIRCUIT_PULSE_EVENT, type CircuitPulseDetail } from "@/lib/circuit-pulse-event";
 import { PCB_BOARD_ID, PCB_MARKUP, PCB_TILE_H, PCB_TILE_W } from "@/components/background/pcb-source";
-import { PCB_ROUTES } from "@/components/background/pcb-routes";
 
 /* ==========================================================================
    Real vector PCB artwork (CC0, see pcb-source.ts) tiled as the background,
    with a second bright copy of the same artwork revealed only where a set
-   of moving soft-edged light shapes sit, via an SVG <mask>. Because the
-   mask only ever reveals real trace pixels, the moving lights read as
-   travelling along the actual traces without needing a centerline path —
-   the dark space between traces simply never lights up.
+   of moving soft round glow spots sit, via an SVG <mask>. The spot's own
+   shape carries no direction or rigid length — it's a round gradient blob,
+   so unlike a shape riding a path (which stays a straight rigid rect even
+   as it bends around corners, and reads as short diagonal strokes wherever
+   it happens to cross a trace instead of following it) a blob always looks
+   correct regardless of its travel line: because the mask can only ever
+   reveal pixels the artwork actually painted, whatever traces the blob
+   currently overlaps light up together, and light moving from one trace to
+   the next as the blob drifts reads as current flowing through the board.
    ========================================================================== */
 
-type Light = { id: number; routeIndex: number; duration: number; delay: number; length: number; thickness: number };
+type Blob = { id: number; x0: number; y0: number; x1: number; y1: number; radius: number; duration: number; delay: number };
 type Ripple = { id: number; x: number; y: number };
 
-const LIGHT_POOL_SIZE = 10;
-const LIGHT_COUNT_FULL = 7;
-const LIGHT_COUNT_MODERATE = 4;
+const BLOB_POOL_SIZE = 10;
+const BLOB_COUNT_FULL = 8;
+const BLOB_COUNT_MODERATE = 5;
 
 /** The board is drawn at this fraction of its native size so ~150-200
  * traces fit across a screen width (median trace is ~10 native units
- * wide, measured directly off the artwork's pixels — see the tracing
- * session that generated pcb-routes.ts), instead of ~20 at native scale. */
+ * wide, measured directly off the artwork's pixels), instead of ~20 at
+ * native scale. */
 const PCB_SCALE = 0.22;
 
-function buildLightPool(): Light[] {
-  return Array.from({ length: LIGHT_POOL_SIZE }, (_, i) => {
-    const duration = 9 + Math.random() * 8;
+function buildBlobPool(): Blob[] {
+  return Array.from({ length: BLOB_POOL_SIZE }, (_, i) => {
+    // seed each blob along the top or left edge (a bit outside it, so it
+    // fades in before entering) and send it generally down-and-right; since
+    // every pattern tile repeat renders the exact same animated content
+    // shifted by a tile size, a blob exiting one tile's edge lines up with
+    // the same blob entering the neighbouring tile repeat, so the motion
+    // reads as continuous across tile seams with no extra wrap-around logic.
+    const fromLeft = Math.random() < 0.5;
+    const x0 = fromLeft ? -300 : Math.random() * (PCB_TILE_W + 600) - 300;
+    const y0 = fromLeft ? Math.random() * (PCB_TILE_H + 600) - 300 : -300;
+    const angle = ((20 + Math.random() * 50) * Math.PI) / 180; // 20-70° from horizontal, always down-right
+    const travel = PCB_TILE_W + PCB_TILE_H;
+    const duration = 16 + Math.random() * 14; // slow drift
     return {
       id: i,
-      routeIndex: i % PCB_ROUTES.length,
+      x0,
+      y0,
+      x1: x0 + Math.cos(angle) * travel,
+      y1: y0 + Math.sin(angle) * travel,
+      radius: 340 + Math.random() * 340, // native units -> ~150-300px on screen at PCB_SCALE
       duration,
       delay: -Math.random() * duration, // negative delay: start already mid-flight, staggered
-      // native units — at PCB_SCALE these render as ~150-250px long and
-      // at most as thick as a single trace (median trace width ~10 native)
-      length: 680 + Math.random() * 440,
-      thickness: 6 + Math.random() * 4,
     };
   });
 }
@@ -87,8 +102,8 @@ export function CircuitBackground() {
     return () => window.removeEventListener(CIRCUIT_PULSE_EVENT, handleBurst);
   }, []);
 
-  const lightPool = useMemo(() => buildLightPool(), []);
-  const lights = lightPool.slice(0, intensity === "moderate" ? LIGHT_COUNT_MODERATE : LIGHT_COUNT_FULL);
+  const blobPool = useMemo(() => buildBlobPool(), []);
+  const blobs = blobPool.slice(0, intensity === "moderate" ? BLOB_COUNT_MODERATE : BLOB_COUNT_FULL);
 
   if (size.w === 0 || size.h === 0) return null;
 
@@ -103,15 +118,15 @@ export function CircuitBackground() {
         {/* static CC0 vector artwork bundled at build time, not user content */}
         <g id={PCB_BOARD_ID} dangerouslySetInnerHTML={{ __html: PCB_MARKUP }} />
 
-        <filter id="pcb-light-blur" x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur stdDeviation="2.5" />
+        <filter id="pcb-glow-blur" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="10" />
         </filter>
 
-        <linearGradient id="pcb-light-gradient" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#fff" stopOpacity="0" />
-          <stop offset="65%" stopColor="#fff" stopOpacity="0.85" />
-          <stop offset="100%" stopColor="#fff" stopOpacity="1" />
-        </linearGradient>
+        <radialGradient id="pcb-blob-gradient">
+          <stop offset="0%" stopColor="#fff" stopOpacity="1" />
+          <stop offset="55%" stopColor="#fff" stopOpacity="0.7" />
+          <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+        </radialGradient>
 
         <pattern
           id="pcb-tile-base"
@@ -139,27 +154,24 @@ export function CircuitBackground() {
           height={PCB_TILE_H * PCB_SCALE}
           viewBox={`0 0 ${PCB_TILE_W} ${PCB_TILE_H}`}
         >
-          <g filter="url(#pcb-light-blur)">
-            {lights.map((l) => (
-              <g
-                key={l.id}
-                className="pcb-light"
-                style={{
-                  offsetPath: `path("${PCB_ROUTES[l.routeIndex]}")`,
-                  offsetRotate: "auto",
-                  animationDuration: `${l.duration}s`,
-                  animationDelay: `${l.delay}s`,
-                }}
-              >
-                <rect
-                  x={-l.length}
-                  y={-l.thickness / 2}
-                  width={l.length}
-                  height={l.thickness}
-                  rx={l.thickness / 2}
-                  fill="url(#pcb-light-gradient)"
-                />
-              </g>
+          <g filter="url(#pcb-glow-blur)">
+            {blobs.map((b) => (
+              <circle
+                key={b.id}
+                className="pcb-blob"
+                r={b.radius}
+                fill="url(#pcb-blob-gradient)"
+                style={
+                  {
+                    "--blob-x0": `${b.x0}px`,
+                    "--blob-y0": `${b.y0}px`,
+                    "--blob-x1": `${b.x1}px`,
+                    "--blob-y1": `${b.y1}px`,
+                    animationDuration: `${b.duration}s`,
+                    animationDelay: `${b.delay}s`,
+                  } as React.CSSProperties
+                }
+              />
             ))}
             {ripples.map((r) => (
               <circle key={r.id} className="pcb-ripple" cx={r.x} cy={r.y} r={6} fill="none" stroke="#fff" />
