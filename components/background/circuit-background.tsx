@@ -351,7 +351,13 @@ export function CircuitBackground() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       tilesX = Math.ceil(width / (PCB_TILE_W * PCB_SCALE)) + 1;
       tilesY = Math.ceil(height / (PCB_TILE_H * PCB_SCALE)) + 1;
-      rebuildComets();
+      // Seed comets only on the very first resize (mount). A later resize
+      // (window resized, or any spurious resize event) must NOT wipe
+      // in-flight comets — that would destroy them at some arbitrary
+      // 0 < t < 1, which is exactly the thing the state machine below is
+      // built to never do. Existing comets keep flying through a resize;
+      // only the tile-instancing bounds used for *future* spawns change.
+      if (comets.length === 0) rebuildComets();
       drawFrame(0);
     }
 
