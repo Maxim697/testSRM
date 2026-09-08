@@ -21,7 +21,7 @@ export function Sparkline({ values, color = "var(--info)" }: { values: (number |
   const last = points[points.length - 1];
 
   return (
-    <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} width={WIDTH} height={HEIGHT} className="inline-block align-middle">
+    <svg data-cursor="chart" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} width={WIDTH} height={HEIGHT} className="inline-block align-middle">
       <path d={path} fill="none" stroke={color} strokeWidth={1} strokeLinecap="butt" strokeLinejoin="miter" />
       {last && (
         <rect x={last.x - 1.8} y={last.y - 1.8} width={3.6} height={3.6} fill="var(--color-surface-2)" stroke={color} strokeWidth={1.2} />

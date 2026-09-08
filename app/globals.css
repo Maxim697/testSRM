@@ -506,3 +506,92 @@ textarea,
 .term-field:focus {
   caret-color: var(--term-glow);
 }
+
+/* ==========================================================================
+   Custom cursor — see custom-cursor.tsx. Two independently-positioned
+   fixed layers (ring, core); position is written straight to
+   `style.transform` every frame, never through React, so nothing here
+   needs to know about motion — only the discrete state transitions
+   (hover, press, category) below.
+   ========================================================================== */
+
+.custom-cursor-active,
+.custom-cursor-active * {
+  cursor: none !important;
+}
+
+.cursor-layer {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 999999;
+  pointer-events: none;
+  will-change: transform;
+  transition: opacity 200ms ease;
+}
+.cursor-layer--hidden {
+  opacity: 0;
+}
+
+.cursor-ring-svg {
+  position: absolute;
+  left: -20px;
+  top: -20px;
+  transform-origin: center;
+  transition: transform 120ms ease-out;
+}
+.cursor-ring-svg--default {
+  transform: scale(1);
+}
+.cursor-ring-svg--hover {
+  transform: scale(0.7143); /* 10px / 14px */
+}
+.cursor-ring-svg--pressed {
+  transform: scale(0.5); /* 7px / 14px */
+}
+
+.cursor-ring-strokes {
+  transition:
+    stroke 120ms ease-out,
+    opacity 120ms ease-out;
+}
+.cursor-ring-strokes--default {
+  stroke: #33ff66;
+  opacity: 0.6;
+}
+.cursor-ring-strokes--active {
+  stroke: var(--info);
+  opacity: 0.9;
+}
+
+.cursor-ring-rect {
+  position: absolute;
+  left: -9px;
+  top: -15px;
+  width: 18px;
+  height: 30px;
+  border: 1px solid var(--info);
+  opacity: 0.9;
+}
+
+.cursor-core-symbol {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: inline-block;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1;
+  color: #33ff66;
+  text-shadow: 0 0 6px rgba(51, 255, 102, 0.5);
+  transition: text-shadow 150ms ease-out;
+}
+.cursor-core-symbol--flash {
+  text-shadow:
+    0 0 10px rgba(51, 255, 102, 0.95),
+    0 0 18px rgba(51, 255, 102, 0.7);
+}
+.cursor-core-symbol--blink {
+  animation: term-caret-blink 530ms step-end infinite;
+}

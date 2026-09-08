@@ -31,7 +31,7 @@ export function StackedBarChart({ points }: { points: StackedBarPoint[] }) {
 
   return (
     <div className="relative">
-      <svg
+      <svg data-cursor="chart"
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         className="w-full"
         style={{ height: HEIGHT }}

@@ -23,7 +23,7 @@ export function RiskDistributionChart({ counts }: { counts: Record<RiskLevel, nu
   const barWidth = Math.min(slot * 0.5, 90);
 
   return (
-    <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full" style={{ height: HEIGHT }}>
+    <svg data-cursor="chart" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full" style={{ height: HEIGHT }}>
       <line
         className="chart-grid-line"
         x1={PAD_X}

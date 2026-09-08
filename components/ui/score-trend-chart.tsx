@@ -64,7 +64,7 @@ export function ScoreTrendChart({
 
   return (
     <div className={className ?? "relative h-full w-full"}>
-      <svg
+      <svg data-cursor="chart"
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         preserveAspectRatio="none"
         className="h-full w-full"

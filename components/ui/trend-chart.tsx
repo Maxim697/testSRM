@@ -52,7 +52,7 @@ export function TrendChart({
 
   return (
     <div className="relative">
-      <svg
+      <svg data-cursor="chart"
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         className="w-full"
         style={{ height: HEIGHT }}

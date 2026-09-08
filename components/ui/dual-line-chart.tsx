@@ -63,7 +63,7 @@ export function DualLineChart({
           {labelB}
         </span>
       </div>
-      <svg
+      <svg data-cursor="chart"
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         className="w-full"
         style={{ height: HEIGHT }}
