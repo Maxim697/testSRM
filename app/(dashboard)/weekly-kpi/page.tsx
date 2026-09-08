@@ -56,7 +56,7 @@ export default async function WeeklyKpiPage() {
       />
 
       <div className="grid grid-cols-2 gap-3">
-        <Card>
+        <Card label="CHART">
           <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
             Сумарний оборот за 12 тижнів
           </div>
@@ -66,7 +66,7 @@ export default async function WeeklyKpiPage() {
             format="number"
           />
         </Card>
-        <Card>
+        <Card label="CHART">
           <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
             Середній CR за 12 тижнів
           </div>
@@ -79,7 +79,7 @@ export default async function WeeklyKpiPage() {
         </Card>
       </div>
 
-      <Card>
+      <Card label="CHART">
         <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
           Розподіл трейдерів за статусами по тижнях
         </div>

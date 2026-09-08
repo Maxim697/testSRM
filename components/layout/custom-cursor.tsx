@@ -61,20 +61,73 @@ export function CustomCursor() {
 
   const active = hoverCapable && intensity !== "off";
 
+  // Diagnostics: window.__cursorDebug always holds the live state, and the
+  // console gets one line per step so "nothing happened" has an answer.
   useEffect(() => {
-    if (!active) return;
+    console.log(
+      `[cursor] mount check — hoverCapable=${hoverCapable} intensity=${intensity} → active=${active}` +
+        (active ? "" : "  (cursor will NOT render: " + (!hoverCapable ? "no fine pointer detected" : "effects intensity is off") + ")"),
+    );
+  }, [hoverCapable, intensity, active]);
+
+  useEffect(() => {
+    if (!active) {
+      document.documentElement.classList.remove("custom-cursor-active");
+      document.documentElement.style.removeProperty("cursor");
+      document.body.style.removeProperty("cursor");
+      return;
+    }
     document.documentElement.classList.add("custom-cursor-active");
-    return () => document.documentElement.classList.remove("custom-cursor-active");
+    // Belt-and-suspenders: an inline !important cursor:none on html and body
+    // directly, on top of the stylesheet rule — inline style with !important
+    // beats every author stylesheet regardless of layers/specificity, so
+    // this can't lose to a stray `cursor: pointer` anywhere.
+    document.documentElement.style.setProperty("cursor", "none", "important");
+    document.body.style.setProperty("cursor", "none", "important");
+    const computed = getComputedStyle(document.body).cursor;
+    console.log(
+      `[cursor] custom-cursor-active class + inline cursor:none applied to <html>/<body>; computed body cursor = "${computed}"` +
+        (computed === "none" ? " ✓" : " ✗ (expected \"none\" — some other rule with higher priority is winning)"),
+    );
+    return () => {
+      document.documentElement.classList.remove("custom-cursor-active");
+      document.documentElement.style.removeProperty("cursor");
+      document.body.style.removeProperty("cursor");
+    };
   }, [active]);
 
   useEffect(() => {
     if (!active) return;
 
+    const ringEl = outerRingRef.current;
+    const coreEl = outerCoreRef.current;
+    console.log(
+      `[cursor] DOM check — ring element: ${ringEl ? "present" : "MISSING"}, core element: ${coreEl ? "present" : "MISSING"}` +
+        (ringEl ? `, ring z-index=${getComputedStyle(ringEl).zIndex}, pointer-events=${getComputedStyle(ringEl).pointerEvents}` : ""),
+    );
+
+    let moveCount = 0;
+    let lastLoggedCategory: Category | null = null;
+
     function handleMove(e: MouseEvent) {
       pointer.current.x = e.clientX;
       pointer.current.y = e.clientY;
       setVisible(true);
-      setCategory(detectCategory(e.target));
+      const cat = detectCategory(e.target);
+      setCategory(cat);
+      moveCount++;
+      const w = window as unknown as { __cursorDebug?: unknown };
+      w.__cursorDebug = { x: e.clientX, y: e.clientY, category: cat, symbol: SYMBOLS[cat], moveCount };
+      // First move proves the handler fires at all; after that, only log when
+      // the context symbol actually changes, so this stays readable instead
+      // of flooding the console on every pixel of mouse travel.
+      if (moveCount === 1) {
+        console.log(`[cursor] first mousemove received at (${e.clientX}, ${e.clientY}) — handler is wired up`);
+      }
+      if (cat !== lastLoggedCategory) {
+        console.log(`[cursor] category → "${cat}" (symbol "${SYMBOLS[cat]}") at (${e.clientX}, ${e.clientY})`);
+        lastLoggedCategory = cat;
+      }
     }
     function handleLeave() {
       setVisible(false);

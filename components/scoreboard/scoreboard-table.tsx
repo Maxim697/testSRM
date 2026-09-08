@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
+import { Card } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tier } from "@/components/ui/tier";
@@ -115,7 +116,7 @@ export function ScoreboardTable({ rows }: { rows: Row[] }) {
 
   return (
     <div className="flex flex-1 flex-col gap-3">
-      <div className="grid grid-cols-4 gap-3">
+      <Card label="FILTER" className="grid grid-cols-4 gap-3">
         <Select value={managerFilter} onChange={(e) => setManagerFilter(e.target.value)}>
           <option value="">Усі менеджери</option>
           {managers.map(([id, name]) => (
@@ -130,7 +131,7 @@ export function ScoreboardTable({ rows }: { rows: Row[] }) {
           <option value="silver">Silver</option>
           <option value="bronze">Bronze</option>
         </Select>
-      </div>
+      </Card>
 
       <DataTable
         columns={columns}

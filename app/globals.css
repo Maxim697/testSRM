@@ -181,9 +181,8 @@ body {
 /* Background atmosphere — a dot grid (24px, 3% opacity) and a CRT-style
    vignette darkening toward the corners, sitting behind all real content
    (z-index below the app shell's own z-10) but above the flat page color.
-   Always on, at every effects intensity — this is base chrome, not a
-   distraction to dial down. */
-body::before {
+   Off entirely at data-fx="off", same as every other background effect. */
+:root:not([data-fx="off"]) body::before {
   content: "";
   position: fixed;
   inset: 0;
@@ -251,6 +250,43 @@ body::before {
   bottom: -1px;
   right: -1px;
   border-width: 0 1.5px 1.5px 0;
+}
+
+/* Corner label — a small technical caption sitting on the border in the
+   top-left corner of a panel, like "[ DATA TABLE ]" on an equipment
+   chassis. Opt-in: only panels that pass a label to Card (or set this class
+   directly) get one. */
+.term-corner-label {
+  position: absolute;
+  top: -7px;
+  left: 8px;
+  padding: 0 4px;
+  background: var(--color-surface-2);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--term-glow);
+  opacity: 0.55;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Section divider — a low-opacity repeating dash, used between nav groups
+   and anywhere else that wants a break without a full solid rule. */
+.term-divider {
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--term-glow) 0,
+    var(--term-glow) 3px,
+    transparent 3px,
+    transparent 7px
+  );
+  opacity: 0.25;
+}
+[data-fx="off"] .term-divider {
+  opacity: 0.15;
+  background-image: none;
+  background-color: var(--color-border);
 }
 
 /* ==========================================================================

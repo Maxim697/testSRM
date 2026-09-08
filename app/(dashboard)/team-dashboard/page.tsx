@@ -80,13 +80,13 @@ export default async function TeamDashboardPage() {
       <div>
         <h2 className="mb-2 text-base font-medium text-text-primary">Розподіл портфеля</h2>
         <div className="grid grid-cols-2 gap-3">
-          <Card>
+          <Card label="CHART">
             <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
               Статуси трейдерів по менеджерах
             </div>
             <StatusByManagerChart points={data.statusByManager} />
           </Card>
-          <Card>
+          <Card label="CHART">
             <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
               Розподіл за рівнями ризику
             </div>
@@ -101,7 +101,7 @@ export default async function TeamDashboardPage() {
           <EmptyState icon={<ChartIcon />} title="Даних поки немає" description="Історія по тижнях ще не накопичилась." />
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            <Card>
+            <Card label="CHART">
               <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
                 Сумарний оборот за 12 тижнів
               </div>
@@ -111,7 +111,7 @@ export default async function TeamDashboardPage() {
                 format="number"
               />
             </Card>
-            <Card>
+            <Card label="CHART">
               <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
                 Середній CR за 12 тижнів
               </div>

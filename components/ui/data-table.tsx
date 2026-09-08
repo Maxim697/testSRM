@@ -9,6 +9,10 @@ export type DataTableColumn<T> = {
   accessor: (row: T) => ReactNode;
   sortValue?: (row: T) => string | number;
   align?: "left" | "right" | "center";
+  /** Explicit column width (e.g. "48px", "18%"). Columns that omit this get
+   * an equal share of the space left after explicit-width columns — every
+   * column ends up with a real, explicit width either way, since that's
+   * what table-layout: fixed needs to actually ignore cell content. */
   width?: string;
 };
 
@@ -19,6 +23,25 @@ const ALIGN_CLASSES: Record<NonNullable<DataTableColumn<unknown>["align"]>, stri
   right: "text-right",
   center: "text-center",
 };
+
+/** Fills in a width for every column that didn't specify one, splitting the
+ * remaining percentage evenly. Columns with a px width are left alone (the
+ * browser reserves that fixed amount regardless); the percentage math below
+ * is a best-effort distribution of the rest, not a hard 100% guarantee when
+ * px and % widths are mixed — table-layout: fixed still renders correctly
+ * either way, it just means the un-widthed columns share what's left over. */
+function resolveColumnWidths<T>(columns: DataTableColumn<T>[]): string[] {
+  const unspecifiedCount = columns.filter((c) => !c.width).length;
+  if (unspecifiedCount === 0) return columns.map((c) => c.width!);
+
+  const claimedPercent = columns.reduce((sum, c) => {
+    if (c.width?.endsWith("%")) return sum + parseFloat(c.width);
+    return sum;
+  }, 0);
+  const fallbackPercent = Math.max(0, (100 - claimedPercent) / unspecifiedCount);
+
+  return columns.map((c) => c.width ?? `${fallbackPercent}%`);
+}
 
 export function DataTable<T>({
   columns,
@@ -38,6 +61,8 @@ export function DataTable<T>({
 }) {
   const [sort, setSort] = useState<{ key: string; direction: SortDirection } | null>(null);
 
+  const columnWidths = useMemo(() => resolveColumnWidths(columns), [columns]);
+
   const sortedData = useMemo(() => {
     if (!sort) return data;
     const column = columns.find((c) => c.key === sort.key);
@@ -54,6 +79,9 @@ export function DataTable<T>({
 
   function toggleSort(column: DataTableColumn<T>) {
     if (!column.sortValue) return;
+    // Sorting only ever reorders `sortedData` — it never touches `columns`
+    // or `columnWidths`, so the fixed column widths below are completely
+    // unaffected by this state change.
     setSort((prev) => {
       if (prev?.key !== column.key) return { key: column.key, direction: "asc" };
       if (prev.direction === "asc") return { key: column.key, direction: "desc" };
@@ -62,15 +90,25 @@ export function DataTable<T>({
   }
 
   return (
-    <div className={cn("term-panel term-corners overflow-x-auto rounded-card", className)}>
+    // Fixed-width container: the table itself is w-full *of this box*, and
+    // this box's own width is whatever its layout parent gives it — never
+    // recomputed from the table's content. Overflow scrolls inside this
+    // box; the box itself never grows or shrinks to fit the table.
+    <div className={cn("term-panel term-corners w-full max-w-full overflow-x-auto rounded-card", className)}>
+      <span className="term-corner-label">[ DATA TABLE ]</span>
       {/* table-layout: fixed is the actual fix for the jitter bug: with the
           browser's default "auto" layout, column widths are recomputed from
           current cell content on every reflow (sort, hover, a re-render
           anywhere in the row) — any table with variable-length content in
-          more than one column will visibly shift. Fixed layout locks every
-          column's width from the header row alone (plus any explicit
-          `width`), so cell content can never feed back into layout. */}
+          more than one column will visibly shift. Fixed layout ignores
+          cell content for sizing entirely — column widths come only from
+          the <colgroup> below, resolved once per `columns` identity. */}
       <table className="w-full table-fixed border-collapse text-base">
+        <colgroup>
+          {columns.map((column, i) => (
+            <col key={column.key} style={{ width: columnWidths[i] }} />
+          ))}
+        </colgroup>
         <thead>
           <tr className="h-row border-b border-dashed border-border">
             {columns.map((column) => {
@@ -78,9 +116,8 @@ export function DataTable<T>({
               return (
                 <th
                   key={column.key}
-                  style={{ width: column.width }}
                   className={cn(
-                    "px-3 text-xs font-medium uppercase tracking-wide text-text-muted",
+                    "overflow-hidden text-ellipsis whitespace-nowrap px-3 text-xs font-medium uppercase tracking-wide text-text-muted",
                     ALIGN_CLASSES[column.align ?? "left"],
                     column.sortValue && "cursor-pointer select-none hover:text-text-secondary",
                   )}

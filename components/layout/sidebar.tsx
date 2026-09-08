@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { getVisibleNavSections } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { UserCard } from "@/components/layout/user-card";
+import { useEffectsIntensity } from "@/components/effects-provider";
 import type { Profile } from "@/lib/types";
 
 export function Sidebar({
@@ -15,6 +16,7 @@ export function Sidebar({
   unreadHrefs?: Set<string>;
 }) {
   const pathname = usePathname();
+  const { intensity } = useEffectsIntensity();
   const sections = getVisibleNavSections(profile.role);
 
   return (
@@ -23,9 +25,10 @@ export function Sidebar({
         <span className="text-lg font-semibold text-text-primary">CRM</span>
       </div>
 
-      <nav className="flex-1 space-y-3 overflow-y-auto px-2 pb-2">
-        {sections.map((section) => (
+      <nav className="flex-1 overflow-y-auto px-2 pb-2">
+        {sections.map((section, i) => (
           <div key={section.key}>
+            {i > 0 && <div className="term-divider my-2" aria-hidden="true" />}
             <div
               className="px-2 text-xs font-medium uppercase tracking-wide"
               style={{ color: `var(--accent-${section.key})` }}
@@ -79,12 +82,14 @@ export function Sidebar({
       </nav>
 
       <UserCard profile={profile} />
-      <div
-        aria-hidden="true"
-        className="shrink-0 border-t border-border px-2 py-1 font-mono text-[10px] tracking-wide text-text-muted"
-      >
-        SESSION: ACTIVE · UID: {profile.id.slice(0, 8).toUpperCase()}
-      </div>
+      {intensity !== "off" && (
+        <div
+          aria-hidden="true"
+          className="shrink-0 border-t border-border px-2 py-1 font-mono text-[10px] tracking-wide text-[#33ff66] opacity-35"
+        >
+          SESSION: ACTIVE · UID: {profile.id.slice(0, 4).toLowerCase()}
+        </div>
+      )}
     </aside>
   );
 }
