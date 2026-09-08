@@ -143,6 +143,11 @@ function mulberry32(seed: number) {
   };
 }
 
+// Only edges with a verified real pad/via ending (see pcb-graph.ts) ever
+// get a comet — the rest end at an arbitrary tracer cutoff with nothing to
+// crash into, so nothing travels on them.
+const TRAVELABLE_EDGE_IDS: number[] = PCB_EDGES.filter((e) => e.hasRealEnd).map((e) => e.id);
+
 type EdgeInstance = { points: Pt[]; cumLen: number[]; totalLen: number; width: number };
 
 function buildEdgeInstance(edgeId: number, offX: number, offY: number): EdgeInstance {
@@ -170,9 +175,10 @@ type Comet = {
  * always forward (increasing arc-length) toward that edge's own far end —
  * a dead end, full stop. */
 function spawnComet(rand: () => number, tilesX: number, tilesY: number, width: number, height: number): Comet | null {
+  if (TRAVELABLE_EDGE_IDS.length === 0) return null;
   const margin = 30;
   for (let attempt = 0; attempt < 12; attempt++) {
-    const edgeId = Math.floor(rand() * PCB_EDGES.length);
+    const edgeId = TRAVELABLE_EDGE_IDS[Math.floor(rand() * TRAVELABLE_EDGE_IDS.length)]!;
     const offX = Math.floor(rand() * tilesX) * PCB_TILE_W * PCB_SCALE;
     const offY = Math.floor(rand() * tilesY) * PCB_TILE_H * PCB_SCALE;
     const inst = buildEdgeInstance(edgeId, offX, offY);
@@ -354,7 +360,7 @@ export function CircuitBackground() {
     function handleBurst(event: Event) {
       if (intensityRef.current === "off") return;
       const detail = (event as CustomEvent<CircuitPulseDetail>).detail;
-      if (!detail || PCB_EDGES.length === 0) return;
+      if (!detail || TRAVELABLE_EDGE_IDS.length === 0) return;
       const tileScreenW = PCB_TILE_W * PCB_SCALE;
       const tileScreenH = PCB_TILE_H * PCB_SCALE;
       const tx = Math.max(0, Math.min(tilesX - 1, Math.floor(detail.x / tileScreenW)));
@@ -365,7 +371,7 @@ export function CircuitBackground() {
       let bestEdgeId = -1;
       let bestS = 0;
       let bestDistSq = Infinity;
-      for (let ei = 0; ei < PCB_EDGES.length; ei++) {
+      for (const ei of TRAVELABLE_EDGE_IDS) {
         const inst = buildEdgeInstance(ei, offX, offY);
         for (let i = 1; i < inst.points.length; i++) {
           const a = inst.points[i - 1]!;
