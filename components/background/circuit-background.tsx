@@ -236,7 +236,14 @@ export function CircuitBackground() {
       };
     }
 
-    function buildBgPattern(callback: () => void) {
+    // Builds the tiled background pattern from the (async, data-URI) SVG
+    // image. This must NEVER be a prerequisite for sizing the canvas or the
+    // comet grid — if this image is ever slow or fails to load, resize()
+    // still has to have already run, or the canvas is stuck at the browser's
+    // default 300x150 and every comet's off-screen check is computed against
+    // a zero-sized viewport (which is what caused comets to vanish entirely
+    // except for a stray one clipped into a corner).
+    function buildBgPattern() {
       if (!ctx) return;
       const palette = currentPalette();
       const fill = rgba(palette.glow, 0.05);
@@ -253,7 +260,11 @@ export function CircuitBackground() {
           tctx.drawImage(img, 0, 0, tileW, tileH);
           bgPattern = ctx.createPattern(tileCanvas, "repeat");
         }
-        callback();
+        drawFrame(0);
+      };
+      img.onerror = () => {
+        // No background pattern this session, but the comet grid (already
+        // sized by resize(), called independently) keeps animating fine.
       };
       img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgStr);
     }
@@ -415,9 +426,10 @@ export function CircuitBackground() {
       resizeTimer = window.setTimeout(resize, 200);
     }
 
-    buildBgPattern(() => {
-      resize();
-    });
+    // Size the canvas and comet grid right away, synchronously — this must
+    // not wait on the background image (see buildBgPattern above).
+    resize();
+    buildBgPattern();
     rafId = requestAnimationFrame(loop);
     document.addEventListener("visibilitychange", handleVisibility);
     window.addEventListener("resize", handleResize);
