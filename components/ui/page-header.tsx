@@ -24,6 +24,7 @@ export function PageHeader({
             key={title}
             as="h1"
             text={title}
+            caret="persist"
             className="term-heading text-xl font-semibold text-info"
           />
         </div>

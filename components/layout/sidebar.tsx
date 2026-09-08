@@ -79,6 +79,12 @@ export function Sidebar({
       </nav>
 
       <UserCard profile={profile} />
+      <div
+        aria-hidden="true"
+        className="shrink-0 border-t border-border px-2 py-1 font-mono text-[10px] tracking-wide text-text-muted"
+      >
+        SESSION: ACTIVE · UID: {profile.id.slice(0, 8).toUpperCase()}
+      </div>
     </aside>
   );
 }

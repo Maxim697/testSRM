@@ -43,8 +43,10 @@ export function KpiCard({
         key={value}
         text={value}
         className={cn(
-          "mt-1.5 block font-semibold tabular-nums text-text-primary",
-          size === "lg" ? "text-2xl" : "text-xl",
+          "mt-1.5 block font-semibold tabular-nums",
+          // The two headline KPIs (size="lg") are the most important values
+          // on the page — white, not phosphor green, per the palette spec.
+          size === "lg" ? "text-2xl text-emphasis" : "text-xl text-text-primary",
         )}
       />
       {delta && (

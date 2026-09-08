@@ -23,7 +23,13 @@ export function EmptyState({
       )}
     >
       <div className="mb-3">{icon ?? <InboxIcon />}</div>
-      <div className="text-lg font-medium text-text-primary">{title}</div>
+      <div className="text-lg font-medium text-text-primary">
+        <span className="text-info">{"> "}</span>
+        <span className="relative inline-block">
+          {title}
+          <span className="term-caret term-caret-abs" aria-hidden="true" />
+        </span>
+      </div>
       {description && (
         <div className="mt-2 max-w-sm text-base text-text-secondary">
           {description}

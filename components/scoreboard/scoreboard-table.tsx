@@ -62,12 +62,14 @@ export function ScoreboardTable({ rows }: { rows: Row[] }) {
         </Link>
       ),
       sortValue: (r) => r.trader.code,
+      width: "18%",
     },
     {
       key: "tier",
       header: "Tier",
       accessor: (r) => (r.trader.tier ? <Tier variant={r.trader.tier} /> : "—"),
       sortValue: (r) => r.trader.tier ?? "",
+      width: "10%",
     },
     {
       key: "score",
@@ -75,6 +77,7 @@ export function ScoreboardTable({ rows }: { rows: Row[] }) {
       accessor: (r) => <span className="tabular-nums font-medium">{r.trader.score ?? "—"}</span>,
       sortValue: (r) => r.trader.score ?? 0,
       align: "right",
+      width: "10%",
     },
     {
       key: "score_delta",
@@ -88,11 +91,13 @@ export function ScoreboardTable({ rows }: { rows: Row[] }) {
       ),
       sortValue: (r) => r.trader.score_delta ?? 0,
       align: "right",
+      width: "10%",
     },
     {
       key: "sparkline",
       header: "Динаміка 12 тижнів",
       accessor: (r) => <Sparkline values={r.sparkline} />,
+      width: "22%",
     },
     {
       key: "status",
@@ -104,6 +109,7 @@ export function ScoreboardTable({ rows }: { rows: Row[] }) {
           "—"
         ),
       sortValue: (r) => r.trader.status ?? "",
+      width: "12%",
     },
   ];
 

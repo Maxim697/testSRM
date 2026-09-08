@@ -1,96 +1,96 @@
 /*
   Design tokens. Single source of truth for the whole app.
 
-  Visual direction: an 80s trading-terminal CRT — near-black green-tinted
-  surfaces, phosphor text, four pure accent colors (no pastels, no muted
-  in-between hues), sharp rectangular edges everywhere (radius tokens are
-  0 — see globals.css). Dark is the primary target; light keeps the same
-  structure with ink-on-paper phosphor substitutes since neon-on-white
-  isn't legible.
+  Visual direction: an 80s trading-terminal CRT — one unified phosphor
+  green (never mixed with other "base" hues), near-black surfaces, sharp
+  rectangular edges everywhere (radius tokens are 0 — see globals.css).
+  Dark is the primary target; light keeps the same structure with
+  ink-on-paper phosphor substitutes since neon-on-white isn't legible.
   Components must never hardcode colors — reference these variables (via
   the Tailwind theme mapping in globals.css) only.
 */
 
 :root {
-  /* Surfaces — near-black with a faint green cast, 4 levels */
-  --surface-0: #050a06; /* page background */
-  --surface-1: #080f09; /* sidebar, header, recessed inputs */
-  --surface-2: #0a130b; /* cards, table containers */
-  --surface-3: #101d12; /* popovers, menus, tooltips, hover/active states */
+  /* Surfaces — near-black with a green cast, 4 levels */
+  --surface-0: #0a0e0a; /* page background */
+  --surface-1: #0d120d; /* sidebar, header, recessed inputs */
+  --surface-2: #101710; /* cards, table containers */
+  --surface-3: #141d14; /* popovers, menus, tooltips, hover/active states */
 
-  /* Text — muted phosphor green, three brightness steps */
-  --text-primary: #8fe6ab;
-  --text-secondary: #5c9c73;
-  --text-muted: #3a6249;
+  /* Text — one phosphor green at three opacities, no separate hues */
+  --text-primary: #33ff66;
+  --text-secondary: rgba(51, 255, 102, 0.55);
+  --text-muted: rgba(51, 255, 102, 0.3);
 
   /* Borders — 1px, in text color at low brightness */
-  --border: rgba(143, 230, 171, 0.22);
-  --border-strong: rgba(143, 230, 171, 0.4);
+  --border: rgba(51, 255, 102, 0.18);
+  --border-strong: rgba(51, 255, 102, 0.4);
 
-  /* Semantic accents — pure, saturated, phosphor-clean. Green = normal/
-     growth, amber = warning, red = critical/falling, cyan = active/links.
-     No pastel tints: *-bg is the same hue at low alpha, not a lighter mix. */
-  --positive: #39ff6e;
-  --positive-bg: rgba(57, 255, 110, 0.14);
-  --negative: #ff3232;
-  --negative-bg: rgba(255, 50, 50, 0.16);
+  /* Semantic accents. Green (= the base phosphor color) is normal/growth;
+     amber is warning; red is critical/falling; cyan is active elements and
+     links; white is reserved for the single most important value on
+     screen. No pastel tints: *-bg is the same hue at low alpha. */
+  --positive: #33ff66;
+  --positive-bg: rgba(51, 255, 102, 0.14);
+  --negative: #ff3b30;
+  --negative-bg: rgba(255, 59, 48, 0.16);
   --warning: #ffb000;
   --warning-bg: rgba(255, 176, 0, 0.16);
-  --info: #22e0ff;
-  --info-bg: rgba(34, 224, 255, 0.14);
+  --info: #00e5ff;
+  --info-bg: rgba(0, 229, 255, 0.14);
+  --emphasis: #e8ffe8;
 
-  /* Data series palette — fixed order, 8 colors, clean phosphor hues */
-  --series-1: #39ff6e;
-  --series-2: #22e0ff;
+  /* Data series palette — the same 4 accents, cycled, never mixed with an
+     extra hue */
+  --series-1: #33ff66;
+  --series-2: #00e5ff;
   --series-3: #ffb000;
-  --series-4: #c86bff;
-  --series-5: #ff3232;
-  --series-6: #22e0ff;
-  --series-7: #ff8a3d;
-  --series-8: #c8ff3d;
+  --series-4: #ff3b30;
+  --series-5: #33ff66;
+  --series-6: #00e5ff;
+  --series-7: #ffb000;
+  --series-8: #ff3b30;
 
-  /* Tier colors — bracketed text, not chips; kept distinct from the 4
-     semantic accents above */
+  /* Tier colors — bracketed text, not chips; a separate ranking language
+     from the 4 status accents above, so gold/silver/bronze stay distinct */
   --tier-gold: #ffd23f;
   --tier-gold-bg: rgba(255, 210, 63, 0.14);
-  --tier-silver: #cfe8dc;
-  --tier-silver-bg: rgba(207, 232, 220, 0.12);
+  --tier-silver: #d9f5e6;
+  --tier-silver-bg: rgba(217, 245, 230, 0.12);
   --tier-bronze: #ff8c42;
   --tier-bronze-bg: rgba(255, 140, 66, 0.14);
 
-  /* Section accents — kept as a hook for future differentiation, but the
-     terminal palette allows exactly one "active" hue (cyan), so every
-     section currently maps to --info. */
+  /* Section accents — one per nav group: analytics is cyan, CRM is green
+     (the base phosphor), platform is amber. */
   --accent-analytics: var(--info);
   --accent-analytics-bg: var(--info-bg);
-  --accent-crm: var(--info);
-  --accent-crm-bg: var(--info-bg);
-  --accent-platform: var(--info);
-  --accent-platform-bg: var(--info-bg);
+  --accent-crm: var(--positive);
+  --accent-crm-bg: var(--positive-bg);
+  --accent-platform: var(--warning);
+  --accent-platform-bg: var(--warning-bg);
 
   /* Focus ring — follows the current section accent (see --info override in
      SectionAccentScope) */
   --focus-ring: var(--info);
 
   /* Phosphor glow — text-shadow and chart accents */
-  --term-trace: rgba(57, 255, 110, 0.08);
-  --term-glow: #39ff6e;
-  --term-glow-cyan: #22e0ff;
-  --term-glow-strong: #baffce;
+  --term-trace: rgba(51, 255, 102, 0.08);
+  --term-glow: #33ff66;
+  --term-glow-cyan: #00e5ff;
+  --term-glow-strong: #e8ffe8;
 
   /* Glass — top layers only (header, sidebar, modals, popovers, tooltips). */
-  --glass-bg: rgba(5, 10, 6, 0.86);
-  --glass-border: rgba(143, 230, 171, 0.22);
+  --glass-bg: rgba(10, 14, 10, 0.88);
+  --glass-border: rgba(51, 255, 102, 0.2);
 
-  /* Card / table surfaces — solid, no translucency (nothing shows through
-     from behind content anymore). */
+  /* Card / table surfaces — solid, no translucency. */
   --panel-bg-glow: var(--surface-2);
   --panel-bg-solid: var(--surface-2);
   --panel-border: var(--border);
 
   /* Scrollbar */
-  --scrollbar-thumb: #1c3520;
-  --scrollbar-thumb-hover: #39ff6e;
+  --scrollbar-thumb: rgba(51, 255, 102, 0.25);
+  --scrollbar-thumb-hover: #33ff66;
 
   /* Motion */
   --transition-fast: 150ms;
@@ -101,62 +101,63 @@
 }
 
 [data-theme="light"] {
-  --surface-0: #eef3f0;
-  --surface-1: #f5f8f6;
+  --surface-0: #eef3ee;
+  --surface-1: #f5f8f5;
   --surface-2: #ffffff;
-  --surface-3: #e9f1ec;
+  --surface-3: #e8f0e8;
 
-  --text-primary: #0d2417;
-  --text-secondary: #3d5c4c;
-  --text-muted: #7a9787;
+  --text-primary: #0d2b17;
+  --text-secondary: rgba(13, 43, 23, 0.65);
+  --text-muted: rgba(13, 43, 23, 0.4);
 
-  --border: rgba(13, 36, 23, 0.2);
-  --border-strong: rgba(13, 36, 23, 0.36);
+  --border: rgba(13, 43, 23, 0.2);
+  --border-strong: rgba(13, 43, 23, 0.36);
 
-  --positive: #0d9440;
-  --positive-bg: rgba(13, 148, 64, 0.14);
-  --negative: #c81616;
-  --negative-bg: rgba(200, 22, 22, 0.14);
+  --positive: #0d8a3d;
+  --positive-bg: rgba(13, 138, 61, 0.14);
+  --negative: #c8281d;
+  --negative-bg: rgba(200, 40, 29, 0.14);
   --warning: #a66c00;
   --warning-bg: rgba(166, 108, 0, 0.14);
   --info: #0089a8;
   --info-bg: rgba(0, 137, 168, 0.12);
+  --emphasis: #06210f;
 
-  --series-1: #0d9440;
+  --series-1: #0d8a3d;
   --series-2: #0089a8;
   --series-3: #a66c00;
-  --series-4: #7a3fd1;
-  --series-5: #c81616;
+  --series-4: #c8281d;
+  --series-5: #0d8a3d;
   --series-6: #0089a8;
-  --series-7: #c9611f;
-  --series-8: #5c8f1f;
+  --series-7: #a66c00;
+  --series-8: #c8281d;
 
   --tier-gold: #96721a;
   --tier-gold-bg: rgba(150, 114, 26, 0.14);
-  --tier-silver: #4c6d5f;
-  --tier-silver-bg: rgba(76, 109, 95, 0.12);
+  --tier-silver: #3d5c4c;
+  --tier-silver-bg: rgba(61, 92, 76, 0.12);
   --tier-bronze: #97501f;
   --tier-bronze-bg: rgba(151, 80, 31, 0.14);
 
   --accent-analytics: var(--info);
   --accent-analytics-bg: var(--info-bg);
-  --accent-crm: var(--info);
-  --accent-crm-bg: var(--info-bg);
-  --accent-platform: var(--info);
-  --accent-platform-bg: var(--info-bg);
+  --accent-crm: var(--positive);
+  --accent-crm-bg: var(--positive-bg);
+  --accent-platform: var(--warning);
+  --accent-platform-bg: var(--warning-bg);
 
-  --term-trace: rgba(13, 148, 64, 0.06);
-  --term-glow: #0d9440;
+  --term-trace: rgba(13, 138, 61, 0.06);
+  --term-glow: #0d8a3d;
   --term-glow-cyan: #0089a8;
-  --term-glow-strong: #0c7a49;
+  --term-glow-strong: #06210f;
 
-  --glass-bg: rgba(255, 255, 255, 0.88);
-  --glass-border: rgba(13, 36, 23, 0.16);
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(13, 43, 23, 0.16);
 
   --panel-bg-glow: var(--surface-2);
   --panel-bg-solid: var(--surface-2);
   --panel-border: var(--border);
 
   --scrollbar-thumb: var(--border-strong);
-  --scrollbar-thumb-hover: #0d9440;
+  --scrollbar-thumb-hover: #0d8a3d;
 }

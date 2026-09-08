@@ -63,7 +63,14 @@ export function DataTable<T>({
 
   return (
     <div className={cn("term-panel term-corners overflow-x-auto rounded-card", className)}>
-      <table className="w-full border-collapse text-base">
+      {/* table-layout: fixed is the actual fix for the jitter bug: with the
+          browser's default "auto" layout, column widths are recomputed from
+          current cell content on every reflow (sort, hover, a re-render
+          anywhere in the row) — any table with variable-length content in
+          more than one column will visibly shift. Fixed layout locks every
+          column's width from the header row alone (plus any explicit
+          `width`), so cell content can never feed back into layout. */}
+      <table className="w-full table-fixed border-collapse text-base">
         <thead>
           <tr className="h-row border-b border-dashed border-border">
             {columns.map((column) => {
@@ -101,7 +108,7 @@ export function DataTable<T>({
                   <td
                     key={column.key}
                     className={cn(
-                      "px-3 text-text-primary tabular-nums",
+                      "overflow-hidden text-ellipsis whitespace-nowrap px-3 text-text-primary tabular-nums",
                       i === 0 && "relative",
                       ALIGN_CLASSES[column.align ?? "left"],
                     )}

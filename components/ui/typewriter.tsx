@@ -4,8 +4,15 @@ import { useEffect, useState } from "react";
 import { useEffectsIntensity } from "@/components/effects-provider";
 
 /** Types `text` out over `durationMs`, left to right, with a blinking block
- * caret that disappears once done. Skipped entirely (full text, no caret)
- * unless effects intensity is "full".
+ * caret. The caret is absolutely positioned against an inline wrapper sized
+ * to exactly the revealed text, so it never itself takes up layout space or
+ * shifts anything after it. Skipped entirely (full text, no caret) unless
+ * effects intensity is "full".
+ *
+ * `caret="hide-when-done"` (default, for KPI/table numbers): the caret
+ * disappears the instant typing finishes.
+ * `caret="persist"` (for page/section titles): once typing finishes the
+ * caret keeps blinking forever, like a standing terminal prompt.
  *
  * Callers must `key` this by whatever makes `text` a "new" value (the text
  * itself, a page path, a fetch timestamp...) to get a fresh typing pass on
@@ -17,11 +24,13 @@ export function Typewriter({
   durationMs = 300,
   className,
   as: Tag = "span",
+  caret = "hide-when-done",
 }: {
   text: string;
   durationMs?: number;
   className?: string;
   as?: "span" | "h1" | "h2";
+  caret?: "hide-when-done" | "persist";
 }) {
   const { intensity } = useEffectsIntensity();
   const full = intensity === "full";
@@ -44,13 +53,16 @@ export function Typewriter({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally NOT re-running on `text` changes; see doc comment above, callers re-key instead
   }, [durationMs, full]);
 
+  const typingDone = !full || progress >= text.length;
   const shown = full ? text.slice(0, progress) : text;
-  const done = !full || progress >= text.length;
+  const showCaret = full && (caret === "persist" ? true : !typingDone);
 
   return (
     <Tag className={className}>
-      {shown}
-      {!done && <span className="term-caret" aria-hidden="true" />}
+      <span className="relative inline-block">
+        {shown}
+        {showCaret && <span className="term-caret term-caret-abs" aria-hidden="true" />}
+      </span>
     </Tag>
   );
 }
