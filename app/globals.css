@@ -148,71 +148,14 @@ body {
 }
 
 /* ==========================================================================
-   Circuit background — real vector PCB artwork (see pcb-source.ts), tiled
-   twice: once dark as the resting board, once bright and revealed only
-   through an SVG mask made of moving soft round glow spots. Because the
-   mask can only ever reveal pixels the artwork actually painted, whatever
-   traces a spot currently overlaps light up together and nothing else does
-   — the spot's own shape carries no direction, so unlike a shape riding a
-   bent path (which stays rigid and only reads as scattered short strokes
-   wherever it happens to cross a trace) a round blob always looks correct
-   regardless of its own straight travel line.
+   Circuit background — rendered entirely on <canvas> now (see
+   circuit-background.tsx): the real vector PCB artwork (pcb-source.ts)
+   tiled dimly as the resting board, with pulses drawn as strokes along
+   real traced routes (pcb-routes.ts, extracted from the artwork's own
+   pixels). No CSS classes are needed for the moving parts — the canvas
+   draws everything itself — only the light-theme hiding rule above applies
+   to it.
    ========================================================================== */
-
-.pcb-tile-base-use {
-  fill: var(--circuit-trace);
-}
-.pcb-tile-glow-use {
-  fill: var(--circuit-glow);
-}
-
-[data-fx="moderate"] .pcb-glow-layer {
-  opacity: 0.6;
-}
-
-@keyframes pcb-blob-travel {
-  0% {
-    cx: var(--blob-x0);
-    cy: var(--blob-y0);
-    opacity: 0;
-  }
-  8% {
-    opacity: 1;
-  }
-  92% {
-    opacity: 1;
-  }
-  100% {
-    cx: var(--blob-x1);
-    cy: var(--blob-y1);
-    opacity: 0;
-  }
-}
-
-.pcb-blob {
-  opacity: 0;
-  animation-name: pcb-blob-travel;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-
-@keyframes pcb-ripple-expand {
-  0% {
-    r: 6px;
-    stroke-width: 16px;
-    stroke-opacity: 0.9;
-  }
-  100% {
-    r: 600px;
-    stroke-width: 2px;
-    stroke-opacity: 0;
-  }
-}
-
-.pcb-ripple {
-  stroke: var(--circuit-glow-strong);
-  animation: pcb-ripple-expand 0.8s ease-out forwards;
-}
 
 /* ==========================================================================
    PCB corner brackets — two opposite corners get a glowing L-shaped tick,
