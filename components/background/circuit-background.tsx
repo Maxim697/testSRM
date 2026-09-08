@@ -221,6 +221,7 @@ export function CircuitBackground() {
     const rand = mulberry32(Date.now() & 0xffffffff);
     let rafId = 0;
     let lastFrame = 0;
+    let lastDrawWall = Date.now();
     let running = true;
     let dpr = 1;
     let tilesX = 1;
@@ -295,6 +296,7 @@ export function CircuitBackground() {
 
     function drawFrame(dtMs: number) {
       if (!canvas || !ctx) return;
+      lastDrawWall = Date.now();
       const width = canvas.width / dpr;
       const height = canvas.height / dpr;
       ctx.clearRect(0, 0, width, height);
@@ -426,6 +428,34 @@ export function CircuitBackground() {
       resizeTimer = window.setTimeout(resize, 200);
     }
 
+    // Watchdog: browsers can throttle or altogether stop scheduling
+    // requestAnimationFrame for a tab (background-tab power saving, a
+    // discarded/frozen tab waking back up, etc.) without ever firing a
+    // visibilitychange we can react to — the loop just goes quiet forever.
+    // Separately, window.innerWidth/innerHeight can occasionally read 0 for
+    // one tick right when resize() runs (a transient layout state), which
+    // leaves the canvas stuck at the browser's tiny 300x150 default forever
+    // since nothing else ever re-triggers resize() on its own. setInterval
+    // isn't throttled the way rAF is, so once a second this both re-sizes
+    // the canvas if it doesn't match the real window anymore and
+    // force-restarts the rAF chain if no frame has actually been drawn
+    // recently while the tab is visible.
+    const watchdog = window.setInterval(() => {
+      if (document.hidden || !canvas) return;
+      if (window.innerWidth > 0 && window.innerHeight > 0) {
+        const expectedDpr = Math.min(window.devicePixelRatio || 1, 2);
+        const expectedW = Math.round(window.innerWidth * expectedDpr);
+        const expectedH = Math.round(window.innerHeight * expectedDpr);
+        if (canvas.width !== expectedW || canvas.height !== expectedH) resize();
+      }
+      if (Date.now() - lastDrawWall > 1500) {
+        cancelAnimationFrame(rafId);
+        running = true;
+        lastFrame = 0;
+        rafId = requestAnimationFrame(loop);
+      }
+    }, 1000);
+
     // Size the canvas and comet grid right away, synchronously — this must
     // not wait on the background image (see buildBgPattern above).
     resize();
@@ -439,6 +469,7 @@ export function CircuitBackground() {
       running = false;
       cancelAnimationFrame(rafId);
       window.clearTimeout(resizeTimer);
+      window.clearInterval(watchdog);
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener(CIRCUIT_PULSE_EVENT, handleBurst);
