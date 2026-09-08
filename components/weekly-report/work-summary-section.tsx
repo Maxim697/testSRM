@@ -92,7 +92,7 @@ function WorkField({
           )}
         </>
       ) : (
-        <p className="whitespace-pre-wrap rounded-control border border-border bg-surface-1 p-2.5 text-base text-text-primary">
+        <p className="pcb-corners whitespace-pre-wrap rounded-control border border-border bg-surface-1 p-2.5 text-base text-text-primary">
           {initialValue || "—"}
         </p>
       )}

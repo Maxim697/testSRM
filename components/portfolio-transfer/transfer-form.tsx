@@ -288,11 +288,11 @@ export function TransferForm({
             <span className="font-medium">{toManagerName}</span>?
           </p>
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-control border border-border bg-surface-1 p-2.5">
+            <div className="pcb-corners rounded-control border border-border bg-surface-1 p-2.5">
               <div className="text-xs text-text-secondary">Сумарний оборот за тиждень</div>
               <div className="text-lg font-semibold tabular-nums text-text-primary">{formatNumber(turnoverSum)}</div>
             </div>
-            <div className="rounded-control border border-border bg-surface-1 p-2.5">
+            <div className="pcb-corners rounded-control border border-border bg-surface-1 p-2.5">
               <div className="text-xs text-text-secondary">Сумарний депозит</div>
               <div className="text-lg font-semibold tabular-nums text-text-primary">{formatNumber(depositSum)}</div>
             </div>

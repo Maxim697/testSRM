@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils";
 import { RISK_LEVEL_LABELS, type RiskScore } from "@/lib/risk-score";
 
 const LEVEL_CLASSES: Record<RiskScore["level"], string> = {
-  low: "bg-positive-bg text-positive border border-positive/30",
-  medium: "bg-warning-bg text-warning border border-warning/30",
-  high: "bg-negative-bg text-negative border border-negative/30",
-  critical: "bg-negative text-white border border-negative",
+  low: "pcb-pulse bg-positive-bg text-positive border border-positive/30 [--pulse-color:var(--positive)] [--pulse-duration:3.4s]",
+  medium: "pcb-pulse bg-warning-bg text-warning border border-warning/30 [--pulse-color:var(--warning)] [--pulse-duration:2.4s]",
+  high: "pcb-pulse bg-negative-bg text-negative border border-negative/30 [--pulse-color:var(--negative)] [--pulse-duration:1.6s]",
+  critical: "pcb-pulse bg-negative text-white border border-negative [--pulse-color:var(--negative)] [--pulse-duration:0.9s]",
 };
 
 const SIZE_CLASSES = {
@@ -47,7 +47,7 @@ export function RiskBadge({
         {risk.score}
       </span>
       {showBreakdown && open && (
-        <span className="glass backdrop-blur-lg pointer-events-none absolute top-full left-1/2 z-20 mt-1.5 w-64 -translate-x-1/2 rounded-control p-2 text-xs font-normal normal-case text-text-secondary">
+        <span className="glass pcb-corners backdrop-blur-lg pointer-events-none absolute top-full left-1/2 z-20 mt-1.5 w-64 -translate-x-1/2 rounded-control p-2 text-xs font-normal normal-case text-text-secondary">
           <div className="mb-1 font-medium text-text-primary">
             {RISK_LEVEL_LABELS[risk.level]} ризик · {risk.score}/100
           </div>

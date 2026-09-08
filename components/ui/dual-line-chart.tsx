@@ -70,20 +70,70 @@ export function DualLineChart({
         onMouseLeave={() => setHoverIndex(null)}
       >
         <line
+          className="chart-grid-line"
           x1={PAD_X}
           y1={PAD_Y + innerH}
           x2={WIDTH - PAD_X}
           y2={PAD_Y + innerH}
-          stroke="var(--color-border)"
           strokeWidth={1}
         />
-        <path d={pathA} fill="none" stroke={colorA} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-        <path d={pathB} fill="none" stroke={colorB} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d={pathA}
+          fill="none"
+          stroke={colorA}
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ filter: `drop-shadow(0 0 3px ${colorA})` }}
+        />
+        <path
+          d={pathB}
+          fill="none"
+          stroke={colorB}
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ filter: `drop-shadow(0 0 3px ${colorB})` }}
+        />
+        {pathA && (
+          <circle
+            r={3}
+            fill="var(--circuit-glow-strong)"
+            className="chart-pulse-dot"
+            style={{ ["--chart-path" as string]: `path("${pathA}")`, ["--pulse-duration" as string]: "3.2s", filter: `drop-shadow(0 0 4px ${colorA})` }}
+          />
+        )}
+        {pathB && (
+          <circle
+            r={3}
+            fill="var(--circuit-glow-strong)"
+            className="chart-pulse-dot"
+            style={{ ["--chart-path" as string]: `path("${pathB}")`, ["--pulse-duration" as string]: "4.1s", filter: `drop-shadow(0 0 4px ${colorB})` }}
+          />
+        )}
         {coordsA.map((c, i) => (
-          <circle key={`a-${i}`} cx={c.x} cy={c.y} r={hoverIndex === i ? 4 : 3} fill={colorA} stroke="var(--color-surface-2)" strokeWidth={1.5} />
+          <circle
+            key={`a-${i}`}
+            cx={c.x}
+            cy={c.y}
+            r={hoverIndex === i ? 4 : 3}
+            fill={colorA}
+            stroke="var(--color-surface-2)"
+            strokeWidth={1.5}
+            className="chart-node"
+          />
         ))}
         {coordsB.map((c, i) => (
-          <circle key={`b-${i}`} cx={c.x} cy={c.y} r={hoverIndex === i ? 4 : 3} fill={colorB} stroke="var(--color-surface-2)" strokeWidth={1.5} />
+          <circle
+            key={`b-${i}`}
+            cx={c.x}
+            cy={c.y}
+            r={hoverIndex === i ? 4 : 3}
+            fill={colorB}
+            stroke="var(--color-surface-2)"
+            strokeWidth={1.5}
+            className="chart-node"
+          />
         ))}
         {coordsA.map((c, i) => (
           <rect
@@ -99,7 +149,7 @@ export function DualLineChart({
       </svg>
       {hoveredWeek && hoveredX !== null && (
         <div
-          className="pointer-events-none absolute rounded-control border border-border bg-surface-3 px-2 py-1 text-xs text-text-primary"
+          className="glass pcb-corners backdrop-blur-lg pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
           style={{ left: `${(hoveredX / WIDTH) * 100}%`, top: 0, transform: "translate(-50%, -110%)" }}
         >
           <div className="text-text-muted">{formatDate(hoveredWeek.weekStart)}</div>

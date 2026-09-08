@@ -3,6 +3,7 @@
 
 @theme inline {
   --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
 
   /* Type scale: 11 / 12 / 13 / 15 / 20 / 28 */
   --text-xs: 11px;
@@ -82,6 +83,14 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Numbers and technical labels read as monospace — nearly everything
+   numeric in this app already carries .tabular-nums, so this one rule
+   covers KPI values, table cells, chart labels, etc. with no per-component
+   changes needed. */
+.tabular-nums {
+  font-family: var(--font-mono);
+}
+
 * {
   border-color: var(--color-border);
 }
@@ -106,6 +115,242 @@ body {
 
 .h-row {
   height: var(--row-height);
+}
+
+/* ==========================================================================
+   Circuit board theme — intensity gating.
+   fx="full" (default): full canvas pulses, glow-under-content panels.
+   fx="moderate": circuit-background.tsx reads --fx itself for pulse rate/
+     count; here we only turn off the glow-under-content translucency.
+   fx="off": every CSS animation in the app is disabled; the background
+     canvas draws one static frame (handled in circuit-background.tsx).
+   ========================================================================== */
+
+:root {
+  --panel-bg-active: var(--panel-bg-glow);
+  --panel-blur: 26px;
+}
+
+:root[data-fx="moderate"],
+:root[data-fx="off"] {
+  --panel-bg-active: var(--panel-bg-solid);
+  --panel-blur: 0px;
+}
+
+[data-fx="off"] *,
+[data-fx="off"] *::before,
+[data-fx="off"] *::after {
+  animation: none !important;
+}
+
+[data-theme="light"] .circuit-canvas {
+  opacity: 0;
+}
+
+/* ==========================================================================
+   PCB corner brackets — two opposite corners get a glowing L-shaped tick,
+   the rest of the outline is a dashed (not solid) line. Shared by cards,
+   tables and glass surfaces so it's one visual language everywhere.
+   ========================================================================== */
+
+.pcb-corners {
+  position: relative;
+}
+.pcb-corners::before,
+.pcb-corners::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: var(--circuit-glow);
+  border-style: solid;
+  opacity: 0.75;
+  pointer-events: none;
+}
+.pcb-corners::before {
+  top: -1px;
+  left: -1px;
+  border-width: 1.5px 0 0 1.5px;
+}
+.pcb-corners::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 1.5px 1.5px 0;
+}
+
+/* ==========================================================================
+   Panels — cards, KPI cards, table containers. Translucent + blurred at
+   fx=full so the circuit canvas glows through; opaque at moderate/off.
+   ========================================================================== */
+
+.pcb-panel {
+  background-color: var(--panel-bg-active);
+  backdrop-filter: blur(var(--panel-blur));
+  -webkit-backdrop-filter: blur(var(--panel-blur));
+  border: 1px dashed var(--panel-border);
+}
+
+/* text inside panels stays fully opaque with a dark halo for contrast
+   against whatever glow passes underneath */
+.pcb-panel h1,
+.pcb-panel h2,
+.pcb-panel h3,
+.pcb-panel .tabular-nums,
+.pcb-panel td,
+.pcb-panel th {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* ==========================================================================
+   Fields — inputs, date inputs, selects: cut corners, glow border on focus.
+   ========================================================================== */
+
+.pcb-field {
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  background-color: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+}
+.pcb-field:focus,
+.pcb-field:focus-visible,
+.pcb-field[aria-expanded="true"] {
+  outline: none;
+  border-color: var(--circuit-glow);
+  box-shadow:
+    0 0 0 1px var(--circuit-glow),
+    0 0 10px rgba(125, 255, 196, 0.35);
+}
+
+/* ==========================================================================
+   Buttons — contact pads: cut corners, faint trace texture, glowing border
+   and a dot that runs the perimeter on hover.
+   ========================================================================== */
+
+.pcb-button {
+  position: relative;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  border: 1px solid var(--color-border-strong);
+  overflow: visible;
+}
+.pcb-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    45deg,
+    currentColor 0,
+    currentColor 1px,
+    transparent 1px,
+    transparent 7px
+  );
+  opacity: 0.05;
+  pointer-events: none;
+}
+.pcb-button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  background: var(--circuit-glow);
+  box-shadow: 0 0 6px 1px var(--circuit-glow);
+  opacity: 0;
+  offset-path: border-box;
+  offset-distance: 0%;
+  pointer-events: none;
+}
+.pcb-button:hover {
+  border-color: var(--circuit-glow);
+  box-shadow: 0 0 10px rgba(125, 255, 196, 0.4);
+}
+.pcb-button:hover::after {
+  opacity: 1;
+  animation: pcb-perimeter 2.4s linear infinite;
+}
+.pcb-button:disabled:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: none;
+}
+.pcb-button:disabled:hover::after {
+  opacity: 0;
+}
+
+@keyframes pcb-perimeter {
+  to {
+    offset-distance: 100%;
+  }
+}
+
+/* ==========================================================================
+   Status pulse — badges / risk indicators glow with an intensity that
+   scales with severity.
+   ========================================================================== */
+
+@keyframes pcb-pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 2px 0 var(--pulse-color, transparent);
+  }
+  50% {
+    box-shadow: 0 0 8px 1px var(--pulse-color, transparent);
+  }
+}
+
+.pcb-pulse {
+  animation: pcb-pulse-glow var(--pulse-duration, 2.4s) ease-in-out infinite;
+}
+
+/* ==========================================================================
+   Charts — glowing lines (via drop-shadow set inline per series color),
+   pulsing nodes, and a traveling pulse dot riding the line's own path.
+   ========================================================================== */
+
+.chart-grid-line {
+  stroke: var(--color-border);
+  filter: drop-shadow(0 0 1.5px var(--circuit-trace));
+}
+
+.chart-node {
+  animation: pcb-node-pulse var(--pulse-duration, 2.6s) ease-in-out infinite;
+}
+
+@keyframes pcb-node-pulse {
+  0%,
+  100% {
+    r: var(--node-r-base, 3px);
+  }
+  50% {
+    r: var(--node-r-pulse, 4.5px);
+  }
+}
+
+.chart-pulse-dot {
+  offset-path: var(--chart-path);
+  offset-rotate: 0deg;
+  animation: pcb-chart-travel var(--pulse-duration, 3.5s) linear infinite;
+}
+
+@keyframes pcb-chart-travel {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  94% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+.chart-bar-glow {
+  animation: pcb-pulse-glow var(--pulse-duration, 2.8s) ease-in-out infinite;
 }
 
 /* ==========================================================================
@@ -135,6 +380,7 @@ body {
 
 *::-webkit-scrollbar-thumb:hover {
   background-color: var(--scrollbar-thumb-hover);
+  box-shadow: 0 0 6px var(--scrollbar-thumb-hover);
 }
 
 /* ==========================================================================
@@ -150,6 +396,10 @@ body {
   border-top: 1px solid var(--glass-border);
   border-left: 1px solid var(--glass-border);
   box-shadow: none;
+}
+.glass.pcb-corners::before,
+.glass.pcb-corners::after {
+  opacity: 0.55;
 }
 
 /* ==========================================================================
@@ -191,11 +441,12 @@ textarea,
 }
 
 .skeleton-shimmer {
+  background-color: var(--color-surface-3);
   background-image: linear-gradient(
     100deg,
-    var(--color-surface-3) 30%,
-    var(--color-border-strong) 50%,
-    var(--color-surface-3) 70%
+    transparent 30%,
+    color-mix(in srgb, var(--circuit-glow) 45%, transparent) 50%,
+    transparent 70%
   );
   background-size: 200% 100%;
   animation: shimmer 1.6s ease-in-out infinite;

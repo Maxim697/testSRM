@@ -25,11 +25,11 @@ export function RiskDistributionChart({ counts }: { counts: Record<RiskLevel, nu
   return (
     <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full" style={{ height: HEIGHT }}>
       <line
+        className="chart-grid-line"
         x1={PAD_X}
         y1={PAD_Y + innerH}
         x2={WIDTH - PAD_X}
         y2={PAD_Y + innerH}
-        stroke="var(--color-border)"
         strokeWidth={1}
       />
       {LEVEL_ORDER.map((level, i) => {
@@ -40,7 +40,21 @@ export function RiskDistributionChart({ counts }: { counts: Record<RiskLevel, nu
         const opacity = level === "critical" ? 1 : level === "high" ? 0.7 : 1;
         return (
           <g key={level}>
-            <rect x={x} y={y} width={barWidth} height={h} fill={LEVEL_COLORS[level]} opacity={opacity} rx={3} />
+            <rect
+              x={x}
+              y={y}
+              width={barWidth}
+              height={h}
+              fill={LEVEL_COLORS[level]}
+              opacity={opacity}
+              rx={3}
+              className={level === "critical" ? "chart-bar-glow" : undefined}
+              style={{
+                filter: `drop-shadow(0 0 4px ${LEVEL_COLORS[level]})`,
+                ["--pulse-color" as string]: LEVEL_COLORS[level],
+                ["--pulse-duration" as string]: level === "critical" ? "1s" : "2.8s",
+              }}
+            />
             <text x={x + barWidth / 2} y={y - 6} textAnchor="middle" fontSize={12} fill="var(--color-text-primary)" fontWeight={600}>
               {value}
             </text>

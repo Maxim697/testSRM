@@ -18,7 +18,7 @@ export function Sidebar({
   const sections = getVisibleNavSections(profile.role);
 
   return (
-    <aside className="glass backdrop-blur-lg flex h-full w-sidebar shrink-0 flex-col overflow-y-auto border-r border-border">
+    <aside className="glass pcb-corners backdrop-blur-lg flex h-full w-sidebar shrink-0 flex-col overflow-y-auto border-r border-border">
       <div className="flex h-12 shrink-0 items-center px-4">
         <span className="text-lg font-semibold text-text-primary">CRM</span>
       </div>

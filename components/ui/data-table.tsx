@@ -62,7 +62,7 @@ export function DataTable<T>({
   }
 
   return (
-    <div className={cn("overflow-x-auto rounded-card border border-border bg-surface-2", className)}>
+    <div className={cn("pcb-panel pcb-corners overflow-x-auto rounded-card", className)}>
       <table className="w-full border-collapse text-base">
         <thead>
           <tr className="h-row border-b border-border">

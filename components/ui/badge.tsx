@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 type BadgeVariant = "green" | "amber" | "red" | "neutral";
 
 const VARIANT_CLASSES: Record<BadgeVariant, string> = {
-  green: "bg-positive-bg text-positive border-positive/35",
-  amber: "bg-warning-bg text-warning border-warning/35",
-  red: "bg-negative-bg text-negative border-negative/35",
+  green: "pcb-pulse bg-positive-bg text-positive border-positive/35 [--pulse-color:var(--positive)] [--pulse-duration:3s]",
+  amber: "pcb-pulse bg-warning-bg text-warning border-warning/35 [--pulse-color:var(--warning)] [--pulse-duration:2.4s]",
+  red: "pcb-pulse bg-negative-bg text-negative border-negative/35 [--pulse-color:var(--negative)] [--pulse-duration:1.6s]",
   neutral: "bg-surface-3 text-text-secondary border-transparent",
 };
 

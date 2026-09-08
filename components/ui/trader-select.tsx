@@ -69,7 +69,7 @@ export function TraderSelect({
         type="button"
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
-        className="flex h-8 w-full items-center justify-between gap-1.5 rounded-control border border-border bg-surface-1 px-2.5 text-left text-base text-text-primary outline-none focus-visible:border-focus-ring disabled:cursor-not-allowed disabled:opacity-50"
+        className="pcb-field flex h-8 w-full items-center justify-between gap-1.5 px-2.5 text-left text-base text-text-primary outline-none disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span className={cn("truncate", !value && "text-text-muted")}>{selectedLabel}</span>
         <svg
@@ -83,13 +83,13 @@ export function TraderSelect({
         </svg>
       </button>
       {open && (
-        <div className="glass backdrop-blur-lg absolute left-0 top-full z-30 mt-1 w-64 rounded-control p-1.5">
+        <div className="glass pcb-corners backdrop-blur-lg absolute left-0 top-full z-30 mt-1 w-64 rounded-control p-1.5">
           <input
             ref={inputRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Пошук трейдера..."
-            className="mb-1.5 h-7 w-full rounded-control border border-border bg-surface-1 px-2 text-sm text-text-primary outline-none focus-visible:border-focus-ring"
+            className="pcb-field mb-1.5 h-7 w-full px-2 text-sm text-text-primary outline-none"
           />
           <div className="max-h-56 overflow-y-auto">
             <div

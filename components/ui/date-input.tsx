@@ -9,7 +9,7 @@ export function DateInput({
     <input
       type="date"
       className={cn(
-        "h-8 w-full rounded-control border border-border bg-surface-1 px-2.5 text-base text-text-primary outline-none focus-visible:border-focus-ring",
+        "pcb-field h-8 w-full px-2.5 text-base text-text-primary outline-none",
         className,
       )}
       {...props}

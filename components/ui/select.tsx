@@ -156,7 +156,7 @@ export function Select({
         disabled={disabled}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={handleKeyDown}
-        className="flex h-8 w-full items-center justify-between gap-1.5 rounded-control border border-border bg-surface-1 px-2.5 text-left text-base text-text-primary outline-none focus-visible:border-focus-ring disabled:cursor-not-allowed disabled:opacity-50"
+        className="pcb-field flex h-8 w-full items-center justify-between gap-1.5 px-2.5 text-left text-base text-text-primary outline-none disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span className="truncate">{selectedOption?.label ?? placeholder ?? ""}</span>
         <ChevronIcon open={open} />
@@ -165,7 +165,7 @@ export function Select({
         <ul
           id={listboxId}
           role="listbox"
-          className="glass backdrop-blur-lg absolute left-0 top-full z-30 mt-1 max-h-60 w-full min-w-max overflow-y-auto rounded-control p-1 text-base"
+          className="glass pcb-corners backdrop-blur-lg absolute left-0 top-full z-30 mt-1 max-h-60 w-full min-w-max overflow-y-auto rounded-control p-1 text-base"
         >
           {options.map((opt, i) => (
             <li

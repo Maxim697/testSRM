@@ -35,7 +35,7 @@ function ReadOnlyField({ label, value }: { label: string; value: string | null }
   return (
     <div>
       <div className="mb-1 text-xs text-text-secondary">{label}</div>
-      <p className="whitespace-pre-wrap rounded-control border border-border bg-surface-1 p-2.5 text-base text-text-primary">
+      <p className="pcb-corners whitespace-pre-wrap rounded-control border border-border bg-surface-1 p-2.5 text-base text-text-primary">
         {value || "—"}
       </p>
     </div>

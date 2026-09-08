@@ -24,11 +24,11 @@ export function StatusByManagerChart({ points }: { points: ManagerStatusPoint[] 
     <div>
       <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full" style={{ height: HEIGHT }}>
         <line
+          className="chart-grid-line"
           x1={PAD_X}
           y1={PAD_Y + innerH}
           x2={WIDTH - PAD_X}
           y2={PAD_Y + innerH}
-          stroke="var(--color-border)"
           strokeWidth={1}
         />
         {points.map((p, i) => {
@@ -45,7 +45,17 @@ export function StatusByManagerChart({ points }: { points: ManagerStatusPoint[] 
               {segments.map((seg, si) => {
                 const h = (innerH * seg.value) / max;
                 yCursor -= h;
-                return <rect key={si} x={x} y={yCursor} width={barWidth} height={h} fill={seg.color} />;
+                return (
+                  <rect
+                    key={si}
+                    x={x}
+                    y={yCursor}
+                    width={barWidth}
+                    height={h}
+                    fill={seg.color}
+                    style={{ filter: `drop-shadow(0 0 3px ${seg.color})` }}
+                  />
+                );
               })}
               <text
                 x={x + barWidth / 2}

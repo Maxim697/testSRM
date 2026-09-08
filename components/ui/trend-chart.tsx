@@ -65,15 +65,31 @@ export function TrendChart({
           </linearGradient>
         </defs>
         <line
+          className="chart-grid-line"
           x1={PAD_X}
           y1={PAD_Y + innerH}
           x2={WIDTH - PAD_X}
           y2={PAD_Y + innerH}
-          stroke="var(--color-border)"
           strokeWidth={1}
         />
         {areaPath && <path d={areaPath} fill={`url(#${gradientId})`} stroke="none" />}
-        <path d={linePath} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d={linePath}
+          fill="none"
+          stroke={color}
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ filter: `drop-shadow(0 0 3px ${color})` }}
+        />
+        {linePath && (
+          <circle
+            r={3}
+            fill="var(--circuit-glow-strong)"
+            className="chart-pulse-dot"
+            style={{ ["--chart-path" as string]: `path("${linePath}")`, filter: `drop-shadow(0 0 4px ${color})` }}
+          />
+        )}
         {coords.map((c, i) => (
           <g key={i}>
             <circle
@@ -83,6 +99,8 @@ export function TrendChart({
               fill={color}
               stroke="var(--color-surface-2)"
               strokeWidth={1.5}
+              className="chart-node"
+              style={{ ["--node-r-base" as string]: "3px", ["--node-r-pulse" as string]: "4px" }}
             />
             <rect
               x={c.x - innerW / points.length / 2}
@@ -97,7 +115,7 @@ export function TrendChart({
       </svg>
       {hovered && (
         <div
-          className="pointer-events-none absolute rounded-control border border-border bg-surface-3 px-2 py-1 text-xs text-text-primary"
+          className="glass pcb-corners backdrop-blur-lg pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
           style={{
             left: `${(hovered.x / WIDTH) * 100}%`,
             top: 0,

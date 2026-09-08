@@ -6,6 +6,7 @@ import { roleLabel } from "@/lib/roles";
 import { usePageTitle } from "@/lib/page-title";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { EffectsToggle } from "@/components/layout/effects-toggle";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import type { NotificationEntry, Profile } from "@/lib/types";
 
@@ -33,6 +34,7 @@ export function Header({ profile, notifications }: { profile: Profile; notificat
           {roleLabel(profile.role)}
         </Badge>
         <NotificationBell notifications={notifications} />
+        <EffectsToggle />
         <ThemeToggle />
       </div>
     </header>

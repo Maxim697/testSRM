@@ -1,76 +1,93 @@
 /*
   Design tokens. Single source of truth for the whole app.
-  Dark theme is the default (:root). Light theme overrides the same
-  variables under [data-theme="light"]. Components must never hardcode
-  colors — reference these variables (via the Tailwind theme mapping
-  in globals.css) only.
+  Dark theme is the default (:root) and is the primary target of the
+  "circuit board" aesthetic — near-black with neon traces. Light theme
+  overrides the same variables under [data-theme="light"] with the same
+  accent hues adapted to a light surface; the animated circuit canvas and
+  glow-under-content effects are dark-theme only (see circuit-background.tsx
+  and globals.css) since neon-on-white isn't legible.
+  Components must never hardcode colors — reference these variables (via
+  the Tailwind theme mapping in globals.css) only.
 */
 
 :root {
-  /* Surfaces — 4 levels, darkest to lightest, each step clearly visible */
-  --surface-0: #0d0d12; /* page background */
-  --surface-1: #14141c; /* sidebar, header, recessed inputs */
-  --surface-2: #1a1a24; /* cards, table containers */
-  --surface-3: #212130; /* popovers, menus, tooltips, hover/active states */
+  /* Surfaces — near-black with a faint green cast, 4 levels */
+  --surface-0: #060a08; /* page background */
+  --surface-1: #0a1210; /* sidebar, header, recessed inputs */
+  --surface-2: #0d1815; /* cards, table containers */
+  --surface-3: #12211c; /* popovers, menus, tooltips, hover/active states */
 
   /* Text */
-  --text-primary: #f1f3f6;
-  --text-secondary: #a2acbd;
-  --text-muted: #6b7488;
+  --text-primary: #eafff2;
+  --text-secondary: #9ac4ae;
+  --text-muted: #5c8271;
 
   /* Borders — thin, but readable against surfaces */
-  --border: #2c2c3a;
-  --border-strong: #3a3a4c;
+  --border: #1c352c;
+  --border-strong: #2b4d3f;
 
   /* Semantic — status backgrounds at ~20% so chips read as saturated color,
-     not a tint */
-  --positive: #2fbf6e;
-  --positive-bg: rgba(47, 191, 110, 0.2);
-  --negative: #ef4a5e;
-  --negative-bg: rgba(239, 74, 94, 0.2);
-  --warning: #e8a339;
-  --warning-bg: rgba(232, 163, 57, 0.2);
-  --info: #3b8ff0;
-  --info-bg: rgba(59, 143, 240, 0.14);
+     not a tint. Green is primary/positive, cyan is informational/analytics,
+     magenta is critical/negative, amber is warning. */
+  --positive: #2fe58a;
+  --positive-bg: rgba(47, 229, 138, 0.18);
+  --negative: #ff2f9e;
+  --negative-bg: rgba(255, 47, 158, 0.2);
+  --warning: #f2b537;
+  --warning-bg: rgba(242, 181, 55, 0.2);
+  --info: #2fe58a;
+  --info-bg: rgba(47, 229, 138, 0.14);
 
-  /* Data series palette — fixed order, 8 colors */
-  --series-1: #3b8ff0;
-  --series-2: #2fbf6e;
-  --series-3: #e8a339;
-  --series-4: #a874e8;
-  --series-5: #ea5fa0;
-  --series-6: #33b8c4;
-  --series-7: #e8823b;
-  --series-8: #9fcf3e;
+  /* Data series palette — fixed order, 8 colors, neon-shifted */
+  --series-1: #2fe58a;
+  --series-2: #33e3ff;
+  --series-3: #f2b537;
+  --series-4: #b073ff;
+  --series-5: #ff2f9e;
+  --series-6: #33e3ff;
+  --series-7: #ff8a3d;
+  --series-8: #9fe83e;
 
   /* Tier colors */
-  --tier-gold: #d4a628;
-  --tier-gold-bg: rgba(212, 166, 40, 0.14);
-  --tier-silver: #a7b0bd;
-  --tier-silver-bg: rgba(167, 176, 189, 0.14);
-  --tier-bronze: #c07a4a;
-  --tier-bronze-bg: rgba(192, 122, 74, 0.14);
+  --tier-gold: #f2c94c;
+  --tier-gold-bg: rgba(242, 201, 76, 0.16);
+  --tier-silver: #a8d8c9;
+  --tier-silver-bg: rgba(168, 216, 201, 0.14);
+  --tier-bronze: #e08a52;
+  --tier-bronze-bg: rgba(224, 138, 82, 0.16);
 
   /* Section accents — one per nav group */
-  --accent-analytics: #3b8ff0;
-  --accent-analytics-bg: rgba(59, 143, 240, 0.15);
-  --accent-crm: #a874e8;
-  --accent-crm-bg: rgba(168, 116, 232, 0.15);
-  --accent-platform: #33b8c4;
-  --accent-platform-bg: rgba(51, 184, 196, 0.15);
+  --accent-analytics: #33e3ff;
+  --accent-analytics-bg: rgba(51, 227, 255, 0.15);
+  --accent-crm: #b073ff;
+  --accent-crm-bg: rgba(176, 115, 255, 0.15);
+  --accent-platform: #2fe58a;
+  --accent-platform-bg: rgba(47, 229, 138, 0.15);
 
   /* Focus ring — follows the current section accent (see --info override in
      SectionAccentScope), so it re-tints along with links/primary actions */
   --focus-ring: var(--info);
 
-  /* Glass — top layers only (header, sidebar, modals, popovers, tooltips).
-     Never used on tables, KPI cards or charts — those stay fully opaque. */
-  --glass-bg: rgba(18, 18, 26, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.09);
+  /* Circuit board — background canvas + glow-through-content effects */
+  --circuit-trace: rgba(47, 229, 138, 0.08);
+  --circuit-glow: #7dffc4;
+  --circuit-glow-cyan: #6df0ff;
+  --circuit-glow-strong: #baffdf;
+
+  /* Glass — top layers only (header, sidebar, modals, popovers, tooltips). */
+  --glass-bg: rgba(6, 12, 10, 0.72);
+  --glass-border: rgba(125, 255, 196, 0.16);
+
+  /* Card / table translucency — content sits above the circuit canvas and
+     lets a blurred glow show through, per the "glow under content" effect.
+     -glow is used at fx=full, -solid at fx=moderate/off (see globals.css). */
+  --panel-bg-glow: rgba(11, 20, 17, 0.62);
+  --panel-bg-solid: var(--surface-2);
+  --panel-border: rgba(125, 255, 196, 0.14);
 
   /* Scrollbar */
-  --scrollbar-thumb: var(--border-strong);
-  --scrollbar-thumb-hover: #4a4a60;
+  --scrollbar-thumb: #1f4536;
+  --scrollbar-thumb-hover: #2fe58a;
 
   /* Motion */
   --transition-fast: 150ms;
@@ -81,53 +98,62 @@
 }
 
 [data-theme="light"] {
-  --surface-0: #e7e9ed;
-  --surface-1: #f4f5f7;
+  --surface-0: #eef3f0;
+  --surface-1: #f5f8f6;
   --surface-2: #ffffff;
   --surface-3: #ffffff;
 
-  --text-primary: #14171c;
-  --text-secondary: #545c6b;
-  --text-muted: #838b99;
+  --text-primary: #0d1f16;
+  --text-secondary: #3d5c4c;
+  --text-muted: #7a9787;
 
-  --border: rgba(20, 23, 28, 0.14);
-  --border-strong: rgba(20, 23, 28, 0.24);
+  --border: rgba(13, 31, 22, 0.14);
+  --border-strong: rgba(13, 31, 22, 0.26);
 
-  --positive: #1f9d57;
-  --positive-bg: rgba(31, 157, 87, 0.16);
-  --negative: #d8394c;
-  --negative-bg: rgba(216, 57, 76, 0.16);
-  --warning: #b97f1e;
-  --warning-bg: rgba(185, 127, 30, 0.16);
-  --info: #2b74d1;
-  --info-bg: rgba(43, 116, 209, 0.12);
+  --positive: #0f9d5c;
+  --positive-bg: rgba(15, 157, 92, 0.16);
+  --negative: #c81f7f;
+  --negative-bg: rgba(200, 31, 127, 0.16);
+  --warning: #a66c14;
+  --warning-bg: rgba(166, 108, 20, 0.16);
+  --info: #0f9d5c;
+  --info-bg: rgba(15, 157, 92, 0.12);
 
-  --series-1: #2b74d1;
-  --series-2: #1f9d57;
-  --series-3: #b97f1e;
-  --series-4: #8a51d1;
-  --series-5: #c94886;
-  --series-6: #1f96a1;
-  --series-7: #c96a2b;
-  --series-8: #7aa82b;
+  --series-1: #0f9d5c;
+  --series-2: #0e93a8;
+  --series-3: #a66c14;
+  --series-4: #7a3fd1;
+  --series-5: #c81f7f;
+  --series-6: #0e93a8;
+  --series-7: #c9611f;
+  --series-8: #5c8f1f;
 
-  --tier-gold: #a9791a;
-  --tier-gold-bg: rgba(169, 121, 26, 0.12);
-  --tier-silver: #6b7484;
-  --tier-silver-bg: rgba(107, 116, 132, 0.12);
-  --tier-bronze: #9c5c34;
-  --tier-bronze-bg: rgba(156, 92, 52, 0.12);
+  --tier-gold: #96721a;
+  --tier-gold-bg: rgba(150, 114, 26, 0.14);
+  --tier-silver: #4c6d5f;
+  --tier-silver-bg: rgba(76, 109, 95, 0.12);
+  --tier-bronze: #97501f;
+  --tier-bronze-bg: rgba(151, 80, 31, 0.14);
 
-  --accent-analytics: #2b74d1;
-  --accent-analytics-bg: rgba(43, 116, 209, 0.12);
-  --accent-crm: #8a51d1;
-  --accent-crm-bg: rgba(138, 81, 209, 0.12);
-  --accent-platform: #1f96a1;
-  --accent-platform-bg: rgba(31, 150, 161, 0.12);
+  --accent-analytics: #0e93a8;
+  --accent-analytics-bg: rgba(14, 147, 168, 0.12);
+  --accent-crm: #7a3fd1;
+  --accent-crm-bg: rgba(122, 63, 209, 0.12);
+  --accent-platform: #0f9d5c;
+  --accent-platform-bg: rgba(15, 157, 92, 0.12);
 
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(20, 23, 28, 0.1);
+  --circuit-trace: rgba(15, 157, 92, 0.06);
+  --circuit-glow: #0f9d5c;
+  --circuit-glow-cyan: #0e93a8;
+  --circuit-glow-strong: #0c7a49;
+
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(13, 31, 22, 0.1);
+
+  --panel-bg-glow: rgba(255, 255, 255, 0.68);
+  --panel-bg-solid: var(--surface-2);
+  --panel-border: rgba(13, 31, 22, 0.1);
 
   --scrollbar-thumb: var(--border-strong);
-  --scrollbar-thumb-hover: #9099a6;
+  --scrollbar-thumb-hover: #0f9d5c;
 }

@@ -104,7 +104,7 @@ export function CreateUserModal({
           <p className="text-sm text-text-secondary">
             Передайте ці дані новому користувачу. Пароль більше ніде не показуватиметься.
           </p>
-          <div className="flex flex-col gap-2 rounded-control border border-border bg-surface-1 p-3">
+          <div className="pcb-corners flex flex-col gap-2 rounded-control border border-border bg-surface-1 p-3">
             <div>
               <div className="text-xs text-text-secondary">Email</div>
               <div className="text-base tabular-nums text-text-primary">{created.email}</div>

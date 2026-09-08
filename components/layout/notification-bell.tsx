@@ -66,7 +66,7 @@ export function NotificationBell({ notifications: initial }: { notifications: No
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="relative flex h-8 w-8 items-center justify-center rounded-control border border-border bg-surface-2 text-text-secondary transition-colors hover:text-text-primary"
+        className="pcb-field relative flex h-8 w-8 items-center justify-center text-text-secondary transition-colors hover:text-text-primary"
         aria-label="Сповіщення"
       >
         <BellIcon />
@@ -77,7 +77,7 @@ export function NotificationBell({ notifications: initial }: { notifications: No
         )}
       </button>
       {open && (
-        <div className="glass backdrop-blur-lg absolute right-0 top-full z-30 mt-1.5 w-80 rounded-control p-2">
+        <div className="glass pcb-corners backdrop-blur-lg absolute right-0 top-full z-30 mt-1.5 w-80 rounded-control p-2">
           <div className="mb-1 flex items-center justify-between px-1">
             <span className="text-xs font-medium uppercase tracking-wide text-text-muted">Сповіщення</span>
             {unreadCount > 0 && (
