@@ -20,7 +20,7 @@ export function UserCard({ profile }: { profile: Profile }) {
   return (
     <div className="shrink-0 border-t border-border p-2">
       <div className="flex items-center gap-2.5 rounded-control px-2 py-1.5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center  bg-surface-3 text-sm font-medium text-text-primary">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-3 text-sm font-medium text-text-primary">
           {getInitials(profile.full_name)}
         </div>
         <div className="min-w-0 flex-1">

@@ -86,8 +86,8 @@ export function TraderDetailView({
   return (
     <div className="flex flex-1 flex-col gap-3">
       {transferContext && (
-        <Card className="border-info bg-info-bg">
-          <div className="text-xs font-medium uppercase tracking-wide text-info">
+        <Card className="border border-info bg-info-bg">
+          <div className="text-xs font-medium text-info">
             Нещодавно передано вам
           </div>
           <p className="mt-1 text-base text-text-primary">
@@ -156,7 +156,7 @@ export function TraderDetailView({
       />
 
       <Card className="flex h-72 flex-col">
-        <div className="mb-2 shrink-0 text-xs font-medium uppercase tracking-wide text-text-muted">
+        <div className="mb-2 shrink-0 field-label">
           Динаміка Score за 12 тижнів
         </div>
         <div className="min-h-0 flex-1">

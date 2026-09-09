@@ -81,13 +81,13 @@ export default async function TeamDashboardPage() {
         <h2 className="mb-2 text-base font-medium text-text-primary">Розподіл портфеля</h2>
         <div className="grid grid-cols-2 gap-3">
           <Card label="CHART">
-            <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
+            <div className="mb-2 field-label">
               Статуси трейдерів по менеджерах
             </div>
             <StatusByManagerChart points={data.statusByManager} />
           </Card>
           <Card label="CHART">
-            <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
+            <div className="mb-2 field-label">
               Розподіл за рівнями ризику
             </div>
             <RiskDistributionChart counts={data.riskDistribution} />
@@ -102,7 +102,7 @@ export default async function TeamDashboardPage() {
         ) : (
           <div className="grid grid-cols-2 gap-3">
             <Card label="CHART">
-              <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
+              <div className="mb-2 field-label">
                 Сумарний оборот за 12 тижнів
               </div>
               <TrendChart
@@ -112,7 +112,7 @@ export default async function TeamDashboardPage() {
               />
             </Card>
             <Card label="CHART">
-              <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
+              <div className="mb-2 field-label">
                 Середній CR за 12 тижнів
               </div>
               <TrendChart

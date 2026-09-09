@@ -5,14 +5,13 @@ import { cn } from "@/lib/utils";
 type ButtonVariant = "primary" | "secondary" | "ghost";
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: "border border-info text-info hover:bg-info hover:text-surface-0",
-  secondary:
-    "border border-border-strong text-text-primary hover:bg-text-primary hover:text-surface-0",
-  ghost: "border border-transparent text-text-secondary hover:bg-text-secondary hover:text-surface-0",
+  primary: "bg-accent text-accent-fg hover:bg-accent-hover",
+  secondary: "bg-surface-3 text-text-primary hover:bg-border-strong",
+  ghost: "text-text-secondary hover:bg-surface-2 hover:text-text-primary",
 };
 
 const BASE_CLASSES =
-  "term-button inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap px-3 text-base font-medium disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-current";
+  "inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-control px-3 text-base font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;

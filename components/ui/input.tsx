@@ -2,7 +2,7 @@ import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 const BASE_CLASSES =
-  "term-field w-full px-2.5 text-base text-text-primary placeholder:text-text-muted outline-none";
+  "field w-full px-2.5 text-base text-text-primary placeholder:text-text-muted outline-none";
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & { multiline?: false };
 type TextareaProps = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "rows"> & {

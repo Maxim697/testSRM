@@ -69,7 +69,7 @@ export function TraderSelect({
         type="button"
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
-        className="term-field flex h-8 w-full items-center justify-between gap-1.5 px-2.5 text-left text-base text-text-primary outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        className="field flex h-8 w-full items-center justify-between gap-1.5 px-2.5 text-left text-base text-text-primary outline-none disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span className={cn("truncate", !value && "text-text-muted")}>{selectedLabel}</span>
         <svg
@@ -77,46 +77,44 @@ export function TraderSelect({
           height="6"
           viewBox="0 0 10 6"
           fill="none"
-          className={cn("shrink-0 text-text-muted transition-transform duration-150", open && "rotate-180")}
+          className={cn("shrink-0 text-text-muted", open && "rotate-180")}
         >
           <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
       {open && (
-        <div className="glass term-corners backdrop-blur-lg absolute left-0 top-full z-30 mt-1 w-64 rounded-control p-1.5">
+        <div className="popover-surface absolute left-0 top-full z-30 mt-1 w-64 rounded-control p-1.5">
           <input
             ref={inputRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Пошук трейдера..."
-            className="term-field mb-1.5 h-7 w-full px-2 text-sm text-text-primary outline-none"
+            className="field mb-1.5 h-7 w-full px-2 text-sm text-text-primary outline-none"
           />
           <div className="max-h-56 overflow-y-auto">
             <div
               onClick={() => select("")}
               className={cn(
-                "cursor-pointer px-2.5 py-1.5 text-sm",
-                !value ? "bg-info-bg text-info" : "text-text-primary",
+                "cursor-pointer rounded-control px-2.5 py-1.5 text-sm",
+                !value ? "bg-accent-bg text-accent" : "text-text-primary",
               )}
             >
-              <span className="mr-1.5 inline-block w-2.5 text-info">{!value ? "›" : ""}</span>
               {placeholder}
             </div>
             {groups.map(
               (g) =>
                 g.items.length > 0 && (
                   <div key={g.tier ?? "none"}>
-                    <div className="term-label mt-1 px-2.5 py-1">{g.label}</div>
+                    <div className="field-label mt-1 px-2.5 py-1">{g.label}</div>
                     {g.items.map((o) => (
                       <div
                         key={o.id}
                         onClick={() => select(o.id)}
                         className={cn(
-                          "cursor-pointer px-2.5 py-1.5 text-sm",
-                          o.id === value ? "bg-info-bg text-info" : "text-text-primary",
+                          "cursor-pointer rounded-control px-2.5 py-1.5 text-sm",
+                          o.id === value ? "bg-accent-bg text-accent" : "text-text-primary",
                         )}
                       >
-                        <span className="mr-1.5 inline-block w-2.5 text-info">{o.id === value ? "›" : ""}</span>
                         {o.code}
                       </div>
                     ))}

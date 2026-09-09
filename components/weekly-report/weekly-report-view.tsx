@@ -168,8 +168,8 @@ export function WeeklyReportView({
       </p>
 
       {report.status === "returned" && report.reviewer_comment && (
-        <Card className="border-negative bg-negative-bg">
-          <div className="text-xs font-medium uppercase tracking-wide text-negative">
+        <Card className="border border-negative bg-negative-bg">
+          <div className="text-xs font-medium text-negative">
             Коментар лідера
           </div>
           <p className="mt-1 text-base text-text-primary">{report.reviewer_comment}</p>

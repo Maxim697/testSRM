@@ -55,11 +55,11 @@ export function DualLineChart({
     <div className="relative">
       <div className="mb-2 flex items-center gap-4 text-xs text-text-secondary">
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 " style={{ background: colorA }} />
+          <span className="h-2 w-2 rounded-full" style={{ background: colorA }} />
           {labelA}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 " style={{ background: colorB }} />
+          <span className="h-2 w-2 rounded-full" style={{ background: colorB }} />
           {labelB}
         </span>
       </div>
@@ -77,17 +77,16 @@ export function DualLineChart({
           y2={PAD_Y + innerH}
           strokeWidth={1}
         />
-        <path d={pathA} fill="none" stroke={colorA} strokeWidth={1} strokeLinecap="butt" strokeLinejoin="miter" />
-        <path d={pathB} fill="none" stroke={colorB} strokeWidth={1} strokeLinecap="butt" strokeLinejoin="miter" />
+        <path d={pathA} fill="none" stroke={colorA} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        <path d={pathB} fill="none" stroke={colorB} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
         {coordsA.map((c, i) => {
           const s = hoverIndex === i ? 3.5 : 2.5;
           return (
-            <rect
+            <circle
               key={`a-${i}`}
-              x={c.x - s}
-              y={c.y - s}
-              width={s * 2}
-              height={s * 2}
+              cx={c.x}
+              cy={c.y}
+              r={s}
               fill="var(--color-surface-2)"
               stroke={colorA}
               strokeWidth={1.5}
@@ -119,7 +118,7 @@ export function DualLineChart({
       </svg>
       {hoveredWeek && hoveredX !== null && (
         <div
-          className="glass term-corners backdrop-blur-lg pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
+          className="popover-surface pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
           style={{ left: `${(hoveredX / WIDTH) * 100}%`, top: 0, transform: "translate(-50%, -110%)" }}
         >
           <div className="text-text-muted">{formatDate(hoveredWeek.weekStart)}</div>

@@ -66,22 +66,22 @@ export function NotificationBell({ notifications: initial }: { notifications: No
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="term-field relative flex h-8 w-8 items-center justify-center text-text-secondary transition-colors hover:text-text-primary"
+        className="relative flex h-8 w-8 items-center justify-center rounded-control text-text-secondary hover:bg-surface-2 hover:text-text-primary"
         aria-label="Сповіщення"
       >
         <BellIcon />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center  bg-info px-1 text-[10px] font-semibold leading-none text-white">
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold leading-none text-accent-fg">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
       {open && (
-        <div className="glass term-corners backdrop-blur-lg absolute right-0 top-full z-30 mt-1.5 w-80 rounded-control p-2">
+        <div className="popover-surface absolute right-0 top-full z-30 mt-1.5 w-80 rounded-card p-2">
           <div className="mb-1 flex items-center justify-between px-1">
-            <span className="text-xs font-medium uppercase tracking-wide text-text-muted">Сповіщення</span>
+            <span className="field-label">Сповіщення</span>
             {unreadCount > 0 && (
-              <button type="button" onClick={markAllRead} className="text-xs text-info hover:underline">
+              <button type="button" onClick={markAllRead} className="text-xs text-accent hover:underline">
                 Позначити всі прочитаними
               </button>
             )}
@@ -100,12 +100,12 @@ export function NotificationBell({ notifications: initial }: { notifications: No
                   type="button"
                   onClick={() => handleClick(n)}
                   className={cn(
-                    "flex flex-col items-start gap-0.5 rounded-control px-2 py-1.5 text-left transition-colors hover:bg-surface-3",
-                    !n.is_read && "bg-info-bg",
+                    "flex flex-col items-start gap-0.5 rounded-control px-2 py-1.5 text-left hover:bg-surface-3",
+                    !n.is_read && "bg-accent-bg",
                   )}
                 >
                   <span className="flex w-full items-center gap-1.5">
-                    {!n.is_read && <span className="h-1.5 w-1.5 shrink-0  bg-info" />}
+                    {!n.is_read && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />}
                     <span className="truncate text-sm font-medium text-text-primary">{n.title}</span>
                   </span>
                   {n.body && <span className="line-clamp-2 text-xs text-text-secondary">{n.body}</span>}

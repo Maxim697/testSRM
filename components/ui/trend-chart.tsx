@@ -77,17 +77,16 @@ export function TrendChart({
           d={linePath}
           fill="none"
           stroke={color}
-          strokeWidth={1}
-          strokeLinecap="butt"
-          strokeLinejoin="miter"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
         {coords.map((c, i) => (
           <g key={i}>
-            <rect
-              x={c.x - (hoverIndex === i ? 3.5 : 2.5)}
-              y={c.y - (hoverIndex === i ? 3.5 : 2.5)}
-              width={hoverIndex === i ? 7 : 5}
-              height={hoverIndex === i ? 7 : 5}
+            <circle
+              cx={c.x}
+              cy={c.y}
+              r={hoverIndex === i ? 3.5 : 2.5}
               fill="var(--color-surface-2)"
               stroke={color}
               strokeWidth={1.5}
@@ -105,7 +104,7 @@ export function TrendChart({
       </svg>
       {hovered && (
         <div
-          className="glass term-corners backdrop-blur-lg pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
+          className="popover-surface pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
           style={{
             left: `${(hovered.x / WIDTH) * 100}%`,
             top: 0,

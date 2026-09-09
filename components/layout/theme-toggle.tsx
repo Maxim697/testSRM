@@ -12,7 +12,7 @@ export function ThemeToggle() {
       type="button"
       onClick={() => setTheme(isLight ? "dark" : "light")}
       className={cn(
-        "term-field flex h-8 items-center gap-1.5 whitespace-nowrap px-3 text-base text-text-secondary hover:text-text-primary",
+        "flex h-8 items-center gap-1.5 whitespace-nowrap rounded-control px-3 text-base text-text-secondary hover:bg-surface-2 hover:text-text-primary",
       )}
       aria-label="Перемкнути тему"
     >

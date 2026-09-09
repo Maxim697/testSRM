@@ -4,14 +4,14 @@ import { cn } from "@/lib/utils";
 type BadgeVariant = "green" | "amber" | "red" | "neutral";
 
 const VARIANT_CLASSES: Record<BadgeVariant, string> = {
-  green: "term-pulse text-positive [--pulse-color:var(--positive)] [--pulse-duration:3s]",
-  amber: "term-pulse text-warning [--pulse-color:var(--warning)] [--pulse-duration:2.4s]",
-  red: "term-pulse text-negative [--pulse-color:var(--negative)] [--pulse-duration:1.6s]",
-  neutral: "text-text-secondary",
+  green: "bg-positive-bg text-positive",
+  amber: "bg-warning-bg text-warning",
+  red: "bg-negative-bg text-negative",
+  neutral: "bg-surface-3 text-text-secondary",
 };
 
-/** Status text in brackets, uppercase, in the status color — no chip, no
- * background, no rounding: [ACTIVE], [PENDING], [OVERDUE]. */
+/** Compact status pill: 15%-alpha background in the status color, text in
+ * the full color, 6px radius. */
 export function Badge({
   variant = "neutral",
   className,
@@ -21,13 +21,13 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center whitespace-nowrap text-xs font-medium uppercase tracking-wide",
+        "inline-flex items-center whitespace-nowrap rounded-control px-1.5 py-0.5 text-xs font-medium",
         VARIANT_CLASSES[variant],
         className,
       )}
       {...props}
     >
-      [{children}]
+      {children}
     </span>
   );
 }

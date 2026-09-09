@@ -69,7 +69,7 @@ export function StatusByManagerChart({ points }: { points: ManagerStatusPoint[] 
                 x={x + barWidth / 2}
                 y={PAD_Y + innerH + 16}
                 textAnchor="middle"
-                fontSize={10}
+                fontSize={11}
                 fill="var(--color-text-muted)"
               >
                 {p.label.length > 12 ? `${p.label.slice(0, 11)}…` : p.label}
@@ -80,13 +80,13 @@ export function StatusByManagerChart({ points }: { points: ManagerStatusPoint[] 
       </svg>
       <div className="flex items-center gap-4 text-xs text-text-secondary">
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2  bg-positive" /> Green
+          <span className="h-2 w-2 rounded-full bg-positive" /> Green
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2  bg-warning" /> Amber
+          <span className="h-2 w-2 rounded-full bg-warning" /> Amber
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2  bg-negative" /> Red
+          <span className="h-2 w-2 rounded-full bg-negative" /> Red
         </span>
       </div>
     </div>

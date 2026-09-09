@@ -18,18 +18,12 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "term-corners flex flex-1 flex-col items-center justify-center rounded-card border border-dashed border-border py-24 text-center",
+        "flex flex-1 flex-col items-center justify-center rounded-card border border-dashed border-border py-24 text-center",
         className,
       )}
     >
-      <div className="mb-3">{icon ?? <InboxIcon />}</div>
-      <div className="text-lg font-medium text-text-primary">
-        <span className="text-info">{"> "}</span>
-        <span className="relative inline-block">
-          {title}
-          <span className="term-caret term-caret-abs" aria-hidden="true" />
-        </span>
-      </div>
+      <div className="mb-3 text-text-muted">{icon ?? <InboxIcon />}</div>
+      <div className="text-lg font-medium text-text-primary">{title}</div>
       {description && (
         <div className="mt-2 max-w-sm text-base text-text-secondary">
           {description}

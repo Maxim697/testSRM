@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 
-/** A loading placeholder that reads as a terminal line printing itself in:
- * a row of block characters, each blinking on its own slight delay. `chars`
- * sets how many blocks wide it is. */
+/** A static loading placeholder bar — flat, no animation. `chars` sizes it
+ * roughly to that many characters wide (kept for call-site compatibility
+ * with the old block-character version). */
 export function Skeleton({
   chars = 12,
   className,
@@ -11,12 +11,10 @@ export function Skeleton({
   className?: string;
 }) {
   return (
-    <span className={cn("term-skeleton", className)} aria-hidden="true">
-      {Array.from({ length: chars }, (_, i) => (
-        <span key={i} style={{ animationDelay: `${(i % 6) * 0.12}s` }}>
-          ▓
-        </span>
-      ))}
-    </span>
+    <span
+      className={cn("skeleton-block h-[1em] align-middle", className)}
+      style={{ width: `${chars * 0.62}em` }}
+      aria-hidden="true"
+    />
   );
 }

@@ -37,8 +37,8 @@ export function KpiCard({
 
   return (
     <Card className={cn("relative overflow-hidden pl-4", className)}>
-      <span className="absolute inset-y-0 left-0 w-[3px]" style={{ background: colorVar }} />
-      <div className="term-label">{label}</div>
+      <span className="absolute inset-y-0 left-0 w-[3px] rounded-r-full" style={{ background: colorVar }} />
+      <div className="field-label">{label}</div>
       <Typewriter
         key={value}
         text={value}

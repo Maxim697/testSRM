@@ -92,84 +92,74 @@ export function DataTable<T>({
   return (
     // Fixed-width container: the table itself is w-full *of this box*, and
     // this box's own width is whatever its layout parent gives it — never
-    // recomputed from the table's content. The corner label sits at
-    // top: -7px (see .term-corner-label), poking above this box's own top
-    // edge — `overflow-x-auto` on the *same* element would force the
-    // browser to compute overflow-y as auto too (the two axes can't be
-    // "auto" and "visible" at once), clipping that label off. So the
-    // horizontal scroll lives on an *inner* wrapper around just the
-    // table, and this outer box (which owns term-corners/the label)
-    // never sets overflow at all — it only ever grows to fit the inner
-    // wrapper, never the table's own content.
-    <div className={cn("term-panel term-corners w-full max-w-full rounded-card", className)}>
-      <span className="term-corner-label">[ DATA TABLE ]</span>
-      <div className="w-full max-w-full overflow-x-auto">
-        {/* table-layout: fixed is the actual fix for the jitter bug: with the
-            browser's default "auto" layout, column widths are recomputed from
-            current cell content on every reflow (sort, hover, a re-render
-            anywhere in the row) — any table with variable-length content in
-            more than one column will visibly shift. Fixed layout ignores
-            cell content for sizing entirely — column widths come only from
-            the <colgroup> below, resolved once per `columns` identity. */}
-        <table className="w-full table-fixed border-collapse text-base">
-          <colgroup>
-            {columns.map((column, i) => (
-              <col key={column.key} style={{ width: columnWidths[i] }} />
-            ))}
-          </colgroup>
-          <thead>
-            <tr className="h-row border-b border-dashed border-border">
-              {columns.map((column) => {
-                const isSorted = sort?.key === column.key;
-                return (
-                  <th
-                    key={column.key}
-                    className={cn(
-                      "overflow-hidden text-ellipsis whitespace-nowrap px-3 text-xs font-medium uppercase tracking-wide text-text-muted",
-                      ALIGN_CLASSES[column.align ?? "left"],
-                      column.sortValue && "cursor-pointer select-none hover:text-text-secondary",
-                    )}
-                    onClick={() => toggleSort(column)}
-                  >
-                    {column.header}
-                    {isSorted && (sort?.direction === "asc" ? " ↑" : " ↓")}
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {sortedData.map((row) => {
-              const accent = rowAccent?.(row);
+    // recomputed from the table's content. Overflow scrolls inside this
+    // box; the box itself never grows or shrinks to fit the table.
+    <div className={cn("panel w-full max-w-full overflow-x-auto rounded-card", className)}>
+      {/* table-layout: fixed is the actual fix for the jitter bug: with the
+          browser's default "auto" layout, column widths are recomputed from
+          current cell content on every reflow (sort, hover, a re-render
+          anywhere in the row) — any table with variable-length content in
+          more than one column will visibly shift. Fixed layout ignores
+          cell content for sizing entirely — column widths come only from
+          the <colgroup> below, resolved once per `columns` identity. */}
+      <table className="w-full table-fixed border-collapse text-base">
+        <colgroup>
+          {columns.map((column, i) => (
+            <col key={column.key} style={{ width: columnWidths[i] }} />
+          ))}
+        </colgroup>
+        <thead>
+          <tr className="h-row border-b border-border">
+            {columns.map((column) => {
+              const isSorted = sort?.key === column.key;
               return (
-                <tr
-                  key={rowKey(row)}
+                <th
+                  key={column.key}
                   className={cn(
-                    "h-row border-b border-dashed border-border last:border-b-0 hover:bg-surface-3",
-                    rowClassName?.(row),
+                    "overflow-hidden text-ellipsis whitespace-nowrap px-3 text-xs font-medium text-text-muted",
+                    ALIGN_CLASSES[column.align ?? "left"],
+                    column.sortValue && "cursor-pointer select-none hover:text-text-secondary",
                   )}
+                  onClick={() => toggleSort(column)}
                 >
-                  {columns.map((column, i) => (
-                    <td
-                      key={column.key}
-                      className={cn(
-                        "overflow-hidden text-ellipsis whitespace-nowrap px-3 text-text-primary tabular-nums",
-                        i === 0 && "relative",
-                        ALIGN_CLASSES[column.align ?? "left"],
-                      )}
-                    >
-                      {i === 0 && accent && (
-                        <span className="absolute inset-y-0 left-0 w-[3px]" style={{ background: accent }} />
-                      )}
-                      {column.accessor(row)}
-                    </td>
-                  ))}
-                </tr>
+                  {column.header}
+                  {isSorted && (sort?.direction === "asc" ? " ↑" : " ↓")}
+                </th>
               );
             })}
-          </tbody>
-        </table>
-      </div>
+          </tr>
+        </thead>
+        <tbody>
+          {sortedData.map((row) => {
+            const accent = rowAccent?.(row);
+            return (
+              <tr
+                key={rowKey(row)}
+                className={cn(
+                  "h-row border-b border-border last:border-b-0 hover:bg-surface-3",
+                  rowClassName?.(row),
+                )}
+              >
+                {columns.map((column, i) => (
+                  <td
+                    key={column.key}
+                    className={cn(
+                      "overflow-hidden text-ellipsis whitespace-nowrap px-3 text-text-primary tabular-nums",
+                      i === 0 && "relative",
+                      ALIGN_CLASSES[column.align ?? "left"],
+                    )}
+                  >
+                    {i === 0 && accent && (
+                      <span className="absolute inset-y-0 left-0 w-[3px] rounded-r-full" style={{ background: accent }} />
+                    )}
+                    {column.accessor(row)}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }

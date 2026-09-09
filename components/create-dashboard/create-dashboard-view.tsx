@@ -82,7 +82,7 @@ export function CreateDashboardView({
         </div>
 
         <Card>
-          <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
+          <div className="mb-2 field-label">
             Динаміка середнього score
           </div>
           <Sparkline values={demoData.scoreTrend.map((w) => w.score)} />
@@ -90,13 +90,13 @@ export function CreateDashboardView({
         </Card>
 
         <Card>
-          <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">Топ-5 за score</div>
+          <div className="mb-2 field-label">Топ-5 за score</div>
           <DataTable columns={topColumns} data={demoData.topTraders} rowKey={(t) => t.id} />
           <div className="mt-2 text-xs text-text-muted">Блок: DataTable · traders</div>
         </Card>
 
         <Card>
-          <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">Розподіл за tier</div>
+          <div className="mb-2 field-label">Розподіл за tier</div>
           <div className="flex gap-2">
             <Badge variant="neutral">Gold: {demoData.tierCounts.gold}</Badge>
             <Badge variant="neutral">Silver: {demoData.tierCounts.silver}</Badge>
@@ -114,7 +114,7 @@ export function CreateDashboardView({
           </Button>
         </div>
         {stubMessage && (
-          <Card className="border-positive bg-positive-bg text-sm text-positive">{stubMessage}</Card>
+          <Card className="bg-positive-bg text-sm text-positive">{stubMessage}</Card>
         )}
 
         <AccessSettingsModal
@@ -152,7 +152,7 @@ export function CreateDashboardView({
         {EXAMPLES.map((example) => (
           <Card
             key={example}
-            className="cursor-pointer text-base text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary"
+            className="cursor-pointer text-base text-text-secondary hover:bg-surface-3 hover:text-text-primary"
             onClick={() => setQuery(example)}
           >
             {example}

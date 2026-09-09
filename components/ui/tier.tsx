@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 type TierVariant = "gold" | "silver" | "bronze";
 
 const VARIANT_CLASSES: Record<TierVariant, string> = {
-  gold: "text-tier-gold",
-  silver: "text-tier-silver",
-  bronze: "text-tier-bronze",
+  gold: "bg-tier-gold-bg text-tier-gold",
+  silver: "bg-tier-silver-bg text-tier-silver",
+  bronze: "bg-tier-bronze-bg text-tier-bronze",
 };
 
 const VARIANT_LABELS: Record<TierVariant, string> = {
@@ -15,7 +15,7 @@ const VARIANT_LABELS: Record<TierVariant, string> = {
   bronze: "Bronze",
 };
 
-/** Tier text in brackets, uppercase, in its own tier color — no chip. */
+/** Compact tier pill — same visual language as Badge, its own color set. */
 export function Tier({
   variant,
   className,
@@ -25,13 +25,13 @@ export function Tier({
   return (
     <span
       className={cn(
-        "inline-flex items-center text-xs font-semibold uppercase tracking-wide",
+        "inline-flex items-center rounded-control px-1.5 py-0.5 text-xs font-medium",
         VARIANT_CLASSES[variant],
         className,
       )}
       {...props}
     >
-      [{children ?? VARIANT_LABELS[variant]}]
+      {children ?? VARIANT_LABELS[variant]}
     </span>
   );
 }

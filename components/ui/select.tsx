@@ -38,7 +38,7 @@ function ChevronIcon({ open }: { open: boolean }) {
       height="6"
       viewBox="0 0 10 6"
       fill="none"
-      className={cn("shrink-0 text-text-muted transition-transform duration-150", open && "rotate-180")}
+      className={cn("shrink-0 text-text-muted", open && "rotate-180")}
     >
       <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -156,7 +156,7 @@ export function Select({
         disabled={disabled}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={handleKeyDown}
-        className="term-field flex h-8 w-full items-center justify-between gap-1.5 px-2.5 text-left text-base text-text-primary outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        className="field flex h-8 w-full items-center justify-between gap-1.5 px-2.5 text-left text-base text-text-primary outline-none disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span className="truncate">{selectedOption?.label ?? placeholder ?? ""}</span>
         <ChevronIcon open={open} />
@@ -165,7 +165,7 @@ export function Select({
         <ul
           id={listboxId}
           role="listbox"
-          className="glass term-corners backdrop-blur-lg absolute left-0 top-full z-30 mt-1 max-h-60 w-full min-w-max overflow-y-auto rounded-control p-1 text-base"
+          className="popover-surface absolute left-0 top-full z-30 mt-1 max-h-60 w-full min-w-max overflow-y-auto rounded-control p-1 text-base"
         >
           {options.map((opt, i) => (
             <li
@@ -175,17 +175,16 @@ export function Select({
               onMouseEnter={() => setHighlighted(i)}
               onClick={() => commit(i)}
               className={cn(
-                "cursor-pointer whitespace-nowrap px-2.5 py-1.5",
+                "cursor-pointer whitespace-nowrap rounded-control px-2.5 py-1.5",
                 opt.disabled
                   ? "cursor-not-allowed text-text-muted opacity-50"
                   : i === highlighted
-                    ? "bg-info-bg text-info"
+                    ? "bg-accent-bg text-accent"
                     : opt.value === value
                       ? "font-medium text-text-primary"
                       : "text-text-primary",
               )}
             >
-              <span className="mr-1.5 inline-block w-2.5 text-info">{opt.value === value ? "›" : ""}</span>
               {opt.label}
             </li>
           ))}

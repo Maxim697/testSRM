@@ -1,166 +1,153 @@
 /*
   Design tokens. Single source of truth for the whole app.
 
-  Visual direction: an 80s trading-terminal CRT — one unified phosphor
-  green (never mixed with other "base" hues), near-black surfaces, sharp
-  rectangular edges everywhere (radius tokens are 0 — see globals.css).
-  Dark is the primary target; light keeps the same structure with
-  ink-on-paper phosphor substitutes since neon-on-white isn't legible.
-  Components must never hardcode colors — reference these variables (via
-  the Tailwind theme mapping in globals.css) only.
+  Visual direction: a clean modern SaaS look (Linear reference) — Inter
+  everywhere, hierarchy from weight and text color rather than size or
+  decoration, blocks separated by background contrast rather than
+  borders, a single muted indigo accent used sparingly, semantic color
+  only in data (status, deltas). Dark is the primary target; light
+  mirrors the same structure. Components must never hardcode colors —
+  reference these variables (via the Tailwind theme mapping in
+  globals.css) only.
 */
 
 :root {
-  /* Surfaces — near-black with a green cast, 4 levels */
-  --surface-0: #0a0e0a; /* page background */
-  --surface-1: #0d120d; /* sidebar, header, recessed inputs */
-  --surface-2: #101710; /* cards, table containers */
-  --surface-3: #141d14; /* popovers, menus, tooltips, hover/active states */
+  /* Surfaces — 4 levels, each a bit lighter than the last */
+  --surface-0: #0e0e10; /* page background */
+  --surface-1: #131316; /* sidebar */
+  --surface-2: #17171a; /* cards, table containers */
+  --surface-3: #1e1e22; /* popovers, menus, tooltips, dropdowns */
 
-  /* Text — one phosphor green at three opacities, no separate hues */
-  --text-primary: #33ff66;
-  --text-secondary: rgba(51, 255, 102, 0.55);
-  --text-muted: rgba(51, 255, 102, 0.3);
+  /* Text — weight and color carry the hierarchy, not size */
+  --text-primary: #e8e8ea;
+  --text-secondary: #9b9ba1;
+  --text-muted: #6b6b73;
 
-  /* Borders — 1px, in text color at low brightness */
-  --border: rgba(51, 255, 102, 0.18);
-  --border-strong: rgba(51, 255, 102, 0.4);
+  /* Borders — used sparingly, only where background contrast alone isn't
+     enough to read a boundary */
+  --border: #26262b;
+  --border-strong: #33333a;
 
-  /* Semantic accents. Green (= the base phosphor color) is normal/growth;
-     amber is warning; red is critical/falling; cyan is active elements and
-     links; white is reserved for the single most important value on
-     screen. No pastel tints: *-bg is the same hue at low alpha. */
-  --positive: #33ff66;
-  --positive-bg: rgba(51, 255, 102, 0.14);
-  --negative: #ff3b30;
-  --negative-bg: rgba(255, 59, 48, 0.16);
-  --warning: #ffb000;
-  --warning-bg: rgba(255, 176, 0, 0.16);
-  --info: #00e5ff;
-  --info-bg: rgba(0, 229, 255, 0.14);
-  --emphasis: #e8ffe8;
+  /* The one accent — primary actions and active states only, never
+     decorative */
+  --accent: #5e6ad2;
+  --accent-hover: #6e79dc;
+  --accent-bg: rgba(94, 106, 210, 0.15);
+  --accent-fg: #ffffff;
 
-  /* Data series palette — the same 4 accents, cycled, never mixed with an
-     extra hue */
-  --series-1: #33ff66;
-  --series-2: #00e5ff;
-  --series-3: #ffb000;
-  --series-4: #ff3b30;
-  --series-5: #33ff66;
-  --series-6: #00e5ff;
-  --series-7: #ffb000;
-  --series-8: #ff3b30;
+  /* Semantic colors — data only: status, deltas, warnings. *-bg is the
+     same hue at 15% alpha, per the badge spec. */
+  --positive: #3fb950;
+  --positive-bg: rgba(63, 185, 80, 0.15);
+  --negative: #f85149;
+  --negative-bg: rgba(248, 81, 73, 0.15);
+  --warning: #d29922;
+  --warning-bg: rgba(210, 153, 34, 0.15);
+  --info: var(--accent);
+  --info-bg: var(--accent-bg);
+  --emphasis: #ffffff;
 
-  /* Tier colors — bracketed text, not chips; a separate ranking language
-     from the 4 status accents above, so gold/silver/bronze stay distinct */
-  --tier-gold: #ffd23f;
-  --tier-gold-bg: rgba(255, 210, 63, 0.14);
-  --tier-silver: #d9f5e6;
-  --tier-silver-bg: rgba(217, 245, 230, 0.12);
-  --tier-bronze: #ff8c42;
-  --tier-bronze-bg: rgba(255, 140, 66, 0.14);
+  /* Focus ring */
+  --focus-ring: var(--accent);
 
-  /* Section accents — one per nav group: analytics is cyan, CRM is a
-     dedicated dark violet, platform is a cold slate gray. All three are
-     standalone hues, deliberately not aliased to --positive/--warning/etc
-     — those stay green/amber/etc everywhere for their own real semantics
-     (growth, important-notice) regardless of which section is showing. */
-  --accent-analytics: var(--info);
-  --accent-analytics-bg: var(--info-bg);
-  --accent-crm: #8b5cf6;
-  --accent-crm-bg: rgba(139, 92, 246, 0.16);
-  --accent-platform: #94a3b8;
-  --accent-platform-bg: rgba(148, 163, 184, 0.16);
+  /* Chart series — semantic colors first (accent, positive, warning,
+     negative), cycled */
+  --series-1: var(--accent);
+  --series-2: #3fb950;
+  --series-3: #d29922;
+  --series-4: #f85149;
+  --series-5: #6e79dc;
+  --series-6: #56d364;
+  --series-7: #e3b341;
+  --series-8: #ff7b72;
 
-  /* Focus ring — follows the current section accent (see --info override in
-     SectionAccentScope) */
-  --focus-ring: var(--info);
+  /* Tier colors — bracketed rank language, kept distinct from the 4
+     status/semantic colors above */
+  --tier-gold: #e3b341;
+  --tier-gold-bg: rgba(227, 179, 65, 0.15);
+  --tier-silver: #9b9ba1;
+  --tier-silver-bg: rgba(155, 155, 161, 0.15);
+  --tier-bronze: #c9752f;
+  --tier-bronze-bg: rgba(201, 117, 47, 0.15);
 
-  /* Phosphor glow — text-shadow and chart accents */
-  --term-trace: rgba(51, 255, 102, 0.08);
-  --term-glow: #33ff66;
-  --term-glow-cyan: #00e5ff;
-  --term-glow-strong: #e8ffe8;
-
-  /* Glass — top layers only (header, sidebar, modals, popovers, tooltips). */
-  --glass-bg: rgba(10, 14, 10, 0.88);
-  --glass-border: rgba(51, 255, 102, 0.2);
-
-  /* Card / table surfaces — solid, no translucency. */
-  --panel-bg-glow: var(--surface-2);
+  /* Card / table surfaces */
   --panel-bg-solid: var(--surface-2);
   --panel-border: var(--border);
 
-  /* Scrollbar */
-  --scrollbar-thumb: rgba(51, 255, 102, 0.25);
-  --scrollbar-thumb-hover: #33ff66;
+  /* Popover / dropdown / modal layer — the only place shadows appear,
+     very soft and low */
+  --popover-bg: var(--surface-3);
+  --shadow-popover: 0 4px 16px rgba(0, 0, 0, 0.32), 0 1px 2px rgba(0, 0, 0, 0.24);
 
-  /* Motion */
-  --transition-fast: 150ms;
+  /* Scrollbar */
+  --scrollbar-thumb: #3a3a41;
+  --scrollbar-thumb-hover: #4a4a52;
+
+  /* Motion — color/background/opacity only, nothing that moves or
+     resizes anything */
+  --transition-fast: 130ms;
+
+  /* Radii — named -base to avoid colliding with the Tailwind theme keys
+     of the same name (rounded-card / rounded-control) that globals.css
+     maps to these */
+  --radius-card-base: 8px;
+  --radius-control-base: 6px;
 
   /* Layout */
-  --sidebar-width: 220px;
-  --row-height: 34px;
+  --sidebar-width: 216px;
+  --row-height: 36px;
 }
 
 [data-theme="light"] {
-  --surface-0: #eef3ee;
-  --surface-1: #f5f8f5;
+  --surface-0: #fbfbfc;
+  --surface-1: #f4f4f6;
   --surface-2: #ffffff;
-  --surface-3: #e8f0e8;
+  --surface-3: #ffffff;
 
-  --text-primary: #0d2b17;
-  --text-secondary: rgba(13, 43, 23, 0.65);
-  --text-muted: rgba(13, 43, 23, 0.4);
+  --text-primary: #1a1a1e;
+  --text-secondary: #6b6b73;
+  --text-muted: #9b9ba1;
 
-  --border: rgba(13, 43, 23, 0.2);
-  --border-strong: rgba(13, 43, 23, 0.36);
+  --border: #e4e4e7;
+  --border-strong: #d4d4d9;
 
-  --positive: #0d8a3d;
-  --positive-bg: rgba(13, 138, 61, 0.14);
-  --negative: #c8281d;
-  --negative-bg: rgba(200, 40, 29, 0.14);
-  --warning: #a66c00;
-  --warning-bg: rgba(166, 108, 0, 0.14);
-  --info: #0089a8;
-  --info-bg: rgba(0, 137, 168, 0.12);
-  --emphasis: #06210f;
+  --accent: #5e6ad2;
+  --accent-hover: #4e5ac2;
+  --accent-bg: rgba(94, 106, 210, 0.1);
+  --accent-fg: #ffffff;
 
-  --series-1: #0d8a3d;
-  --series-2: #0089a8;
-  --series-3: #a66c00;
-  --series-4: #c8281d;
-  --series-5: #0d8a3d;
-  --series-6: #0089a8;
-  --series-7: #a66c00;
-  --series-8: #c8281d;
+  --positive: #1a7f37;
+  --positive-bg: rgba(26, 127, 55, 0.12);
+  --negative: #cf222e;
+  --negative-bg: rgba(207, 34, 46, 0.12);
+  --warning: #9a6700;
+  --warning-bg: rgba(154, 103, 0, 0.12);
+  --info: var(--accent);
+  --info-bg: var(--accent-bg);
+  --emphasis: #0e0e10;
 
-  --tier-gold: #96721a;
-  --tier-gold-bg: rgba(150, 114, 26, 0.14);
-  --tier-silver: #3d5c4c;
-  --tier-silver-bg: rgba(61, 92, 76, 0.12);
-  --tier-bronze: #97501f;
-  --tier-bronze-bg: rgba(151, 80, 31, 0.14);
+  --series-1: var(--accent);
+  --series-2: #1a7f37;
+  --series-3: #9a6700;
+  --series-4: #cf222e;
+  --series-5: #4e5ac2;
+  --series-6: #2a9d47;
+  --series-7: #b98200;
+  --series-8: #e0454f;
 
-  --accent-analytics: var(--info);
-  --accent-analytics-bg: var(--info-bg);
-  --accent-crm: #6d28d9;
-  --accent-crm-bg: rgba(109, 40, 217, 0.14);
-  --accent-platform: #475569;
-  --accent-platform-bg: rgba(71, 85, 105, 0.14);
+  --tier-gold: #9a6700;
+  --tier-gold-bg: rgba(154, 103, 0, 0.12);
+  --tier-silver: #6b6b73;
+  --tier-silver-bg: rgba(107, 107, 115, 0.12);
+  --tier-bronze: #a15c1e;
+  --tier-bronze-bg: rgba(161, 92, 30, 0.12);
 
-  --term-trace: rgba(13, 138, 61, 0.06);
-  --term-glow: #0d8a3d;
-  --term-glow-cyan: #0089a8;
-  --term-glow-strong: #06210f;
-
-  --glass-bg: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(13, 43, 23, 0.16);
-
-  --panel-bg-glow: var(--surface-2);
   --panel-bg-solid: var(--surface-2);
   --panel-border: var(--border);
 
-  --scrollbar-thumb: var(--border-strong);
-  --scrollbar-thumb-hover: #0d8a3d;
+  --popover-bg: var(--surface-3);
+  --shadow-popover: 0 4px 16px rgba(20, 20, 30, 0.1), 0 1px 3px rgba(20, 20, 30, 0.08);
+
+  --scrollbar-thumb: #d4d4d9;
+  --scrollbar-thumb-hover: #b8b8bf;
 }

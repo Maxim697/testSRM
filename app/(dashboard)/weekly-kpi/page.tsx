@@ -57,7 +57,7 @@ export default async function WeeklyKpiPage() {
 
       <div className="grid grid-cols-2 gap-3">
         <Card label="CHART">
-          <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
+          <div className="mb-2 field-label">
             Сумарний оборот за 12 тижнів
           </div>
           <TrendChart
@@ -67,7 +67,7 @@ export default async function WeeklyKpiPage() {
           />
         </Card>
         <Card label="CHART">
-          <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
+          <div className="mb-2 field-label">
             Середній CR за 12 тижнів
           </div>
           <TrendChart
@@ -80,7 +80,7 @@ export default async function WeeklyKpiPage() {
       </div>
 
       <Card label="CHART">
-        <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
+        <div className="mb-2 field-label">
           Розподіл трейдерів за статусами по тижнях
         </div>
         <StackedBarChart

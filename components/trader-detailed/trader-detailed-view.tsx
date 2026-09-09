@@ -100,7 +100,7 @@ export function TraderDetailedView({
           />
 
           <Card>
-            <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
+            <div className="mb-2 field-label">
               Score та CR за 12 тижнів
             </div>
             {sorted.length === 0 ? (
