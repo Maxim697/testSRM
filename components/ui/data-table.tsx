@@ -137,7 +137,7 @@ export function DataTable<T>({
               <tr
                 key={rowKey(row)}
                 className={cn(
-                  "group h-row border-b border-dashed border-border last:border-b-0 transition-colors duration-150 hover:bg-surface-3",
+                  "h-row border-b border-dashed border-border last:border-b-0 hover:bg-surface-3",
                   rowClassName?.(row),
                 )}
               >
@@ -152,14 +152,6 @@ export function DataTable<T>({
                   >
                     {i === 0 && accent && (
                       <span className="absolute inset-y-0 left-0 w-[3px]" style={{ background: accent }} />
-                    )}
-                    {i === 0 && (
-                      <span
-                        className="mr-1 inline-block w-2.5 text-info opacity-0 transition-opacity group-hover:opacity-100"
-                        aria-hidden="true"
-                      >
-                        ▸
-                      </span>
                     )}
                     {column.accessor(row)}
                   </td>
