@@ -18,10 +18,29 @@ function applyIntensity(intensity: EffectsIntensity) {
   }
 }
 
+// TEMPORARILY forced off site-wide (all animation/CRT-effect CSS gated on
+// data-fx, see globals.css) while the Scoreboard table jitter is under
+// investigation — ignores any stored preference (including a "full" left
+// over in someone's localStorage from earlier testing) and the OS
+// reduced-motion setting alike, so this is unconditional for every
+// visitor. Revert to the stored/media-query logic once the jitter is
+// resolved (or a real "off" is explicitly what's wanted going forward).
+const FORCE_OFF = true;
+
 export function EffectsProvider({ children }: { children: ReactNode }) {
-  const [intensity, setIntensityState] = useState<EffectsIntensity>("full");
+  const [intensity, setIntensityState] = useState<EffectsIntensity>(FORCE_OFF ? "off" : "full");
 
   useEffect(() => {
+    if (FORCE_OFF) {
+      document.documentElement.setAttribute("data-fx", "off");
+      try {
+        localStorage.setItem("fx-intensity", "off");
+      } catch {
+        // localStorage unavailable, forcing "off" still applies for this session
+      }
+      return;
+    }
+
     let stored: EffectsIntensity | null = null;
     try {
       const raw = localStorage.getItem("fx-intensity");

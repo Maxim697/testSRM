@@ -3,7 +3,6 @@ import { JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { EffectsProvider } from "@/components/effects-provider";
 import { SystemStatusLine } from "@/components/layout/system-status-line";
-import { CustomCursor } from "@/components/layout/custom-cursor";
 import { FxDebugController } from "@/components/layout/fx-debug-controller";
 import { BuildMarker } from "@/components/layout/build-marker";
 import "./globals.css";
@@ -44,7 +43,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ThemeProvider>
           <EffectsProvider>
             <FxDebugController />
-            <CustomCursor />
+            {/* CustomCursor removed from render entirely (not just gated off
+                via effects intensity) per explicit request while the
+                Scoreboard jitter is under investigation — see
+                components/layout/custom-cursor.tsx, kept in the repo so
+                it's a one-line re-add once resolved. */}
             <SystemStatusLine />
             <BuildMarker />
             <div className="relative z-10 h-full">{children}</div>
