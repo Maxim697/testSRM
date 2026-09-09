@@ -164,6 +164,22 @@ function HistoryIcon(props: IconProps) {
   );
 }
 
+// A roster of three, one picked out (small dot above the middle head) —
+// distinct from UsersIcon (dashboard, the analytics view of the team) by
+// reading as "my people", not "a chart about people".
+function TeamIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="3.4" cy="6.2" r="1.7" />
+      <circle cx="12.6" cy="6.2" r="1.7" />
+      <circle cx="8" cy="4.6" r="2" />
+      <path d="M1 14c.4-2.2 1.2-3.4 2.4-3.4s2 1.2 2.4 3.4" />
+      <path d="M10.2 14c.4-2.2 1.2-3.4 2.4-3.4s2 1.2 2.4 3.4" />
+      <path d="M5.2 14c.5-2.7 1.4-4.2 2.8-4.2s2.3 1.5 2.8 4.2" />
+    </svg>
+  );
+}
+
 export const NAV_ICONS: Record<string, (props: IconProps) => React.JSX.Element> = {
   "/trader-detailed": UserIcon,
   "/scoreboard": BarChartIcon,
@@ -171,6 +187,7 @@ export const NAV_ICONS: Record<string, (props: IconProps) => React.JSX.Element> 
   "/my-day": SunIcon,
   "/portfolio": BriefcaseIcon,
   "/churn-risk": AlertTriangleIcon,
+  "/my-team": TeamIcon,
   "/team-dashboard": UsersIcon,
   "/weekly-report": FileTextIcon,
   "/reports-review": CheckSquareIcon,

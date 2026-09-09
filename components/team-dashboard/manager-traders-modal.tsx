@@ -8,16 +8,21 @@ import { Tier } from "@/components/ui/tier";
 import { RiskBadge } from "@/components/risk/risk-badge";
 import { formatNumber, formatPercent } from "@/lib/format";
 import type { EnrichedTrader } from "@/lib/trader-metrics";
-import type { ManagerSummary } from "@/lib/team-dashboard";
 
 const STATUS_LABELS: Record<string, string> = { green: "Green", amber: "Amber", red: "Red" };
 const STATUS_BADGE: Record<string, "green" | "amber" | "red"> = { green: "green", amber: "amber", red: "red" };
+
+/** Deliberately just the two fields this modal actually needs, not the
+ * full ManagerSummary (team-dashboard) or ManagerCard (my-team) shape —
+ * both of those structurally satisfy this already, so either page can
+ * open the same modal without an adapter object. */
+type ManagerLike = { name: string; traders: EnrichedTrader[] };
 
 export function ManagerTradersModal({
   manager,
   onClose,
 }: {
-  manager: ManagerSummary | null;
+  manager: ManagerLike | null;
   onClose: () => void;
 }) {
   const columns: DataTableColumn<EnrichedTrader>[] = [

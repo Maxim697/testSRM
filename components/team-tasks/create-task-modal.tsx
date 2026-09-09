@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -23,6 +23,7 @@ export function CreateTaskModal({
   traders,
   currentUserId,
   onCreated,
+  initialAssigneeId,
 }: {
   open: boolean;
   onClose: () => void;
@@ -30,8 +31,20 @@ export function CreateTaskModal({
   traders: Pick<Trader, "id" | "code" | "manager_id" | "tier">[];
   currentUserId: string;
   onCreated: (task: TaskWithRelations) => void;
+  /** Pre-selects the assignee — e.g. the "Поставити завдання" button on a
+   * specific manager's card in Моя команда. Re-applied every time the
+   * modal opens (not just on first mount), since one shared modal
+   * instance gets reused for whichever card was clicked most recently. */
+  initialAssigneeId?: string;
 }) {
-  const [assigneeId, setAssigneeId] = useState("");
+  const [assigneeId, setAssigneeId] = useState(initialAssigneeId ?? "");
+
+  useEffect(() => {
+    if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- re-applying the pre-selected assignee each time the modal opens for a (possibly different) card, not mirroring a prop continuously
+      setAssigneeId(initialAssigneeId ?? "");
+    }
+  }, [open, initialAssigneeId]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [kind, setKind] = useState<TaskKind>("daily");
