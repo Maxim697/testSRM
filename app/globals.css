@@ -130,28 +130,101 @@ body {
 }
 
 /* ==========================================================================
-   Effects — TEMPORARILY REMOVED AT THE CODE LEVEL (not just gated off) for
-   the Scoreboard table jitter investigation: no flicker overlay, no
-   scanlines, no dot-grid/vignette, no sweep line, no persistent glow, no
-   typing animation, no custom cursor, no hover/focus transitions anywhere.
-   The goal is a genuinely animation-free baseline to re-add pieces to one
-   at a time, in code, so each one's contribution can be checked in
-   isolation. Every removed block below is preserved as a comment (not
-   deleted from history — see git log for the full working versions) so
-   putting one back is a small, precise change instead of a rewrite:
+   Effects — being re-added ONE CATEGORY AT A TIME for the Scoreboard
+   jitter isolation (see git log for the full removal). Categories:
+   background, lettering (typing animation), button-press, cursor.
+   Still-removed categories stay as a comment below; re-add the same way
+   this one came back — copy the block, drop the still-removed note.
 
-   - screen flicker: @keyframes term-flicker + html[data-fx="full"]::after
-   - scanlines: body::after repeating-linear-gradient overlay
-   - dot-grid + vignette: body::before radial-gradient overlay
-   - sweep line: @keyframes term-sweep + html[data-fx="full"]::before
-   - persistent phosphor glow: body { text-shadow: ... }
-   - typing animation: components/ui/typewriter.tsx (now renders plain text)
-   - custom cursor: components/layout/custom-cursor.tsx (already unmounted)
+   RE-ENABLED: background (screen flicker, scanlines, dot-grid + vignette,
+   sweep line) — unconditional now, no data-fx gate, since the toggle
+   button and the ?fxdebug= mechanism are both gone.
 
-   See commit history around this comment for the exact removed CSS and
-   the ?fxdebug= isolation mechanism this replaces (deleted: lib/fx-debug.ts,
-   components/layout/fx-debug-controller.tsx, components/layout/effects-toggle.tsx).
+   STILL REMOVED:
+   - lettering: components/ui/typewriter.tsx (currently renders plain text)
+   - button-press: the hover/focus transitions stripped from globals.css
+     and from several components' own Tailwind transition-* classes
+   - cursor: components/layout/custom-cursor.tsx (still unmounted)
    ========================================================================== */
+
+@keyframes term-flicker {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.02;
+  }
+}
+html::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+  background: #000;
+  animation: term-flicker 4s ease-in-out infinite;
+}
+
+/* Scanlines — a fixed overlay above the entire interface, including
+   modals. Step 3px, 3% opacity. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0px,
+    rgba(0, 0, 0, 0.35) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* Background atmosphere — a dot grid (24px, 3% opacity) and a CRT-style
+   vignette darkening toward the corners, sitting behind all real content
+   (z-index below the app shell's own z-10) but above the flat page
+   color. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, color-mix(in srgb, var(--term-glow) 3%, transparent) 1px, transparent 1px),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+  background-size:
+    24px 24px,
+    100% 100%;
+  background-repeat: repeat, no-repeat;
+}
+
+/* Slow sweep — one thin horizontal band drifting top to bottom over 8s,
+   4% opacity. A separate element from body's own pseudo-elements (both
+   already spoken for), so it lives on <html>. */
+@keyframes term-sweep {
+  0% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+html::before {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  z-index: 9998;
+  pointer-events: none;
+  background: rgba(51, 255, 102, 0.04);
+  animation: term-sweep 8s linear infinite;
+}
 
 /* ==========================================================================
    Corner ticks — two opposite corners get a short L-shaped stroke, like a
