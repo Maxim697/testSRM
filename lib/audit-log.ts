@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export type AuditEntityType = "trader" | "profile" | "task" | "report" | "dashboard";
+export type AuditEntityType = "trader" | "profile" | "task" | "report" | "dashboard" | "team";
 
 export const AUDIT_ACTIONS = {
   ROLE_CHANGE: "role_change",
@@ -15,6 +15,11 @@ export const AUDIT_ACTIONS = {
   USER_CREATED: "user_created",
   USER_DEACTIVATED: "user_deactivated",
   USER_ACTIVATED: "user_activated",
+  TEAM_CREATED: "team_created",
+  TEAM_RENAMED: "team_renamed",
+  TEAM_DELETED: "team_deleted",
+  TEAM_LEAD_CHANGED: "team_lead_changed",
+  TEAM_MEMBER_MOVED: "team_member_moved",
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
@@ -32,6 +37,11 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   [AUDIT_ACTIONS.USER_CREATED]: "Створення користувача",
   [AUDIT_ACTIONS.USER_DEACTIVATED]: "Деактивація користувача",
   [AUDIT_ACTIONS.USER_ACTIVATED]: "Активація користувача",
+  [AUDIT_ACTIONS.TEAM_CREATED]: "Створення команди",
+  [AUDIT_ACTIONS.TEAM_RENAMED]: "Перейменування команди",
+  [AUDIT_ACTIONS.TEAM_DELETED]: "Видалення команди",
+  [AUDIT_ACTIONS.TEAM_LEAD_CHANGED]: "Зміна тімліда",
+  [AUDIT_ACTIONS.TEAM_MEMBER_MOVED]: "Переміщення в іншу команду",
 };
 
 export const AUDIT_ENTITY_TYPE_LABELS: Record<AuditEntityType, string> = {
@@ -40,6 +50,7 @@ export const AUDIT_ENTITY_TYPE_LABELS: Record<AuditEntityType, string> = {
   task: "Завдання",
   report: "Звіт",
   dashboard: "Дашборд",
+  team: "Команда",
 };
 
 export type AuditLogInput = {

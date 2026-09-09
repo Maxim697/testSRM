@@ -1,11 +1,10 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ShieldIcon } from "@/components/ui/empty-icons";
-import { AccessMatrix } from "@/components/access/access-matrix";
-import { UsersTable } from "@/components/access/users-table";
+import { AccessTabs } from "@/components/access/access-tabs";
 import { getCurrentProfile } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
-import type { Profile } from "@/lib/types";
+import type { Profile, Team } from "@/lib/types";
 
 export default async function AccessPage() {
   const current = await getCurrentProfile();
@@ -25,12 +24,14 @@ export default async function AccessPage() {
   }
 
   const supabase = await createClient();
-  const [usersRes, tradersRes] = await Promise.all([
-    supabase.from("profiles").select("id, full_name, telegram, role, is_active").order("full_name"),
+  const [usersRes, tradersRes, teamsRes] = await Promise.all([
+    supabase.from("profiles").select("id, full_name, telegram, role, is_active, team_id").order("full_name"),
     supabase.from("traders").select("manager_id"),
+    supabase.from("teams").select("id, name, lead_id, created_at").order("name"),
   ]);
 
   const users = (usersRes.data ?? []) as Profile[];
+  const teams = (teamsRes.data ?? []) as Team[];
 
   const traderCountByManager = new Map<string, number>();
   for (const row of tradersRes.data ?? []) {
@@ -41,9 +42,9 @@ export default async function AccessPage() {
   return (
     <>
       <PageHeader title="Доступи" description="Керування ролями та правами доступу" />
-      <AccessMatrix />
-      <UsersTable
-        users={users}
+      <AccessTabs
+        teams={teams}
+        profiles={users}
         traderCounts={Object.fromEntries(traderCountByManager)}
         currentUserId={current.userId}
         currentUserRole={current.profile.role}

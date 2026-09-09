@@ -6,6 +6,7 @@ export const NOTIFICATION_KINDS = {
   TASK_ASSIGNED: "task_assigned",
   PORTFOLIO_TRANSFERRED: "portfolio_transferred",
   TRADER_HIGH_RISK: "trader_high_risk",
+  TEAM_CHANGED: "team_changed",
 } as const;
 
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[keyof typeof NOTIFICATION_KINDS];

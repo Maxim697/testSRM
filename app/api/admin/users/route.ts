@@ -16,7 +16,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Створювати користувачів може лише адміністратор." }, { status: 403 });
   }
 
-  let body: { email?: unknown; fullName?: unknown; telegram?: unknown; role?: unknown; password?: unknown };
+  let body: {
+    email?: unknown;
+    fullName?: unknown;
+    telegram?: unknown;
+    role?: unknown;
+    password?: unknown;
+    teamId?: unknown;
+    newTeamName?: unknown;
+  };
   try {
     body = await request.json();
   } catch {
@@ -28,6 +36,8 @@ export async function POST(request: Request) {
   const telegram = typeof body.telegram === "string" ? body.telegram.trim() : "";
   const role = typeof body.role === "string" ? body.role : "";
   const password = typeof body.password === "string" ? body.password : "";
+  const teamId = typeof body.teamId === "string" && body.teamId ? body.teamId : null;
+  const newTeamName = typeof body.newTeamName === "string" ? body.newTeamName.trim() : "";
 
   if (!email || !fullName || !password) {
     return NextResponse.json({ error: "Заповніть email, ім'я та пароль." }, { status: 400 });
@@ -37,6 +47,12 @@ export async function POST(request: Request) {
   }
   if (password.length < 8) {
     return NextResponse.json({ error: "Пароль має містити щонайменше 8 символів." }, { status: 400 });
+  }
+  if (role === "manager" && !teamId) {
+    return NextResponse.json({ error: "Для менеджера обов'язково оберіть команду." }, { status: 400 });
+  }
+  if (role === "lead" && teamId && newTeamName) {
+    return NextResponse.json({ error: "Оберіть наявну команду або створіть нову — не обидва варіанти." }, { status: 400 });
   }
 
   let admin;
@@ -64,10 +80,41 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createClient();
+
+  // A brand-new team for a lead being created right now: insert it first
+  // (lead_id set once we know this profile is actually going to hold that
+  // role — see below) so the profile update just below can point its
+  // team_id at a real row in one pass instead of two.
+  let resolvedTeamId = teamId;
+  let resolvedTeamName: string | null = null;
+  if (role === "lead" && newTeamName) {
+    const { data: newTeam, error: teamError } = await supabase
+      .from("teams")
+      .insert({ name: newTeamName, lead_id: created.user.id })
+      .select("id, name")
+      .single();
+    if (teamError || !newTeam) {
+      // The auth user already exists at this point — leave it as a
+      // teamless lead rather than failing the whole request; the admin
+      // can create/assign a team for them afterwards from Структура.
+      resolvedTeamId = null;
+    } else {
+      resolvedTeamId = newTeam.id;
+      resolvedTeamName = newTeam.name;
+    }
+  }
+
   await supabase
     .from("profiles")
-    .update({ role, telegram: telegram || null, full_name: fullName })
+    .update({ role, telegram: telegram || null, full_name: fullName, team_id: resolvedTeamId })
     .eq("id", created.user.id);
+
+  // A lead assigned to an *existing* teamless team (not the "create new
+  // team" branch above, which already set lead_id on insert): point that
+  // team's lead_id back at them.
+  if (role === "lead" && teamId && !newTeamName) {
+    await supabase.from("teams").update({ lead_id: created.user.id }).eq("id", teamId);
+  }
 
   await logAudit(supabase, {
     actorId: current.userId,
@@ -78,5 +125,5 @@ export async function POST(request: Request) {
     newValue: `Роль: ${roleLabel(role)}`,
   });
 
-  return NextResponse.json({ id: created.user.id });
+  return NextResponse.json({ id: created.user.id, teamId: resolvedTeamId, teamName: resolvedTeamName });
 }

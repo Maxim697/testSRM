@@ -179,7 +179,7 @@ export type AuditLogEntry = {
   id: string;
   actor_id: string | null;
   action: string;
-  entity_type: "trader" | "profile" | "task" | "report" | "dashboard";
+  entity_type: "trader" | "profile" | "task" | "report" | "dashboard" | "team";
   entity_id: string | null;
   entity_label: string | null;
   old_value: string | null;
