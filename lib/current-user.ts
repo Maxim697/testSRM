@@ -40,11 +40,31 @@ export const getProfileForUser = cache(async (userId: string, fallbackEmail: str
   // already live and depends on the migrations before it having run), so
   // that defensive split no longer earns its cost: one full extra
   // Supabase round trip on every single page load in the app.
-  const { data: profileRow } = await supabase
+  // profiles and teams have TWO foreign keys between them (teams.lead_id
+  // → profiles.id, and profiles.team_id → teams.id — see
+  // supabase/migrations/0010_portfolio_transfers.sql's note on the exact
+  // same issue for traders/profiles), so a bare "team:teams(name)" embed
+  // is ambiguous (PGRST201) and the query fails outright. It failed
+  // *silently* here specifically: this function swallows the error and
+  // falls back to the hardcoded default profile below — which has
+  // role: "manager" — so every single real (non-debug) login was
+  // rendering as a manager regardless of their actual role, ever since
+  // the teams migration added this embed. Explicit constraint name picks
+  // the "a profile's own team" relationship, not "the team this profile
+  // happens to lead".
+  const { data: profileRow, error: profileError } = await supabase
     .from("profiles")
-    .select("id, full_name, telegram, role, is_active, team_id, team:teams(name)")
+    .select("id, full_name, telegram, role, is_active, team_id, team:teams!profiles_team_id_fkey(name)")
     .eq("id", userId)
     .single();
+
+  if (profileError && profileError.code !== "PGRST116") {
+    // PGRST116 = "no rows" (a genuinely new user with no profile row
+    // yet) — that one's expected and falls through to the default
+    // below. Anything else is a real query failure that should be loud,
+    // not silently rendered as "you're a manager now".
+    console.error("getProfileForUser query failed:", profileError);
+  }
 
   return profileRow
     ? (profileRow as unknown as Profile)
