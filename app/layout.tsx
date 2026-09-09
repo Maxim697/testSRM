@@ -3,7 +3,6 @@ import { JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { EffectsProvider } from "@/components/effects-provider";
 import { SystemStatusLine } from "@/components/layout/system-status-line";
-import { FxDebugController } from "@/components/layout/fx-debug-controller";
 import { BuildMarker } from "@/components/layout/build-marker";
 import "./globals.css";
 
@@ -42,7 +41,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="h-full antialiased text-base">
         <ThemeProvider>
           <EffectsProvider>
-            <FxDebugController />
             {/* CustomCursor removed from render entirely (not just gated off
                 via effects intensity) per explicit request while the
                 Scoreboard jitter is under investigation — see

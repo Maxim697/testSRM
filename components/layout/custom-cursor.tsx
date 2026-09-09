@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useEffectsIntensity } from "@/components/effects-provider";
-import { fxDebugOverride } from "@/lib/fx-debug";
 import { cn } from "@/lib/utils";
 
 type Category = "default" | "table" | "click" | "input" | "disabled" | "chart";
@@ -60,22 +59,12 @@ export function CustomCursor() {
     return () => mq.removeEventListener("change", handleChange);
   }, []);
 
-  // ?fxdebug=... (see lib/fx-debug.ts) overrides the intensity check
-  // entirely when present, so this one effect can be isolated on the live
-  // site without touching the real effects-intensity setting. Reading it
-  // directly at render time (fxDebugOverride() touches window.location)
-  // made the very first render — before this effect has run — briefly use
-  // the *real* intensity instead of the override, i.e. a cursor that
-  // should start off could flash on for one frame. null on both the
-  // server and the client's first paint is SSR-safe by construction; the
-  // real override value (if any) lands a moment later via the effect
-  // below, same pattern as Typewriter's debugTyping.
-  const [debugCursor, setDebugCursor] = useState<boolean | null>(null);
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of a client-only value (URL search params), not a prop mirror
-    setDebugCursor(fxDebugOverride("cursor"));
-  }, []);
-  const active = hoverCapable && (debugCursor !== null ? debugCursor : intensity !== "off");
+  // The ?fxdebug= isolation mechanism this used to read has been removed
+  // (see globals.css) — this now just follows the real effects intensity,
+  // which is itself forced to "off" for everyone right now (see
+  // effects-provider.tsx), and this component isn't even mounted in
+  // app/layout.tsx currently, so `active` never becomes true either way.
+  const active = hoverCapable && intensity !== "off";
 
   // Diagnostics: window.__cursorDebug always holds the live state, and the
   // console gets one line per step so "nothing happened" has an answer.
