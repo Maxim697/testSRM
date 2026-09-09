@@ -3,26 +3,40 @@ import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { SectionAccentScope } from "@/components/layout/section-accent-scope";
-import { getCurrentProfile } from "@/lib/current-user";
+import { getAuthUser, getProfileForUser } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { findNavItem } from "@/lib/nav";
 import { PageTitleProvider } from "@/lib/page-title";
 import type { NotificationEntry } from "@/lib/types";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const current = await getCurrentProfile();
-
-  if (!current) redirect("/login");
-  if (!current.profile.is_active) redirect("/login?deactivated=1");
+  // This layout wraps every single page, so its data fetching sets a
+  // floor on how fast *any* navigation can feel. It used to be 4 fully
+  // sequential Supabase round trips (getUser → profile → is_active →
+  // notifications) before the page below even started rendering — now
+  // it's 2 stages: resolve the user id, then fetch the profile and
+  // notifications in parallel (both only ever needed that id, not each
+  // other). getProfileForUser is called with the exact same arguments
+  // getCurrentProfile() uses internally, so React's cache() treats this
+  // as the same call — any page below that also calls getCurrentProfile()
+  // (most do) reuses this result instead of re-querying.
+  const user = await getAuthUser();
+  if (!user) redirect("/login");
 
   const supabase = await createClient();
-  const { data: notificationsData } = await supabase
-    .from("notifications")
-    .select("*")
-    .eq("user_id", current.userId)
-    .order("created_at", { ascending: false })
-    .limit(50);
+  const [profile, { data: notificationsData }] = await Promise.all([
+    getProfileForUser(user.id, user.email),
+    supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(50),
+  ]);
 
+  if (!profile.is_active) redirect("/login?deactivated=1");
+
+  const current = { userId: user.id, profile };
   const notifications = (notificationsData ?? []) as NotificationEntry[];
 
   const unreadHrefs = new Set<string>();
