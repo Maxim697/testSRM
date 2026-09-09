@@ -5,6 +5,7 @@ import { EffectsProvider } from "@/components/effects-provider";
 import { SystemStatusLine } from "@/components/layout/system-status-line";
 import { CustomCursor } from "@/components/layout/custom-cursor";
 import { FxDebugController } from "@/components/layout/fx-debug-controller";
+import { BuildMarker } from "@/components/layout/build-marker";
 import "./globals.css";
 
 const jetbrainsMono = JetBrains_Mono({
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <FxDebugController />
             <CustomCursor />
             <SystemStatusLine />
+            <BuildMarker />
             <div className="relative z-10 h-full">{children}</div>
           </EffectsProvider>
         </ThemeProvider>

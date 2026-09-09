@@ -62,8 +62,19 @@ export function CustomCursor() {
 
   // ?fxdebug=... (see lib/fx-debug.ts) overrides the intensity check
   // entirely when present, so this one effect can be isolated on the live
-  // site without touching the real effects-intensity setting.
-  const debugCursor = fxDebugOverride("cursor");
+  // site without touching the real effects-intensity setting. Reading it
+  // directly at render time (fxDebugOverride() touches window.location)
+  // made the very first render — before this effect has run — briefly use
+  // the *real* intensity instead of the override, i.e. a cursor that
+  // should start off could flash on for one frame. null on both the
+  // server and the client's first paint is SSR-safe by construction; the
+  // real override value (if any) lands a moment later via the effect
+  // below, same pattern as Typewriter's debugTyping.
+  const [debugCursor, setDebugCursor] = useState<boolean | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of a client-only value (URL search params), not a prop mirror
+    setDebugCursor(fxDebugOverride("cursor"));
+  }, []);
   const active = hoverCapable && (debugCursor !== null ? debugCursor : intensity !== "off");
 
   // Diagnostics: window.__cursorDebug always holds the live state, and the
