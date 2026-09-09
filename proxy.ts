@@ -1,7 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isDebugNoAuth } from "@/lib/debug-auth";
 
 export async function proxy(request: NextRequest) {
+  // Debug-only, local-only (see lib/debug-auth.ts) — skip the session
+  // check entirely so every route is reachable without logging in.
+  if (isDebugNoAuth()) return NextResponse.next();
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(

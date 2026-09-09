@@ -1,11 +1,19 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { isDebugNoAuth, DEBUG_USER_ID, DEBUG_PROFILE } from "@/lib/debug-auth";
 import type { Profile } from "@/lib/types";
 
 export const getCurrentProfile = cache(async (): Promise<{
   userId: string;
   profile: Profile;
 } | null> => {
+  // Debug-only, local-only — see lib/debug-auth.ts. Short-circuits before
+  // ever touching Supabase auth, so there's no dependency on a real
+  // session or a matching `profiles` row.
+  if (isDebugNoAuth()) {
+    return { userId: DEBUG_USER_ID, profile: DEBUG_PROFILE };
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
