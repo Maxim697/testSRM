@@ -80,7 +80,7 @@ export function AccessSettingsModal({
                 type="button"
                 onClick={() => toggleRole(role)}
                 className={cn(
-                  "rounded-control border px-3 py-1.5 text-sm transition-colors",
+                  "rounded-control border px-3 py-1.5 text-sm",
                   roles[role]
                     ? "border-info bg-info-bg text-info"
                     : "border-border text-text-secondary hover:text-text-primary",

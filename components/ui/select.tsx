@@ -38,7 +38,7 @@ function ChevronIcon({ open }: { open: boolean }) {
       height="6"
       viewBox="0 0 10 6"
       fill="none"
-      className={cn("shrink-0 text-text-muted transition-transform duration-150", open && "rotate-180")}
+      className={cn("shrink-0 text-text-muted", open && "rotate-180")}
     >
       <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>

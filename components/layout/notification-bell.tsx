@@ -66,7 +66,7 @@ export function NotificationBell({ notifications: initial }: { notifications: No
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="term-field relative flex h-8 w-8 items-center justify-center text-text-secondary transition-colors hover:text-text-primary"
+        className="term-field relative flex h-8 w-8 items-center justify-center text-text-secondary hover:text-text-primary"
         aria-label="Сповіщення"
       >
         <BellIcon />
@@ -100,7 +100,7 @@ export function NotificationBell({ notifications: initial }: { notifications: No
                   type="button"
                   onClick={() => handleClick(n)}
                   className={cn(
-                    "flex flex-col items-start gap-0.5 rounded-control px-2 py-1.5 text-left transition-colors hover:bg-surface-3",
+                    "flex flex-col items-start gap-0.5 rounded-control px-2 py-1.5 text-left hover:bg-surface-3",
                     !n.is_read && "bg-info-bg",
                   )}
                 >

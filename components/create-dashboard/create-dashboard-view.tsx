@@ -152,7 +152,7 @@ export function CreateDashboardView({
         {EXAMPLES.map((example) => (
           <Card
             key={example}
-            className="cursor-pointer text-base text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary"
+            className="cursor-pointer text-base text-text-secondary hover:border-border-strong hover:text-text-primary"
             onClick={() => setQuery(example)}
           >
             {example}
