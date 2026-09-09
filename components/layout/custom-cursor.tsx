@@ -148,14 +148,37 @@ export function CustomCursor() {
     document.documentElement.addEventListener("mouseleave", handleLeave);
     document.documentElement.addEventListener("mouseenter", handleEnter);
 
+    let lastCoreX = NaN;
+    let lastCoreY = NaN;
+    let lastRingX = NaN;
+    let lastRingY = NaN;
+
     function tick() {
-      ring.current.x += (pointer.current.x - ring.current.x) * SMOOTHING;
-      ring.current.y += (pointer.current.y - ring.current.y) * SMOOTHING;
-      if (outerCoreRef.current) {
-        outerCoreRef.current.style.transform = `translate3d(${pointer.current.x}px, ${pointer.current.y}px, 0)`;
+      const dx = pointer.current.x - ring.current.x;
+      const dy = pointer.current.y - ring.current.y;
+      // Snap once the remaining gap is sub-visible instead of easing
+      // forever — 0.35 asymptotically approaches the target but never
+      // exactly reaches it, which otherwise means this writes a
+      // (compositor-visible) new transform on two fixed, very-high-z-index
+      // elements every single frame for as long as the page stays open,
+      // long after the ring has visually caught up.
+      if (Math.abs(dx) < 0.05 && Math.abs(dy) < 0.05) {
+        ring.current.x = pointer.current.x;
+        ring.current.y = pointer.current.y;
+      } else {
+        ring.current.x += dx * SMOOTHING;
+        ring.current.y += dy * SMOOTHING;
       }
-      if (outerRingRef.current) {
+
+      if (outerCoreRef.current && (pointer.current.x !== lastCoreX || pointer.current.y !== lastCoreY)) {
+        outerCoreRef.current.style.transform = `translate3d(${pointer.current.x}px, ${pointer.current.y}px, 0)`;
+        lastCoreX = pointer.current.x;
+        lastCoreY = pointer.current.y;
+      }
+      if (outerRingRef.current && (ring.current.x !== lastRingX || ring.current.y !== lastRingY)) {
         outerRingRef.current.style.transform = `translate3d(${ring.current.x}px, ${ring.current.y}px, 0)`;
+        lastRingX = ring.current.x;
+        lastRingY = ring.current.y;
       }
       rafRef.current = requestAnimationFrame(tick);
     }
