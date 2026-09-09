@@ -37,14 +37,26 @@ export type TeamDashboardData = {
   topRisk: EnrichedTrader[];
 };
 
-export async function getTeamDashboardData(): Promise<TeamDashboardData> {
+/** `viewerTeamId` narrows the manager roster to one team — pass it for a
+ * lead (their own team_id), omit/null it for an admin (every manager).
+ * Everything else in here (traders, reports, tasks) is already
+ * team-scoped for free by RLS once the viewer's own session is a lead's
+ * — this is the one query in the mix that reads `profiles`, which RLS
+ * leaves globally readable, so it's the one place that needs an explicit
+ * filter to match. */
+export async function getTeamDashboardData(viewerTeamId?: string | null): Promise<TeamDashboardData> {
   const supabase = await createClient();
   const today = new Date().toISOString().slice(0, 10);
+
+  let managersQuery = supabase.from("profiles").select("id, full_name").eq("role", "manager").order("full_name");
+  if (viewerTeamId !== undefined) {
+    managersQuery = managersQuery.eq("team_id", viewerTeamId ?? "00000000-0000-0000-0000-000000000000");
+  }
 
   const [traders, weeks, managersRes, reportsRes, tasksRes] = await Promise.all([
     getEnrichedTraders(),
     getWeeklyAggregates(),
-    supabase.from("profiles").select("id, full_name").eq("role", "manager").order("full_name"),
+    managersQuery,
     supabase.from("weekly_reports").select("author_id, week_start, status"),
     supabase.from("tasks").select("assignee_id, status, due_date"),
   ]);

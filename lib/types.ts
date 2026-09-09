@@ -6,6 +6,17 @@ export type Profile = {
   telegram: string | null;
   role: Role;
   is_active: boolean;
+  team_id: string | null;
+  /** Only populated where the query embeds it (see getProfileForUser) —
+   * absent, not null, on plain profiles selects that don't ask for it. */
+  team?: { name: string } | null;
+};
+
+export type Team = {
+  id: string;
+  name: string;
+  lead_id: string | null;
+  created_at: string;
 };
 
 export type TraderTier = "gold" | "silver" | "bronze";

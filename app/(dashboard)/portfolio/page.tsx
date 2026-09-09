@@ -6,16 +6,16 @@ import { PortfolioTable } from "@/components/portfolio/portfolio-table";
 import { getEnrichedTraders } from "@/lib/trader-metrics";
 import { getCurrentProfile } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
-import type { Profile } from "@/lib/types";
+import { getScopedManagers } from "@/lib/team-scope";
 
 export default async function PortfolioPage() {
   const current = await getCurrentProfile();
   if (!current) return null;
 
   const supabase = await createClient();
-  const [traders, managersRes] = await Promise.all([
+  const [traders, managers] = await Promise.all([
     getEnrichedTraders(),
-    supabase.from("profiles").select("id, full_name, telegram, role").eq("role", "manager"),
+    getScopedManagers(supabase, current.profile),
   ]);
 
   const canReassign = current.profile.role === "admin" || current.profile.role === "lead";
@@ -37,7 +37,7 @@ export default async function PortfolioPage() {
       ) : (
         <PortfolioTable
           traders={traders}
-          allManagers={(managersRes.data ?? []) as Profile[]}
+          allManagers={managers}
           canReassign={canReassign}
           currentUserId={current.userId}
         />

@@ -5,7 +5,8 @@ import { TransferForm } from "@/components/portfolio-transfer/transfer-form";
 import { getEnrichedTraders } from "@/lib/trader-metrics";
 import { getCurrentProfile } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
-import type { PortfolioTransferWithNames, Profile } from "@/lib/types";
+import { getScopedManagers } from "@/lib/team-scope";
+import type { PortfolioTransferWithNames } from "@/lib/types";
 
 export default async function PortfolioTransferPage() {
   const current = await getCurrentProfile();
@@ -25,9 +26,9 @@ export default async function PortfolioTransferPage() {
   }
 
   const supabase = await createClient();
-  const [traders, managersRes, historyRes] = await Promise.all([
+  const [traders, managers, historyRes] = await Promise.all([
     getEnrichedTraders(),
-    supabase.from("profiles").select("id, full_name, telegram, role").eq("role", "manager").order("full_name"),
+    getScopedManagers(supabase, current.profile),
     supabase
       .from("portfolio_transfers")
       .select(
@@ -41,7 +42,7 @@ export default async function PortfolioTransferPage() {
       <PageHeader title="Передача портфеля" description="Перерозподіл трейдерів між менеджерами" />
       <TransferForm
         traders={traders}
-        managers={(managersRes.data ?? []) as Profile[]}
+        managers={managers}
         history={(historyRes.data ?? []) as unknown as PortfolioTransferWithNames[]}
         currentUserId={current.userId}
       />

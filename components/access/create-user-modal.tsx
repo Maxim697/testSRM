@@ -82,7 +82,15 @@ export function CreateUserModal({
       return;
     }
 
-    onCreated({ id: payload.id, full_name: fullName.trim(), telegram: telegram.trim() || null, role, is_active: true });
+    onCreated({
+      id: payload.id,
+      full_name: fullName.trim(),
+      telegram: telegram.trim() || null,
+      role,
+      is_active: true,
+      team_id: null,
+      team: null,
+    });
     setCreated({ email: email.trim(), password });
   }
 

@@ -35,7 +35,7 @@ export default async function TeamDashboardPage() {
     );
   }
 
-  const data = await getTeamDashboardData();
+  const data = await getTeamDashboardData(current.profile.role === "lead" ? current.profile.team_id : undefined);
 
   return (
     <>

@@ -42,18 +42,20 @@ export const getProfileForUser = cache(async (userId: string, fallbackEmail: str
   // Supabase round trip on every single page load in the app.
   const { data: profileRow } = await supabase
     .from("profiles")
-    .select("id, full_name, telegram, role, is_active")
+    .select("id, full_name, telegram, role, is_active, team_id, team:teams(name)")
     .eq("id", userId)
     .single();
 
   return profileRow
-    ? (profileRow as Profile)
+    ? (profileRow as unknown as Profile)
     : {
         id: userId,
         full_name: fallbackEmail,
         telegram: null,
         role: "manager",
         is_active: true,
+        team_id: null,
+        team: null,
       };
 });
 

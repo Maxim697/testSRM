@@ -4,7 +4,8 @@ import { InboxIcon, ShieldIcon } from "@/components/ui/empty-icons";
 import { ReportsReviewList } from "@/components/reports-review/reports-review-list";
 import { getCurrentProfile } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
-import type { Profile, WeeklyReportWithAuthor } from "@/lib/types";
+import { getScopedManagers } from "@/lib/team-scope";
+import type { WeeklyReportWithAuthor } from "@/lib/types";
 
 export default async function ReportsReviewPage() {
   const current = await getCurrentProfile();
@@ -24,17 +25,18 @@ export default async function ReportsReviewPage() {
   }
 
   const supabase = await createClient();
-  const [reportsRes, managersRes] = await Promise.all([
+  const [reportsRes, managers] = await Promise.all([
     supabase
       .from("weekly_reports")
       .select("*, author:profiles!weekly_reports_author_id_fkey(full_name)")
       .order("submitted_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false }),
-    supabase.from("profiles").select("id, full_name, telegram, role").eq("role", "manager"),
+    getScopedManagers(supabase, current.profile),
   ]);
 
+  // weekly_reports itself is already team-scoped by RLS (a lead's query
+  // only ever returns same-team authors) — nothing to filter here.
   const reports = (reportsRes.data ?? []) as unknown as WeeklyReportWithAuthor[];
-  const managers = (managersRes.data ?? []) as Profile[];
 
   return (
     <>

@@ -29,6 +29,7 @@ export function UserCard({ profile }: { profile: Profile }) {
           </div>
           <div className="truncate text-xs text-text-secondary">
             {roleLabel(profile.role)}
+            {profile.team?.name && <span className="text-text-muted"> · {profile.team.name}</span>}
           </div>
         </div>
         <button

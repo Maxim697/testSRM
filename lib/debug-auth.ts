@@ -27,4 +27,6 @@ export const DEBUG_PROFILE: Profile = {
   telegram: null,
   role: "admin",
   is_active: true,
+  team_id: null,
+  team: null,
 };

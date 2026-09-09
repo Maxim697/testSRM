@@ -4,8 +4,9 @@ import { ShieldIcon } from "@/components/ui/empty-icons";
 import { TeamTasksView } from "@/components/team-tasks/team-tasks-view";
 import { getCurrentProfile } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
+import { getScopedManagers } from "@/lib/team-scope";
 import { TASK_WITH_RELATIONS_SELECT } from "@/lib/task-actions";
-import type { Profile, TaskWithRelations, Trader } from "@/lib/types";
+import type { TaskWithRelations, Trader } from "@/lib/types";
 
 export default async function TeamTasksPage() {
   const current = await getCurrentProfile();
@@ -25,14 +26,14 @@ export default async function TeamTasksPage() {
   }
 
   const supabase = await createClient();
-  const [tasksRes, managersRes, tradersRes] = await Promise.all([
+  const [tasksRes, managers, tradersRes] = await Promise.all([
     supabase.from("tasks").select(TASK_WITH_RELATIONS_SELECT).order("due_date", { ascending: true }),
-    supabase.from("profiles").select("id, full_name, telegram, role").eq("role", "manager"),
+    getScopedManagers(supabase, current.profile),
     supabase.from("traders").select("id, code, manager_id, tier").order("code"),
   ]);
 
+  // tasks and traders are already team-scoped by RLS.
   const tasks = (tasksRes.data ?? []) as unknown as TaskWithRelations[];
-  const managers = (managersRes.data ?? []) as Profile[];
   const traders = (tradersRes.data ?? []) as Pick<Trader, "id" | "code" | "manager_id" | "tier">[];
 
   return (
