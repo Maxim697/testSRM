@@ -1,18 +1,12 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ShieldIcon } from "@/components/ui/empty-icons";
-import { TeamSelector } from "@/components/my-team/team-selector";
 import { MyTeamView } from "@/components/my-team/my-team-view";
 import { getCurrentProfile } from "@/lib/current-user";
-import { getMyTeamData } from "@/lib/my-team";
+import { getMyTeamData, type MyTeamData } from "@/lib/my-team";
 import { createClient } from "@/lib/supabase/server";
-import type { Team } from "@/lib/types";
 
-export default async function MyTeamPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ team?: string }>;
-}) {
+export default async function MyTeamPage() {
   const current = await getCurrentProfile();
   if (!current) return null;
 
@@ -30,21 +24,22 @@ export default async function MyTeamPage({
   }
 
   const isAdmin = current.profile.role === "admin";
-  const supabase = await createClient();
 
-  let teams: Team[] = [];
-  let teamId: string | null;
-
+  // Admin doesn't belong to any team — rather than making them pick one
+  // team at a time from a selector, show every team at once, each as its
+  // own block headed by its own lead. A lead only ever has the one team,
+  // so this list is always length 1 for them — same content as before,
+  // just expressed as "a list of one" instead of a special case.
+  let teamIds: string[];
   if (isAdmin) {
-    const { data } = await supabase.from("teams").select("id, name, lead_id, created_at").order("name");
-    teams = (data ?? []) as Team[];
-    const { team: requestedTeamId } = await searchParams;
-    teamId = (requestedTeamId && teams.some((t) => t.id === requestedTeamId) ? requestedTeamId : teams[0]?.id) ?? null;
+    const supabase = await createClient();
+    const { data } = await supabase.from("teams").select("id").order("name");
+    teamIds = (data ?? []).map((t) => t.id);
   } else {
-    teamId = current.profile.team_id;
+    teamIds = current.profile.team_id ? [current.profile.team_id] : [];
   }
 
-  if (!teamId) {
+  if (teamIds.length === 0) {
     return (
       <>
         <PageHeader title="Моя команда" description="Огляд команди: менеджери, показники, що потребує уваги" />
@@ -61,24 +56,14 @@ export default async function MyTeamPage({
     );
   }
 
-  const data = await getMyTeamData(teamId);
-  if (!data) {
-    return (
-      <>
-        <PageHeader title="Моя команда" description="Огляд команди: менеджери, показники, що потребує уваги" />
-        <EmptyState icon={<ShieldIcon />} title="Команду не знайдено" description="Можливо, її було видалено." />
-      </>
-    );
-  }
+  const teams = (await Promise.all(teamIds.map((id) => getMyTeamData(id)))).filter(
+    (t): t is MyTeamData => t !== null,
+  );
 
   return (
     <>
-      <PageHeader
-        title="Моя команда"
-        description="Огляд команди: менеджери, показники, що потребує уваги"
-        actions={isAdmin ? <TeamSelector teams={teams} selectedTeamId={teamId} /> : undefined}
-      />
-      <MyTeamView data={data} currentUserId={current.userId} />
+      <PageHeader title="Моя команда" description="Огляд команди: менеджери, показники, що потребує уваги" />
+      <MyTeamView teams={teams} currentUserId={current.userId} />
     </>
   );
 }
