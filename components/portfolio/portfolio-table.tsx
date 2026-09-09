@@ -100,7 +100,10 @@ export function PortfolioTable({
     {
       key: "code",
       header: "Trader",
-      width: "130px",
+      // Wide enough for the longest real trader code ("RE[P2P] Vikram
+      // Patel", 22 chars) without ellipsis — only genuinely long outliers
+      // should ever truncate, not the routine case.
+      width: "210px",
       accessor: (t) => (
         <Link href={`/trader/${t.id}`} prefetch={false} className="font-medium text-info hover:underline">
           {t.code}
@@ -290,13 +293,17 @@ export function PortfolioTable({
         columns={columns}
         data={filtered}
         rowKey={(t) => t.id}
-        rowClassName={(t) =>
-          t.status === "red" || (t.daysSinceContact !== null && t.daysSinceContact >= 5)
-            ? "bg-negative-bg"
-            : undefined
-        }
+        // A full-row red wash was too loud for something that shows up on
+        // every problem row in a dense table — a thin accent stripe
+        // (rowAccent, below) carries the same signal much more quietly.
+        // Folded the status/contact-staleness condition that used to
+        // drive the background into the stripe color too, so nothing
+        // that was flagged before stops being flagged now.
         rowAccent={(t) =>
-          t.risk.level === "critical" || t.risk.level === "high"
+          t.risk.level === "critical" ||
+          t.risk.level === "high" ||
+          t.status === "red" ||
+          (t.daysSinceContact !== null && t.daysSinceContact >= 5)
             ? "var(--color-negative)"
             : t.risk.level === "medium"
               ? "var(--color-warning)"

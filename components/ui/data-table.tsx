@@ -130,15 +130,21 @@ export function DataTable<T>({
           </tr>
         </thead>
         <tbody>
-          {sortedData.map((row) => {
+          {sortedData.map((row, index) => {
             const accent = rowAccent?.(row);
             return (
               <tr
                 key={rowKey(row)}
                 className={cn(
-                  "h-row border-b border-border last:border-b-0 hover:bg-surface-3",
+                  "h-row row-enter border-b border-border last:border-b-0 hover:bg-surface-3",
                   rowClassName?.(row),
                 )}
+                // Staggered entrance, capped at the first 20 rows — past
+                // that a long table would just keep making later rows
+                // wait longer and longer for no real benefit, so row 21+
+                // all appear together with row 20 instead of queuing
+                // further behind it.
+                style={index < 20 ? { animationDelay: `${index * 15}ms` } : undefined}
               >
                 {columns.map((column, i) => (
                   <td

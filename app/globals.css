@@ -210,7 +210,7 @@ body {
 }
 
 /* ==========================================================================
-   Motion — transition on color/background/opacity only, 120-150ms.
+   Motion — transition on color/background/opacity only, 120ms.
    Nothing that moves or resizes anything, nothing that runs forever.
    ========================================================================== */
 
@@ -228,6 +228,76 @@ textarea,
     color var(--transition-fast) ease,
     opacity var(--transition-fast) ease,
     box-shadow var(--transition-fast) ease;
+}
+
+/* ==========================================================================
+   Entrance transitions — every one is a one-shot animation on mount
+   (opacity/transform only, so nothing ever recomputes layout), never a
+   loop. Reduced-motion users get an instant cut instead — see the media
+   query below.
+   ========================================================================== */
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.page-enter {
+  animation: page-enter 180ms ease-out;
+}
+
+@keyframes row-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.row-enter {
+  animation: row-enter 160ms ease-out both;
+}
+
+@keyframes popover-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.popover-enter {
+  animation: popover-enter 140ms ease-out;
+}
+
+@keyframes fade-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* Generic 120ms opacity-only entrance — tab panel content, modal backdrop,
+   anywhere else that just needs a plain fade in. */
+.fade-enter {
+  animation: fade-enter 120ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter,
+  .row-enter,
+  .popover-enter,
+  .fade-enter {
+    animation: none;
+  }
 }
 
 /* ==========================================================================

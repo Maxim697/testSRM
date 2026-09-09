@@ -18,8 +18,16 @@ export function InfoTooltip({ text }: { text: string }) {
         i
       </span>
       {open && (
-        <span className="popover-surface pointer-events-none absolute bottom-full left-1/2 z-10 mb-1.5 w-56 -translate-x-1/2 rounded-control p-2 text-xs font-normal normal-case text-text-secondary">
-          {text}
+        // Positioning (centering via -translate-x-1/2) lives on this outer,
+        // unanimated span; the entrance scale animation goes on the inner
+        // one instead — both would fight over the `transform` property
+        // (the animation's keyframes fully own it while playing) if they
+        // were on the same element, popping the tooltip off-center for the
+        // 140ms the animation runs.
+        <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1.5 w-56 -translate-x-1/2">
+          <span className="popover-surface popover-enter block rounded-control p-2 text-xs font-normal normal-case text-text-secondary">
+            {text}
+          </span>
         </span>
       )}
     </span>

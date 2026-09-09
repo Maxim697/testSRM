@@ -102,6 +102,7 @@ export function InactiveTradersTable({
     {
       key: "code",
       header: "Trader",
+      width: "210px",
       accessor: (t) => (
         <Link href={`/trader/${t.id}`} prefetch={false} className="font-medium text-info hover:underline">
           {t.code}
@@ -112,18 +113,21 @@ export function InactiveTradersTable({
     {
       key: "manager",
       header: "Менеджер",
+      width: "140px",
       accessor: (t) => t.manager?.full_name ?? "—",
       sortValue: (t) => t.manager?.full_name ?? "",
     },
     {
       key: "last_active",
       header: "Останній актив",
+      width: "120px",
       accessor: (t) => formatDate(t.last_active),
       sortValue: (t) => t.last_active ?? "",
     },
     {
       key: "days_inactive",
       header: "Днів неактивний",
+      width: "110px",
       accessor: (t) => (
         <span className="tabular-nums text-negative font-medium">
           {t.daysSinceContact ?? "—"}
@@ -135,6 +139,7 @@ export function InactiveTradersTable({
     {
       key: "deposit",
       header: "Депозит",
+      width: "110px",
       accessor: (t) => <span className="tabular-nums">{formatNumber(t.deposit)}</span>,
       sortValue: (t) => t.deposit ?? 0,
       align: "right",
@@ -142,6 +147,7 @@ export function InactiveTradersTable({
     {
       key: "status",
       header: "Статус",
+      width: "220px",
       accessor: (t) => (
         <div className="flex items-center gap-2">
           <Badge variant={STATUS_BADGE[statuses[t.id]]}>{STATUS_LABELS[statuses[t.id]]}</Badge>
@@ -163,6 +169,7 @@ export function InactiveTradersTable({
     {
       key: "comment",
       header: "Коментар",
+      width: "280px",
       accessor: (t) => <CommentCell traderId={t.id} currentUserId={currentUserId} />,
     },
   ];

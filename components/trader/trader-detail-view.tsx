@@ -177,28 +177,30 @@ export function TraderDetailView({
         onValueChange={setTab}
       />
 
-      {tab === "history" && (
-        <HistoryTab
-          traderId={trader.id}
-          currentUserId={currentUserId}
-          interactions={interactions}
-          onCreated={(row) => setInteractions((prev) => [row, ...prev])}
-        />
-      )}
-      {tab === "tasks" && (
-        <TasksTab
-          traderId={trader.id}
-          traderCode={trader.code}
-          tasks={tasks}
-          currentUserId={currentUserId}
-          onCreated={(row) => setTasks((prev) => [...prev, row])}
-          onUpdated={(row) => setTasks((prev) => prev.map((t) => (t.id === row.id ? row : t)))}
-        />
-      )}
-      {tab === "metrics" && <MetricsTab weekly={weekly} />}
-      {tab === "audit" && (currentUserRole === "lead" || currentUserRole === "admin") && (
-        <AuditHistoryTab traderId={trader.id} />
-      )}
+      <div className="fade-enter" key={tab}>
+        {tab === "history" && (
+          <HistoryTab
+            traderId={trader.id}
+            currentUserId={currentUserId}
+            interactions={interactions}
+            onCreated={(row) => setInteractions((prev) => [row, ...prev])}
+          />
+        )}
+        {tab === "tasks" && (
+          <TasksTab
+            traderId={trader.id}
+            traderCode={trader.code}
+            tasks={tasks}
+            currentUserId={currentUserId}
+            onCreated={(row) => setTasks((prev) => [...prev, row])}
+            onUpdated={(row) => setTasks((prev) => prev.map((t) => (t.id === row.id ? row : t)))}
+          />
+        )}
+        {tab === "metrics" && <MetricsTab weekly={weekly} />}
+        {tab === "audit" && (currentUserRole === "lead" || currentUserRole === "admin") && (
+          <AuditHistoryTab traderId={trader.id} />
+        )}
+      </div>
     </div>
   );
 }

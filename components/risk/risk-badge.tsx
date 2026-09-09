@@ -47,24 +47,28 @@ export function RiskBadge({
         {risk.score}
       </span>
       {showBreakdown && open && (
-        <span className="popover-surface pointer-events-none absolute top-full left-1/2 z-20 mt-1.5 w-64 -translate-x-1/2 rounded-card p-2 text-xs font-normal text-text-secondary">
-          <div className="mb-1 font-medium text-text-primary">
-            {RISK_LEVEL_LABELS[risk.level]} ризик · {risk.score}/100
-          </div>
-          {risk.factors.length === 0 ? (
-            <div>Факторів ризику не виявлено.</div>
-          ) : (
-            <ul className="flex flex-col gap-0.5">
-              {risk.factors.map((f) => (
-                <li key={f.key} className="flex items-center justify-between gap-2">
-                  <span>
-                    {f.label} ({f.detail})
-                  </span>
-                  <span className="font-medium text-text-primary">+{f.points}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+        // See info-tooltip.tsx for why the animated element is nested
+        // inside the (unanimated) positioning/centering one.
+        <span className="pointer-events-none absolute top-full left-1/2 z-20 mt-1.5 w-64 -translate-x-1/2">
+          <span className="popover-surface popover-enter block rounded-card p-2 text-xs font-normal text-text-secondary">
+            <div className="mb-1 font-medium text-text-primary">
+              {RISK_LEVEL_LABELS[risk.level]} ризик · {risk.score}/100
+            </div>
+            {risk.factors.length === 0 ? (
+              <div>Факторів ризику не виявлено.</div>
+            ) : (
+              <ul className="flex flex-col gap-0.5">
+                {risk.factors.map((f) => (
+                  <li key={f.key} className="flex items-center justify-between gap-2">
+                    <span>
+                      {f.label} ({f.detail})
+                    </span>
+                    <span className="font-medium text-text-primary">+{f.points}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </span>
         </span>
       )}
     </span>

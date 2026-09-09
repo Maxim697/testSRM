@@ -85,7 +85,7 @@
 
   /* Motion — color/background/opacity only, nothing that moves or
      resizes anything */
-  --transition-fast: 130ms;
+  --transition-fast: 120ms;
 
   /* Radii — named -base to avoid colliding with the Tailwind theme keys
      of the same name (rounded-card / rounded-control) that globals.css

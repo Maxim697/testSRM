@@ -14,10 +14,12 @@ export default async function WeeklyReportPage({
 }: {
   searchParams: Promise<{ week?: string }>;
 }) {
-  const current = await getCurrentProfile();
+  // Neither of these needs the other's result — getCurrentProfile() is
+  // also already request-memoized (see lib/current-user.ts), so this
+  // doesn't cost anything extra even though the layout above already
+  // resolved it.
+  const [current, weeks] = await Promise.all([getCurrentProfile(), getWeeklyAggregates()]);
   if (!current) return null;
-
-  const weeks = await getWeeklyAggregates();
 
   if (weeks.length === 0) {
     return (

@@ -165,7 +165,7 @@ export function Select({
         <ul
           id={listboxId}
           role="listbox"
-          className="popover-surface absolute left-0 top-full z-30 mt-1 max-h-60 w-full min-w-max overflow-y-auto rounded-control p-1 text-base"
+          className="popover-surface popover-enter absolute left-0 top-full z-30 mt-1 max-h-60 w-full min-w-max overflow-y-auto rounded-control p-1 text-base"
         >
           {options.map((opt, i) => (
             <li
@@ -175,7 +175,7 @@ export function Select({
               onMouseEnter={() => setHighlighted(i)}
               onClick={() => commit(i)}
               className={cn(
-                "cursor-pointer whitespace-nowrap rounded-control px-2.5 py-1.5",
+                "flex h-8 cursor-pointer items-center whitespace-nowrap rounded-control px-2.5",
                 opt.disabled
                   ? "cursor-not-allowed text-text-muted opacity-50"
                   : i === highlighted

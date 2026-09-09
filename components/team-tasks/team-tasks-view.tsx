@@ -167,7 +167,6 @@ export function TeamTasksView({
           columns={columns}
           data={filtered}
           rowKey={(t) => t.id}
-          rowClassName={(t) => (isOverdue(t) ? "bg-negative-bg" : undefined)}
           rowAccent={(t) => (isOverdue(t) ? "var(--color-negative)" : undefined)}
         />
       )}

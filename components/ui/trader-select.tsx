@@ -83,7 +83,7 @@ export function TraderSelect({
         </svg>
       </button>
       {open && (
-        <div className="popover-surface absolute left-0 top-full z-30 mt-1 w-64 rounded-control p-1.5">
+        <div className="popover-surface popover-enter absolute left-0 top-full z-30 mt-1 w-64 rounded-control p-1.5">
           <input
             ref={inputRef}
             value={search}
@@ -95,7 +95,7 @@ export function TraderSelect({
             <div
               onClick={() => select("")}
               className={cn(
-                "cursor-pointer rounded-control px-2.5 py-1.5 text-sm",
+                "flex h-8 cursor-pointer items-center rounded-control px-2.5 text-sm",
                 !value ? "bg-accent-bg text-accent" : "text-text-primary",
               )}
             >
@@ -111,7 +111,7 @@ export function TraderSelect({
                         key={o.id}
                         onClick={() => select(o.id)}
                         className={cn(
-                          "cursor-pointer rounded-control px-2.5 py-1.5 text-sm",
+                          "flex h-8 cursor-pointer items-center rounded-control px-2.5 text-sm",
                           o.id === value ? "bg-accent-bg text-accent" : "text-text-primary",
                         )}
                       >

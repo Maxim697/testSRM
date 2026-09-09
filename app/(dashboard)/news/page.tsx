@@ -11,16 +11,15 @@ import { formatDateTime } from "@/lib/format";
 import type { NewsWithAuthor } from "@/lib/types";
 
 export default async function NewsPage() {
-  const current = await getCurrentProfile();
+  const [current, newsRes] = await Promise.all([
+    getCurrentProfile(),
+    createClient().then((supabase) =>
+      supabase.from("news").select("*, author:profiles(full_name, role)").order("created_at", { ascending: false }),
+    ),
+  ]);
   if (!current) return null;
 
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("news")
-    .select("*, author:profiles(full_name, role)")
-    .order("created_at", { ascending: false });
-
-  const news = (data ?? []) as unknown as NewsWithAuthor[];
+  const news = (newsRes.data ?? []) as unknown as NewsWithAuthor[];
   const canPublish = current.profile.role === "lead" || current.profile.role === "admin";
 
   return (

@@ -77,7 +77,7 @@ export function NotificationBell({ notifications: initial }: { notifications: No
         )}
       </button>
       {open && (
-        <div className="popover-surface absolute right-0 top-full z-30 mt-1.5 w-80 rounded-card p-2">
+        <div className="popover-surface popover-enter absolute right-0 top-full z-30 mt-1.5 w-80 rounded-card p-2">
           <div className="mb-1 flex items-center justify-between px-1">
             <span className="field-label">Сповіщення</span>
             {unreadCount > 0 && (

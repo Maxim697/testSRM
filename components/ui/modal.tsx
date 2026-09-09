@@ -31,11 +31,11 @@ export function Modal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      className="fade-enter fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
       onClick={onClose}
     >
       <Card
-        className={cn("popover-surface w-full max-w-md", className)}
+        className={cn("popover-surface popover-enter w-full max-w-md", className)}
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-semibold text-text-primary">{title}</h2>

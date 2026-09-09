@@ -18,9 +18,10 @@ export default async function TraderDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const supabase = await createClient();
-  const current = await getCurrentProfile();
+  // None of these three depend on each other's result, so no reason to
+  // wait for them one at a time before the real data batch below can
+  // even start.
+  const [{ id }, supabase, current] = await Promise.all([params, createClient(), getCurrentProfile()]);
 
   const [traderRes, weeklyRes, interactionsRes, tasksRes] = await Promise.all([
     // traders has two FKs into profiles (manager_id, previous_manager_id) — the

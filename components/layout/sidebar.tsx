@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getVisibleNavSections } from "@/lib/nav";
@@ -18,6 +19,25 @@ export function Sidebar({
   const pathname = usePathname();
   const sections = getVisibleNavSections(profile.role);
 
+  // Highlights the clicked item the instant it's clicked, not once the
+  // destination page has actually finished loading. usePathname() only
+  // reflects the *committed* route, and with real data-fetching pages
+  // that commit can lag a click by a beat — this local, synchronous bit
+  // of state closes that gap. It's cleared as soon as the pathname
+  // genuinely catches up (or the user navigates some other way, e.g.
+  // back/forward), so it never gets stuck pointing at a stale item.
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+  useEffect(() => {
+    // Clears the optimistic click state once the real route has actually
+    // caught up to it — also the only thing that resets it after a
+    // browser back/forward (which changes pathname without going through
+    // the Link's onClick below).
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting derived UI state in response to the pathname actually changing, not mirroring a prop
+    setPendingHref(null);
+  }, [pathname]);
+
+  const activePath = pendingHref ?? pathname;
+
   return (
     <aside className="flex h-full w-sidebar shrink-0 flex-col overflow-y-auto bg-surface-1">
       <div className="flex h-12 shrink-0 items-center px-4">
@@ -31,25 +51,22 @@ export function Sidebar({
             <div className="section-caption px-2">{section.title}</div>
             <ul className="mt-1 space-y-0.5">
               {section.items.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                const isActive = activePath === item.href || activePath.startsWith(`${item.href}/`);
                 const Icon = NAV_ICONS[item.href];
                 return (
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      // prefetch={false}: every one of these ~14 links sits
-                      // in the viewport on every single page load (the
-                      // sidebar never scrolls out of view), and none of
-                      // these routes has a loading.tsx boundary — so
-                      // Next.js's default prefetch was firing a *full*
-                      // server-rendered RSC request (real Supabase queries
-                      // and all) for every nav item, on every page, all the
-                      // time. That flood was competing with the actual
-                      // click the user just made, which is what made
-                      // switching sections feel like it hung for a second.
-                      // A real click still fetches immediately — it's just
-                      // the sole request now instead of one of 30+.
-                      prefetch={false}
+                      onClick={() => setPendingHref(item.href)}
+                      // Prefetch is back on now that app/(dashboard)/loading.tsx
+                      // exists: with a loading boundary in place, Next only
+                      // prefetches the fast static shell for these ~14 fixed
+                      // links, not a full server-rendered page per link (that
+                      // full-page flood — from these plus every per-row
+                      // trader link — was the real cause of the original
+                      // "switching sections hangs" report; those per-row
+                      // links stay prefetch={false}, this fixed, small set
+                      // doesn't have that scaling problem).
                       className={cn(
                         "flex h-[30px] items-center gap-2 rounded-control px-2 text-base outline-none",
                         isActive
