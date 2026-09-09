@@ -100,6 +100,7 @@ export function PortfolioTable({
     {
       key: "code",
       header: "Trader",
+      width: "130px",
       accessor: (t) => (
         <Link href={`/trader/${t.id}`} className="font-medium text-info hover:underline">
           {t.code}
@@ -110,12 +111,14 @@ export function PortfolioTable({
     {
       key: "tier",
       header: "Tier",
+      width: "90px",
       accessor: (t) => (t.tier ? <Tier variant={t.tier} /> : "—"),
       sortValue: (t) => t.tier ?? "",
     },
     {
       key: "deposit",
       header: "Депозит",
+      width: "100px",
       accessor: (t) => <span className="tabular-nums">{formatNumber(t.deposit)}</span>,
       sortValue: (t) => t.deposit ?? 0,
       align: "right",
@@ -123,6 +126,7 @@ export function PortfolioTable({
     {
       key: "turnover_week",
       header: "Оборот за тиждень",
+      width: "130px",
       accessor: (t) => <span className="tabular-nums">{formatNumber(t.turnover_week)}</span>,
       sortValue: (t) => t.turnover_week ?? 0,
       align: "right",
@@ -130,6 +134,7 @@ export function PortfolioTable({
     {
       key: "turnover_delta",
       header: "Δ Оборот",
+      width: "100px",
       accessor: (t) => (
         <span className={`tabular-nums ${deltaClass(t.turnover_delta)}`}>
           {deltaText(t.turnover_delta, "%")}
@@ -141,6 +146,7 @@ export function PortfolioTable({
     {
       key: "cr",
       header: "CR",
+      width: "80px",
       accessor: (t) => <span className="tabular-nums">{formatPercent(t.cr)}</span>,
       sortValue: (t) => t.cr ?? 0,
       align: "right",
@@ -148,6 +154,7 @@ export function PortfolioTable({
     {
       key: "cr_delta",
       header: "Δ CR",
+      width: "100px",
       accessor: (t) => (
         <span className={`tabular-nums ${deltaClass(t.crDelta)}`}>
           {deltaText(t.crDelta, "пп")}
@@ -159,18 +166,21 @@ export function PortfolioTable({
     {
       key: "sla_in",
       header: "SLA IN",
+      width: "90px",
       accessor: (t) => <span className="tabular-nums">{t.sla_in ?? "—"}</span>,
       sortValue: (t) => t.sla_in ?? "",
     },
     {
       key: "sla_out",
       header: "SLA OUT",
+      width: "90px",
       accessor: (t) => <span className="tabular-nums">{t.sla_out ?? "—"}</span>,
       sortValue: (t) => t.sla_out ?? "",
     },
     {
       key: "score",
       header: "Score",
+      width: "80px",
       accessor: (t) => <span className="tabular-nums">{t.score ?? "—"}</span>,
       sortValue: (t) => t.score ?? 0,
       align: "right",
@@ -178,6 +188,7 @@ export function PortfolioTable({
     {
       key: "score_delta",
       header: "Δ Score",
+      width: "90px",
       accessor: (t) => (
         <span className={`tabular-nums ${deltaClass(t.score_delta)}`}>
           {deltaText(t.score_delta)}
@@ -189,6 +200,7 @@ export function PortfolioTable({
     {
       key: "status",
       header: "Статус",
+      width: "100px",
       accessor: (t) =>
         t.status ? <Badge variant={STATUS_BADGE[t.status]}>{STATUS_LABELS[t.status]}</Badge> : "—",
       sortValue: (t) => t.status ?? "",
@@ -196,6 +208,7 @@ export function PortfolioTable({
     {
       key: "risk",
       header: "Ризик",
+      width: "100px",
       accessor: (t) => <RiskBadge risk={t.risk} size="sm" />,
       sortValue: (t) => t.risk.score,
       align: "right",
@@ -203,6 +216,7 @@ export function PortfolioTable({
     {
       key: "days_since_contact",
       header: "Днів без контакту",
+      width: "100px",
       accessor: (t) => (
         <span
           className={`tabular-nums ${
@@ -218,6 +232,7 @@ export function PortfolioTable({
     {
       key: "manager",
       header: "Менеджер",
+      width: "170px",
       accessor: (t) =>
         canReassign ? (
           <Select
