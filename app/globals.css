@@ -240,6 +240,93 @@ html[data-fx="full"]::before {
 }
 
 /* ==========================================================================
+   TEMPORARY — jitter isolation via ?fxdebug=... (lib/fx-debug.ts,
+   fx-debug-controller.tsx). When data-fxdebug="1" is set, each effect
+   below is forced fully on or off by its own data-x-<key>, regardless of
+   the real data-fx setting, so they can be tested one at a time on the
+   live site without a redeploy per step. Delete this whole block (and the
+   two source files) once the actual cause is found.
+   ========================================================================== */
+
+[data-fxdebug-blank="1"] *,
+[data-fxdebug-blank="1"] *::before,
+[data-fxdebug-blank="1"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+[data-fxdebug="1"][data-x-flicker="off"] html::after {
+  content: none !important;
+  animation: none !important;
+}
+[data-fxdebug="1"][data-x-flicker="on"] html::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+  background: #000;
+  animation: term-flicker 4s ease-in-out infinite;
+}
+
+[data-fxdebug="1"][data-x-sweep="off"] html::before,
+[data-fxdebug="1"][data-x-sweep="off"] body::after {
+  content: none !important;
+  animation: none !important;
+}
+[data-fxdebug="1"][data-x-sweep="on"] html::before {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  z-index: 9998;
+  pointer-events: none;
+  background: rgba(51, 255, 102, 0.04);
+  animation: term-sweep 8s linear infinite;
+}
+[data-fxdebug="1"][data-x-sweep="on"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0px,
+    rgba(0, 0, 0, 0.35) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+[data-fxdebug="1"][data-x-glow="off"] body {
+  text-shadow: none !important;
+}
+[data-fxdebug="1"][data-x-glow="on"] body {
+  text-shadow: 0 0 4px color-mix(in srgb, currentColor 20%, transparent) !important;
+}
+
+[data-fxdebug="1"][data-x-vignette="off"] body::before {
+  content: none !important;
+}
+[data-fxdebug="1"][data-x-vignette="on"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, color-mix(in srgb, var(--term-glow) 3%, transparent) 1px, transparent 1px),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+  background-size:
+    24px 24px,
+    100% 100%;
+  background-repeat: repeat, no-repeat;
+}
+
+/* ==========================================================================
    Corner ticks — two opposite corners get a short L-shaped stroke, like a
    technical drawing or a targeting reticle. Shared by cards, tables and
    glass surfaces so it's one visual language everywhere.

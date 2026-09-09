@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useEffectsIntensity } from "@/components/effects-provider";
+import { fxDebugOverride } from "@/lib/fx-debug";
 import { cn } from "@/lib/utils";
 
 type Category = "default" | "table" | "click" | "input" | "disabled" | "chart";
@@ -59,7 +60,11 @@ export function CustomCursor() {
     return () => mq.removeEventListener("change", handleChange);
   }, []);
 
-  const active = hoverCapable && intensity !== "off";
+  // ?fxdebug=... (see lib/fx-debug.ts) overrides the intensity check
+  // entirely when present, so this one effect can be isolated on the live
+  // site without touching the real effects-intensity setting.
+  const debugCursor = fxDebugOverride("cursor");
+  const active = hoverCapable && (debugCursor !== null ? debugCursor : intensity !== "off");
 
   // Diagnostics: window.__cursorDebug always holds the live state, and the
   // console gets one line per step so "nothing happened" has an answer.

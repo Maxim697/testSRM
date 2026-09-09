@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useEffectsIntensity } from "@/components/effects-provider";
+import { fxDebugOverride } from "@/lib/fx-debug";
 
 /** Types `text` out over `durationMs`, left to right, with a blinking block
  * caret — with zero React state. The real `text` is rendered into the DOM
@@ -42,7 +43,8 @@ export function Typewriter({
   // Computed straight from props at render time — correct on the very first
   // paint, so there's no flash-of-visible-then-hidden (or vice versa)
   // waiting for an effect to run.
-  const willAnimate = intensity === "full" && text.length > 0;
+  const debugTyping = fxDebugOverride("typing");
+  const willAnimate = (debugTyping !== null ? debugTyping : intensity === "full") && text.length > 0;
 
   useEffect(() => {
     const final = finalRef.current;
