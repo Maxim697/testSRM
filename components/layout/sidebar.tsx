@@ -59,7 +59,7 @@ export function Sidebar({
                           : undefined),
                       }}
                       className={cn(
-                        "nav-link flex h-7 items-center rounded-control pl-3 pr-2 text-base outline-none",
+                        "nav-link flex h-7 items-center rounded-control pl-3 pr-2 text-base outline-none transition-colors",
                         isActive
                           ? "font-medium"
                           : "text-text-secondary hover:bg-surface-2 hover:text-text-primary",

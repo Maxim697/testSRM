@@ -35,7 +35,7 @@ export function UserCard({ profile }: { profile: Profile }) {
           type="button"
           onClick={handleLogout}
           disabled={loggingOut}
-          className="shrink-0 rounded-control px-2 py-1 text-xs text-text-secondary hover:bg-surface-2 hover:text-text-primary disabled:opacity-50"
+          className="shrink-0 rounded-control px-2 py-1 text-xs text-text-secondary transition-colors hover:bg-surface-2 hover:text-text-primary disabled:opacity-50"
         >
           {loggingOut ? "…" : "Вийти"}
         </button>

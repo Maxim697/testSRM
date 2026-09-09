@@ -139,12 +139,12 @@ body {
    RE-ENABLED:
    - background: screen flicker, scanlines, dot-grid + vignette, sweep line
    - lettering: components/ui/typewriter.tsx (typing animation + carets)
-   Both unconditional now, no data-fx gate, since the toggle button and
+   - button-press: hover/focus transitions below, plus the Tailwind
+     transition-* classes restored on the components that had them
+   All unconditional now, no data-fx gate, since the toggle button and
    the ?fxdebug= mechanism are both gone.
 
    STILL REMOVED:
-   - button-press: the hover/focus transitions stripped from globals.css
-     and from several components' own Tailwind transition-* classes
    - cursor: components/layout/custom-cursor.tsx (still unmounted)
    ========================================================================== */
 
@@ -435,12 +435,26 @@ html::before {
 }
 
 /* ==========================================================================
-   Motion — TEMPORARILY REMOVED (see the big comment above): interactive
-   elements used to have a quick flat transition on hover/focus
-   (background-color, border-color, color, opacity, box-shadow, over
-   var(--transition-fast)). State changes are now instant, no transition
-   property at all.
+   Motion — re-enabled as part of "button-press" (see the big comment
+   above): quick, flat transitions on interactive elements (no hover lift —
+   the terminal look stays two-dimensional).
    ========================================================================== */
+
+a,
+button,
+input,
+select,
+textarea,
+[role="button"],
+[role="option"],
+[role="combobox"] {
+  transition:
+    background-color var(--transition-fast) ease,
+    border-color var(--transition-fast) ease,
+    color var(--transition-fast) ease,
+    opacity var(--transition-fast) ease,
+    box-shadow var(--transition-fast) ease;
+}
 
 /* ==========================================================================
    Skeletons — TEMPORARILY STATIC (see the big comment above): a fixed dim
