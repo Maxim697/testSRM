@@ -61,15 +61,16 @@
   --tier-bronze-bg: rgba(255, 140, 66, 0.14);
 
   /* Section accents — one per nav group: analytics is cyan, CRM is a
-     dedicated dark violet (its own hue, deliberately not --positive — that
-     token stays green everywhere for growth/success regardless of which
-     section it's shown in), platform is amber (the base --warning). */
+     dedicated dark violet, platform is a cold slate gray. All three are
+     standalone hues, deliberately not aliased to --positive/--warning/etc
+     — those stay green/amber/etc everywhere for their own real semantics
+     (growth, important-notice) regardless of which section is showing. */
   --accent-analytics: var(--info);
   --accent-analytics-bg: var(--info-bg);
   --accent-crm: #8b5cf6;
   --accent-crm-bg: rgba(139, 92, 246, 0.16);
-  --accent-platform: var(--warning);
-  --accent-platform-bg: var(--warning-bg);
+  --accent-platform: #94a3b8;
+  --accent-platform-bg: rgba(148, 163, 184, 0.16);
 
   /* Focus ring — follows the current section accent (see --info override in
      SectionAccentScope) */
@@ -145,8 +146,8 @@
   --accent-analytics-bg: var(--info-bg);
   --accent-crm: #6d28d9;
   --accent-crm-bg: rgba(109, 40, 217, 0.14);
-  --accent-platform: var(--warning);
-  --accent-platform-bg: var(--warning-bg);
+  --accent-platform: #475569;
+  --accent-platform-bg: rgba(71, 85, 105, 0.14);
 
   --term-trace: rgba(13, 138, 61, 0.06);
   --term-glow: #0d8a3d;
