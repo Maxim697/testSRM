@@ -60,12 +60,14 @@
   --tier-bronze: #ff8c42;
   --tier-bronze-bg: rgba(255, 140, 66, 0.14);
 
-  /* Section accents — one per nav group: analytics is cyan, CRM is green
-     (the base phosphor), platform is amber. */
+  /* Section accents — one per nav group: analytics is cyan, CRM is a
+     dedicated dark violet (its own hue, deliberately not --positive — that
+     token stays green everywhere for growth/success regardless of which
+     section it's shown in), platform is amber (the base --warning). */
   --accent-analytics: var(--info);
   --accent-analytics-bg: var(--info-bg);
-  --accent-crm: var(--positive);
-  --accent-crm-bg: var(--positive-bg);
+  --accent-crm: #8b5cf6;
+  --accent-crm-bg: rgba(139, 92, 246, 0.16);
   --accent-platform: var(--warning);
   --accent-platform-bg: var(--warning-bg);
 
@@ -141,8 +143,8 @@
 
   --accent-analytics: var(--info);
   --accent-analytics-bg: var(--info-bg);
-  --accent-crm: var(--positive);
-  --accent-crm-bg: var(--positive-bg);
+  --accent-crm: #6d28d9;
+  --accent-crm-bg: rgba(109, 40, 217, 0.14);
   --accent-platform: var(--warning);
   --accent-platform-bg: var(--warning-bg);
 
