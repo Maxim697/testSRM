@@ -146,17 +146,35 @@ body {
   text-shadow: 0 0 4px color-mix(in srgb, currentColor 20%, transparent);
 }
 
+/* Screen flicker — a plain fixed black overlay pulsing between 0 and ~2%
+   opacity approximates the "98-100% brightness" spec. This used to be a
+   `filter: brightness()` animation on <body> itself; animating `filter` on
+   an ancestor that large forces the browser to rasterize the entire app
+   into an offscreen compositing layer every frame, which is a well-known
+   source of subpixel jitter in descendants (thin borders, table lines) on
+   some engines — exactly the kind of shimmer that was reported against
+   this app's tables. A separate, tiny, opacity-only overlay gets the same
+   visible effect without ever touching how anything else is painted. */
 @keyframes term-flicker {
   0%,
   100% {
-    filter: brightness(1);
+    opacity: 0;
   }
   50% {
-    filter: brightness(0.98);
+    opacity: 0.02;
   }
 }
 
-:root[data-fx="full"] body {
+/* html[data-fx], not :root[data-fx] html — :root *is* <html>, so a
+   descendant combinator between them can never match; this cost the sweep
+   line below its animation for as long as it existed. */
+html[data-fx="full"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+  background: #000;
   animation: term-flicker 4s ease-in-out infinite;
 }
 
@@ -208,7 +226,7 @@ body {
     transform: translateY(100vh);
   }
 }
-:root[data-fx="full"] html::before {
+html[data-fx="full"]::before {
   content: "";
   position: fixed;
   left: 0;
@@ -541,6 +559,40 @@ textarea,
    available without replacing native text editing with a fake caret. */
 .term-field:focus {
   caret-color: var(--term-glow);
+}
+
+/* Typewriter (components/ui/typewriter.tsx) — no React state involved.
+   .term-typewriter-final is the real value, sized and laid out normally
+   (just invisible while typing) so it alone determines this element's
+   width from the first paint. .term-typewriter-overlay sits on top,
+   absolutely positioned but NOT stretched to the wrap's full width — its
+   own box shrink-wraps its (partial, growing) textContent, so the ::after
+   caret riding its right edge tracks the animation instead of jumping
+   straight to the final width. */
+.term-typewriter-wrap {
+  position: relative;
+  display: inline-block;
+}
+.term-typewriter-final {
+  white-space: pre;
+}
+.term-typewriter-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: pre;
+  pointer-events: none;
+}
+.term-typewriter-overlay.term-typewriter-caret::after {
+  content: "";
+  position: absolute;
+  left: 100%;
+  top: 0.05em;
+  width: 0.55em;
+  height: 1em;
+  margin-left: 1px;
+  background: var(--term-glow);
+  animation: term-caret-blink 530ms step-end infinite;
 }
 
 /* ==========================================================================
