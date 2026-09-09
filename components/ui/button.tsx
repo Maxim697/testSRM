@@ -21,8 +21,17 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 export function Button({ variant = "primary", className, href, ...props }: ButtonProps) {
   if (href) {
+    // prefetch={false}: these buttons mostly link to per-row detail pages
+    // (a specific trader) inside a list — with many rows on screen at
+    // once, Next.js's default viewport prefetching was firing one full
+    // server-rendered RSC request per row simultaneously (each one re-runs
+    // that whole page's Supabase queries), which was measurably slowing
+    // down the *actual* navigation the user just clicked (it had to queue
+    // behind all those speculative ones). A real click still fetches on
+    // demand, just not speculatively for every row that happens to be
+    // visible.
     return (
-      <Link href={href} className={cn(BASE_CLASSES, VARIANT_CLASSES[variant], className)}>
+      <Link href={href} prefetch={false} className={cn(BASE_CLASSES, VARIANT_CLASSES[variant], className)}>
         {props.children}
       </Link>
     );

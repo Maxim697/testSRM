@@ -49,6 +49,19 @@ export function Sidebar({
                     )}
                     <Link
                       href={item.href}
+                      // prefetch={false}: every one of these ~14 links sits
+                      // in the viewport on every single page load (the
+                      // sidebar never scrolls out of view), and none of
+                      // these routes has a loading.tsx boundary — so
+                      // Next.js's default prefetch was firing a *full*
+                      // server-rendered RSC request (real Supabase queries
+                      // and all) for every nav item, on every page, all the
+                      // time. That flood was competing with the actual
+                      // click the user just made, which is what made
+                      // switching sections feel like it hung for a second.
+                      // A real click still fetches immediately — it's just
+                      // the sole request now instead of one of 30+.
+                      prefetch={false}
                       style={{
                         ["--item-accent" as string]: `var(--accent-${section.key})`,
                         ...(isActive

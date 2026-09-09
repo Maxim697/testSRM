@@ -103,7 +103,7 @@ export function InactiveTradersTable({
       key: "code",
       header: "Trader",
       accessor: (t) => (
-        <Link href={`/trader/${t.id}`} className="font-medium text-info hover:underline">
+        <Link href={`/trader/${t.id}`} prefetch={false} className="font-medium text-info hover:underline">
           {t.code}
         </Link>
       ),
