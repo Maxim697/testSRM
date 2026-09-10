@@ -70,7 +70,7 @@ export function ScoreboardTable({ rows }: { rows: Row[] }) {
       key: "code",
       header: "Trader",
       accessor: (r) => (
-        <Link href={`/trader/${r.trader.id}`} prefetch={false} className="font-medium text-accent hover:underline">
+        <Link href={`/trader/${r.trader.id}`} prefetch={false} className="font-medium text-text-primary hover:text-accent hover:underline">
           {r.trader.code}
         </Link>
       ),

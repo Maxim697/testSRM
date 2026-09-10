@@ -96,7 +96,7 @@ export function WeeklyTasksSection({
             />
             <div className="text-text-primary">{t.title}</div>
             {t.trader_id && t.trader_code && (
-              <Link href={`/trader/${t.trader_id}`} prefetch={false} className="text-xs text-accent hover:underline">
+              <Link href={`/trader/${t.trader_id}`} prefetch={false} className="text-xs text-text-primary hover:text-accent hover:underline">
                 {t.trader_code}
               </Link>
             )}

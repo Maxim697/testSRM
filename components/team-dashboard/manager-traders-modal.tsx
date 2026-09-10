@@ -30,7 +30,7 @@ export function ManagerTradersModal({
       key: "code",
       header: "Trader",
       accessor: (t) => (
-        <Link href={`/trader/${t.id}`} prefetch={false} className="font-medium text-accent hover:underline">
+        <Link href={`/trader/${t.id}`} prefetch={false} className="font-medium text-text-primary hover:text-accent hover:underline">
           {t.code}
         </Link>
       ),

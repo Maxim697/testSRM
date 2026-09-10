@@ -46,7 +46,7 @@ export function ManagersTable({ managers }: { managers: ManagerSummary[] }) {
         const flags = flagsFor(m);
         return (
           <button type="button" onClick={() => setSelected(m)} className="text-left">
-            <div className="font-medium text-accent hover:underline">{m.name}</div>
+            <div className="font-medium text-text-primary hover:text-accent hover:underline">{m.name}</div>
             {flags.length > 0 && (
               <div className="mt-1 flex flex-wrap gap-1">
                 {flags.map((f) => (
@@ -136,7 +136,11 @@ export function ManagersTable({ managers }: { managers: ManagerSummary[] }) {
         columns={columns}
         data={managers}
         rowKey={(m) => m.id}
-        rowAccent={(m) => (flagsFor(m).length > 0 ? "var(--color-warning)" : undefined)}
+        // The stripe marks only the real exception — a manager whose own
+        // book has several at-risk traders. "No report yet" / "few
+        // contacts" are common enough that striping every such row would
+        // flag most of the table; they stay visible as badges instead.
+        rowAccent={(m) => (m.riskCount >= HIGH_RISK_THRESHOLD ? "var(--color-negative)" : undefined)}
       />
       <ManagerTradersModal manager={selected} onClose={() => setSelected(null)} />
     </>

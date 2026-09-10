@@ -126,16 +126,23 @@ export function RiskList({
       ) : (
         <div className="flex flex-col gap-2">
           {filtered.map((trader) => {
-            const levelColor = RISK_LEVEL_COLOR_VAR[trader.risk.level];
+            // Low risk (0-24) gets no stripe and no wash — the stripe
+            // marks the traders that are actually a concern, not every
+            // row in the list.
+            const levelColor = trader.risk.level === "low" ? null : RISK_LEVEL_COLOR_VAR[trader.risk.level];
             return (
             <Card
               key={trader.id}
               className={cn("relative overflow-hidden pl-4 flex flex-col gap-2", notingId === trader.id && "gap-0")}
-              style={{
-                background: `linear-gradient(135deg, color-mix(in srgb, ${levelColor} 4%, var(--color-surface-2)), var(--color-surface-2) 65%)`,
-              }}
+              style={
+                levelColor
+                  ? {
+                      background: `linear-gradient(135deg, color-mix(in srgb, ${levelColor} 4%, var(--color-surface-2)), var(--color-surface-2) 65%)`,
+                    }
+                  : undefined
+              }
             >
-              <span className="absolute inset-y-0 left-0 w-[3px]" style={{ background: levelColor }} />
+              {levelColor && <span className="absolute inset-y-0 left-0 w-[3px]" style={{ background: levelColor }} />}
               <div className="flex items-center justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">
                   <RiskBadge risk={trader.risk} size="lg" showBreakdown={false} />

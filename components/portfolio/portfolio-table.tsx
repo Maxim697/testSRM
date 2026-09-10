@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tier } from "@/components/ui/tier";
 import { RiskBadge } from "@/components/risk/risk-badge";
+import { RISK_LEVEL_COLOR_VAR } from "@/lib/risk-score";
 import { createClient } from "@/lib/supabase/client";
 import { AUDIT_ACTIONS, logAudit } from "@/lib/audit-log";
 import type { EnrichedTrader } from "@/lib/trader-metrics";
@@ -105,7 +106,11 @@ export function PortfolioTable({
       // should ever truncate, not the routine case.
       width: "210px",
       accessor: (t) => (
-        <Link href={`/trader/${t.id}`} prefetch={false} className="font-medium text-accent hover:underline">
+        <Link
+          href={`/trader/${t.id}`}
+          prefetch={false}
+          className="font-medium text-text-primary hover:text-accent hover:underline"
+        >
           {t.code}
         </Link>
       ),
@@ -293,22 +298,12 @@ export function PortfolioTable({
         columns={columns}
         data={filtered}
         rowKey={(t) => t.id}
-        // A full-row red wash was too loud for something that shows up on
-        // every problem row in a dense table — a thin accent stripe
-        // (rowAccent, below) carries the same signal much more quietly.
-        // Folded the status/contact-staleness condition that used to
-        // drive the background into the stripe color too, so nothing
-        // that was flagged before stops being flagged now.
-        rowAccent={(t) =>
-          t.risk.level === "critical" ||
-          t.risk.level === "high" ||
-          t.status === "red" ||
-          (t.daysSinceContact !== null && t.daysSinceContact >= 5)
-            ? "var(--color-negative)"
-            : t.risk.level === "medium"
-              ? "var(--color-warning)"
-              : undefined
-        }
+        // The stripe is strictly the trader's risk level and nothing else
+        // (status, contact staleness etc. already have their own cells) —
+        // red for critical (75-100), orange for high (50-74), amber for
+        // medium (25-49), no stripe for low. So it flags the exceptions,
+        // not most of the table.
+        rowAccent={(t) => (t.risk.level === "low" ? undefined : RISK_LEVEL_COLOR_VAR[t.risk.level])}
       />
     </div>
   );
