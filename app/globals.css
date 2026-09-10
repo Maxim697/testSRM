@@ -175,7 +175,7 @@ body {
 .chart-grid-line {
   stroke: var(--color-border);
   stroke-width: 1;
-  stroke-opacity: 0.6;
+  stroke-opacity: 0.4;
 }
 
 .chart-tooltip {

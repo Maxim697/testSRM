@@ -1,51 +1,55 @@
 /*
   Design tokens. Single source of truth for the whole app.
 
-  Visual direction: dark-first, glass top layers (header, sidebar, modals,
-  dropdowns, tooltips — never tables/KPI cards/charts). Each nav section
-  (Аналітика/CRM/Платформа) carries its own accent hue that reaches into
-  its own pages (--accent below is repointed per section by
-  SectionAccentScope — see components/layout/section-accent-scope.tsx),
-  not just the sidebar. Status colors (green/amber/red) and --info (a
-  fixed cyan, "neutral information" — happens to equal the Analytics
-  section's own hue) are separate from that and never repointed — they
-  mean the same thing everywhere. Inter everywhere. Components must never
-  hardcode colors — reference these variables (via the Tailwind theme
-  mapping in globals.css) only.
+  Visual direction: cold, muted, industrial blue. Dark-first, glass top
+  layers (header, sidebar, modals, dropdowns, tooltips — never
+  tables/KPI cards/charts). Every neutral carries a blue cast — never a
+  flat gray, never a violet one. Each nav section (Аналітика/CRM/
+  Платформа) carries its own hue inside the blue family (teal / blue /
+  indigo) that reaches into its own pages (--accent below is repointed
+  per section by SectionAccentScope — see
+  components/layout/section-accent-scope.tsx), not just the sidebar.
+  Status colors (green/amber/orange/red) and --info (a fixed teal,
+  "neutral information" — equal to the Analytics section's own hue) are
+  separate from that and never repointed — they mean the same thing
+  everywhere. Inter everywhere. Components must never hardcode colors —
+  reference these variables (via the Tailwind theme mapping in
+  globals.css) only.
 */
 
 :root {
-  /* Surfaces — 4 levels, each a clearly distinct step, not a gradient */
-  --surface-0: #0b0b0f; /* page background */
-  --surface-1: #131218; /* sidebar, header, recessed inputs */
-  --surface-2: #1a1922; /* cards, table containers */
-  --surface-3: #221f2c; /* popovers, menus, tooltips, hover/active states */
+  /* Surfaces — 4 levels, each a clearly distinct step, all with a blue cast */
+  --surface-0: #0a0f18; /* page background */
+  --surface-1: #0e141f; /* sidebar, header */
+  --surface-2: #141b28; /* cards, table containers */
+  --surface-3: #1a2231; /* raised card, hover/active states, recessed inputs */
 
-  /* Text */
-  --text-primary: #f1f3f6;
-  --text-secondary: #a2acbd;
-  --text-muted: #6b7488;
+  /* Text — blue-cool, never neutral gray */
+  --text-primary: #e6ecf5;
+  --text-secondary: #8fa0b8;
+  --text-muted: #5d6d84;
 
   /* Borders — thin, but readable against surfaces */
-  --border: #2e2b3a;
-  --border-strong: #3c3750;
+  --border: #253044;
+  --border-strong: #33415a;
 
-  /* Per-section accents — Аналітика / CRM / Платформа. --accent (below)
-     is one of these three at any given moment, repointed by
-     SectionAccentScope to match whichever section the current page
-     belongs to; these three named ones are also used directly wherever
-     something needs to show a *specific* section's color regardless of
-     which page is currently open (the sidebar's own group captions and
-     each group's active-item highlight). */
-  --accent-analytics: #22b8cf;
-  --accent-analytics-hover: #3fc7dd;
-  --accent-analytics-bg: rgba(34, 184, 207, 0.16);
-  --accent-crm: #6c5ce7;
-  --accent-crm-hover: #7d6dea;
-  --accent-crm-bg: rgba(108, 92, 231, 0.16);
-  --accent-platform: #e8a33d;
-  --accent-platform-hover: #edb75c;
-  --accent-platform-bg: rgba(232, 163, 61, 0.16);
+  /* Per-section accents — Аналітика (teal) / CRM (blue) / Платформа
+     (indigo), all inside the blue family so none of them fights the base.
+     --accent (below) is one of these three at any given moment, repointed
+     by SectionAccentScope to match whichever section the current page
+     belongs to; the three named ones are also used directly wherever
+     something needs a *specific* section's color regardless of which page
+     is currently open (the sidebar's own group captions and each group's
+     active-item highlight). */
+  --accent-analytics: #2b9fb3;
+  --accent-analytics-hover: #35b3c8;
+  --accent-analytics-bg: rgba(43, 159, 179, 0.15);
+  --accent-crm: #3b7dd8;
+  --accent-crm-hover: #4d8ce5;
+  --accent-crm-bg: rgba(59, 125, 216, 0.15);
+  --accent-platform: #6b6fd4;
+  --accent-platform-hover: #7d81de;
+  --accent-platform-bg: rgba(107, 111, 212, 0.15);
 
   /* The current accent — primary actions, active nav state, links, focus
      ring, page titles, chart line defaults. Repointed per nav section;
@@ -55,63 +59,59 @@
   --accent-bg: var(--accent-crm-bg);
   --accent-fg: #ffffff;
 
-  /* Semantic — status colors for data (green/amber/red), plus a fixed
-     "neutral information" cyan. Backgrounds at 18% alpha so chips read
-     as saturated color, not a faint tint; badge borders use the same
-     color at 30%. */
-  --positive: #2ecc71;
-  --positive-bg: rgba(46, 204, 113, 0.18);
-  --negative: #ff5c5c;
-  --negative-bg: rgba(255, 92, 92, 0.18);
-  --warning: #f0a938;
-  --warning-bg: rgba(240, 169, 56, 0.18);
+  /* Semantic — status colors for data, plus a fixed "neutral information"
+     teal. Backgrounds at 18% alpha so chips read as saturated color, not
+     a faint tint; badge borders use the same color at 30%. */
+  --positive: #35c07f;
+  --positive-bg: rgba(53, 192, 127, 0.18);
+  --negative: #e5544b;
+  --negative-bg: rgba(229, 84, 75, 0.18);
+  --warning: #e0a23c;
+  --warning-bg: rgba(224, 162, 60, 0.18);
   --info: var(--accent-analytics);
   --info-bg: var(--accent-analytics-bg);
   --emphasis: #ffffff;
 
-  /* A 4th step between warning and negative — used only for the "high"
-     risk band (50-74), so risk reads as a real gray→amber→orange→red
-     escalation instead of just two colors. */
-  --risk-high: #ff8c42;
-  --risk-high-bg: rgba(255, 140, 66, 0.18);
+  /* A 4th step between warning and negative — the "high" risk band
+     (50-74), so risk reads as a real gray→amber→orange→red escalation. */
+  --risk-high: #ec7f3c;
+  --risk-high-bg: rgba(236, 127, 60, 0.18);
 
   /* Focus ring — follows the current section accent */
   --focus-ring: var(--accent);
 
-  /* Data series palette — semantic colors first (so a chart that just
-     wants "series 1, 2, 3…" already gets meaningful colors), then four
-     more fixed, non-semantic hues for charts with more lines than that. */
-  --series-1: var(--info);
-  --series-2: var(--positive);
-  --series-3: var(--warning);
-  --series-4: var(--accent-crm);
-  --series-5: #ea5fa0;
-  --series-6: #33b8c4;
-  --series-7: #e8823b;
-  --series-8: #9fcf3e;
+  /* Data series palette — cold family: blue, teal, green, indigo, amber,
+     orange, then two muted blue-grays for charts with more lines. */
+  --series-1: var(--accent-crm);
+  --series-2: var(--accent-analytics);
+  --series-3: var(--positive);
+  --series-4: var(--accent-platform);
+  --series-5: var(--warning);
+  --series-6: var(--risk-high);
+  --series-7: var(--text-secondary);
+  --series-8: var(--text-muted);
 
-  /* Tier colors — metallic, distinct from the 4 status/semantic colors
-     above */
-  --tier-gold: #e0b354;
-  --tier-gold-bg: rgba(224, 179, 84, 0.18);
-  --tier-silver: #b8bcc8;
-  --tier-silver-bg: rgba(184, 188, 200, 0.18);
-  --tier-bronze: #c08457;
-  --tier-bronze-bg: rgba(192, 132, 87, 0.18);
+  /* Tier colors — metallic, muted to sit inside the cold palette */
+  --tier-gold: #d4a544;
+  --tier-gold-bg: rgba(212, 165, 68, 0.18);
+  --tier-silver: #a8b4c8;
+  --tier-silver-bg: rgba(168, 180, 200, 0.18);
+  --tier-bronze: #b8794f;
+  --tier-bronze-bg: rgba(184, 121, 79, 0.18);
 
   /* Popover / dropdown / modal layer — glass, see .glass / .popover-surface
      in globals.css. The only place a shadow appears, soft and low. */
-  --popover-bg: var(--surface-3);
-  --shadow-popover: 0 4px 16px rgba(0, 0, 0, 0.32), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --popover-bg: #1e2735;
+  --shadow-popover: 0 4px 16px rgba(0, 0, 0, 0.36), 0 1px 2px rgba(0, 0, 0, 0.28);
 
   /* Glass — top layers only (header, sidebar, modals, popovers, tooltips).
      Never used on tables, KPI cards or charts — those stay fully opaque. */
-  --glass-bg: rgba(15, 14, 20, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-bg: rgba(16, 22, 33, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.08);
 
   /* Scrollbar */
   --scrollbar-thumb: var(--border-strong);
-  --scrollbar-thumb-hover: #4c4664;
+  --scrollbar-thumb-hover: #3f5170;
 
   /* Motion */
   --transition-fast: 150ms;
@@ -126,68 +126,68 @@
 }
 
 [data-theme="light"] {
-  --surface-0: #e9ebef;
-  --surface-1: #f2f3f6;
+  --surface-0: #f4f7fb;
+  --surface-1: #eaf0f8;
   --surface-2: #ffffff;
-  --surface-3: #ece9f6;
+  --surface-3: #e7eef7;
 
-  --text-primary: #14171c;
-  --text-secondary: #545c6b;
-  --text-muted: #838b99;
+  --text-primary: #16202e;
+  --text-secondary: #5d6d84;
+  --text-muted: #8a97a8;
 
-  --border: rgba(20, 23, 28, 0.14);
-  --border-strong: rgba(20, 23, 28, 0.26);
+  --border: #dde5ef;
+  --border-strong: #c4d0de;
 
-  --accent-analytics: #0e8fa3;
-  --accent-analytics-hover: #0c7d8f;
-  --accent-analytics-bg: rgba(14, 143, 163, 0.12);
-  --accent-crm: #5b4bd1;
-  --accent-crm-hover: #4c3ec2;
-  --accent-crm-bg: rgba(91, 75, 209, 0.12);
-  --accent-platform: #a4711e;
-  --accent-platform-hover: #8f6119;
-  --accent-platform-bg: rgba(164, 113, 30, 0.12);
+  --accent-analytics: #1f8697;
+  --accent-analytics-hover: #2b9fb3;
+  --accent-analytics-bg: rgba(31, 134, 151, 0.12);
+  --accent-crm: #2f6dc4;
+  --accent-crm-hover: #3b7dd8;
+  --accent-crm-bg: rgba(47, 109, 196, 0.12);
+  --accent-platform: #5a5ec2;
+  --accent-platform-hover: #6b6fd4;
+  --accent-platform-bg: rgba(90, 94, 194, 0.12);
 
   --accent: var(--accent-crm);
   --accent-hover: var(--accent-crm-hover);
   --accent-bg: var(--accent-crm-bg);
   --accent-fg: #ffffff;
 
-  --positive: #1f9d57;
-  --positive-bg: rgba(31, 157, 87, 0.16);
-  --negative: #d8394c;
-  --negative-bg: rgba(216, 57, 76, 0.16);
-  --warning: #b97f1e;
-  --warning-bg: rgba(185, 127, 30, 0.16);
+  --positive: #1f9d5f;
+  --positive-bg: rgba(31, 157, 95, 0.14);
+  --negative: #cf4038;
+  --negative-bg: rgba(207, 64, 56, 0.14);
+  --warning: #b9801f;
+  --warning-bg: rgba(185, 128, 31, 0.14);
   --info: var(--accent-analytics);
   --info-bg: var(--accent-analytics-bg);
-  --emphasis: #0e0e10;
+  --emphasis: #16202e;
 
-  --risk-high: #c1621e;
-  --risk-high-bg: rgba(193, 98, 30, 0.14);
+  --risk-high: #c9612a;
+  --risk-high-bg: rgba(201, 97, 42, 0.14);
 
-  --series-1: var(--info);
-  --series-2: var(--positive);
-  --series-3: var(--warning);
-  --series-4: var(--accent-crm);
-  --series-5: #c94886;
-  --series-6: #1f96a1;
-  --series-7: #c96a2b;
-  --series-8: #7aa82b;
+  --series-1: var(--accent-crm);
+  --series-2: var(--accent-analytics);
+  --series-3: var(--positive);
+  --series-4: var(--accent-platform);
+  --series-5: var(--warning);
+  --series-6: var(--risk-high);
+  --series-7: #5d6d84;
+  --series-8: #8a97a8;
 
-  --tier-gold: #a9791a;
-  --tier-gold-bg: rgba(169, 121, 26, 0.14);
-  --tier-silver: #6b7280;
-  --tier-silver-bg: rgba(107, 114, 128, 0.14);
-  --tier-bronze: #935a30;
-  --tier-bronze-bg: rgba(147, 90, 48, 0.14);
+  --tier-gold: #b28a2e;
+  --tier-gold-bg: rgba(178, 138, 46, 0.14);
+  --tier-silver: #6b7688;
+  --tier-silver-bg: rgba(107, 118, 136, 0.14);
+  --tier-bronze: #9a5f3c;
+  --tier-bronze-bg: rgba(154, 95, 60, 0.14);
 
-  --popover-bg: var(--surface-3);
-  --shadow-popover: 0 4px 16px rgba(20, 20, 30, 0.1), 0 1px 3px rgba(20, 20, 30, 0.08);
+  --popover-bg: #ffffff;
+  --shadow-popover: 0 4px 16px rgba(22, 32, 46, 0.1), 0 1px 3px rgba(22, 32, 46, 0.08);
 
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(20, 23, 28, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(22, 32, 46, 0.1);
 
   --scrollbar-thumb: var(--border-strong);
-  --scrollbar-thumb-hover: #9099a6;
+  --scrollbar-thumb-hover: #a9b6c6;
 }
