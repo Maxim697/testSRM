@@ -298,12 +298,16 @@ export function PortfolioTable({
         columns={columns}
         data={filtered}
         rowKey={(t) => t.id}
-        // The stripe is strictly the trader's risk level and nothing else
-        // (status, contact staleness etc. already have their own cells) —
-        // red for critical (75-100), orange for high (50-74), amber for
-        // medium (25-49), no stripe for low. So it flags the exceptions,
-        // not most of the table.
-        rowAccent={(t) => (t.risk.level === "low" ? undefined : RISK_LEVEL_COLOR_VAR[t.risk.level])}
+        // Only the top two risk bands get a stripe — red for critical
+        // (75-100), orange for high (50-74). Medium (25-49) is common
+        // enough that striping it flags most of the table; that level is
+        // still shown in the "Ризик" column and on the trader card, just
+        // not as a row stripe.
+        rowAccent={(t) =>
+          t.risk.level === "critical" || t.risk.level === "high"
+            ? RISK_LEVEL_COLOR_VAR[t.risk.level]
+            : undefined
+        }
       />
     </div>
   );

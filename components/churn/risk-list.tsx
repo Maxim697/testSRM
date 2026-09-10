@@ -126,10 +126,14 @@ export function RiskList({
       ) : (
         <div className="flex flex-col gap-2">
           {filtered.map((trader) => {
-            // Low risk (0-24) gets no stripe and no wash — the stripe
-            // marks the traders that are actually a concern, not every
-            // row in the list.
-            const levelColor = trader.risk.level === "low" ? null : RISK_LEVEL_COLOR_VAR[trader.risk.level];
+            // Only critical (75-100) and high (50-74) get a stripe/wash —
+            // medium and low are common enough that marking them would
+            // flag most of the list. The risk score itself (the big
+            // number on the left) still carries the full level.
+            const levelColor =
+              trader.risk.level === "critical" || trader.risk.level === "high"
+                ? RISK_LEVEL_COLOR_VAR[trader.risk.level]
+                : null;
             return (
             <Card
               key={trader.id}
