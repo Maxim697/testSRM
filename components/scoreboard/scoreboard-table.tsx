@@ -8,7 +8,17 @@ import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tier } from "@/components/ui/tier";
 import { Sparkline } from "@/components/ui/sparkline";
+import { cn } from "@/lib/utils";
 import type { EnrichedTrader } from "@/lib/trader-metrics";
+
+// Podium colors for the top 3 ranks — the same metallic tokens the Tier
+// pill uses. Applied to the rank number only (no row fill), so the
+// sparkline in those rows stays readable.
+const RANK_CLASS: Record<number, string> = {
+  1: "font-bold text-tier-gold",
+  2: "font-bold text-tier-silver",
+  3: "font-bold text-tier-bronze",
+};
 
 const STATUS_LABELS: Record<string, string> = { green: "Green", amber: "Amber", red: "Red" };
 const STATUS_BADGE: Record<string, "green" | "amber" | "red"> = {
@@ -50,7 +60,9 @@ export function ScoreboardTable({ rows }: { rows: Row[] }) {
     {
       key: "rank",
       header: "#",
-      accessor: (r) => <span className="tabular-nums text-text-secondary">{r.rank}</span>,
+      accessor: (r) => (
+        <span className={cn("tabular-nums", RANK_CLASS[r.rank] ?? "text-text-secondary")}>{r.rank}</span>
+      ),
       sortValue: (r) => r.rank,
       width: "48px",
     },
@@ -133,12 +145,7 @@ export function ScoreboardTable({ rows }: { rows: Row[] }) {
         </Select>
       </Card>
 
-      <DataTable
-        columns={columns}
-        data={filtered}
-        rowKey={(r) => r.trader.id}
-        rowClassName={(r) => (r.rank <= 3 ? "bg-positive-bg" : undefined)}
-      />
+      <DataTable columns={columns} data={filtered} rowKey={(r) => r.trader.id} />
     </div>
   );
 }

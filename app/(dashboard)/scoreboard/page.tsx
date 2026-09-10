@@ -51,10 +51,10 @@ export default async function ScoreboardPage() {
         <>
           <KpiRow
             items={[
-              { label: "Середній score", value: avgScore.toString() },
-              { label: "Green / Amber / Red", value: `${greenCount} / ${amberCount} / ${redCount}` },
-              { label: "Вище 50 балів", value: above50.toString() },
-              { label: "Всього трейдерів", value: traders.length.toString() },
+              { label: "Середній score", value: avgScore.toString(), status: "neutral" },
+              { label: "Green / Amber / Red", value: `${greenCount} / ${amberCount} / ${redCount}`, status: "neutral" },
+              { label: "Вище 50 балів", value: above50.toString(), status: "positive" },
+              { label: "Всього трейдерів", value: traders.length.toString(), status: "neutral" },
             ]}
           />
 
