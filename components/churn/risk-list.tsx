@@ -160,7 +160,7 @@ export function RiskList({
                   >
                     Додати нотатку
                   </Button>
-                  <Button href={`/trader/${trader.id}`} variant="primary">
+                  <Button href={`/trader/${trader.id}`} variant="accent-soft">
                     Відкрити картку
                   </Button>
                 </div>

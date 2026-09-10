@@ -31,7 +31,7 @@ export function RiskBadge({
     >
       <span
         className={cn(
-          "inline-flex items-center gap-1 font-bold tabular-nums leading-none",
+          "inline-flex items-center gap-1 font-extrabold tabular-nums leading-none",
           RISK_LEVEL_TEXT_CLASS[risk.level],
           SIZE_CLASSES[size],
           className,

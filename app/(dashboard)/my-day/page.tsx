@@ -80,7 +80,7 @@ export default async function MyDayPage() {
             {attentionList.map((trader) => (
               <Card key={trader.id} className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  <RiskBadge risk={trader.risk} />
+                  <RiskBadge risk={trader.risk} size="lg" />
                   <div className="min-w-0">
                     <div className="font-medium text-text-primary">{trader.code}</div>
                     <div className="mt-1">

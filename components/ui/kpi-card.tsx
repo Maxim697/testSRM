@@ -9,7 +9,10 @@ const STATUS_COLOR_VAR: Record<KpiStatus, string> = {
   negative: "var(--color-negative)",
   warning: "var(--color-warning)",
   info: "var(--info)",
-  neutral: "var(--color-accent)",
+  // A KPI with no inherent good/bad direction (a plain count) — a muted
+  // blue-gray bar, never the section accent. Blue on a KPI bar would
+  // read as "this means something" when it doesn't.
+  neutral: "var(--color-text-muted)",
 };
 
 const DELTA_CLASSES: Record<"up" | "down" | "flat", string> = {

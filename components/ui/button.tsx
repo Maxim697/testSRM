@@ -8,11 +8,11 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: "bg-accent text-accent-fg hover:bg-accent-hover",
   secondary: "bg-surface-3 text-text-primary border border-border hover:border-border-strong",
   ghost: "text-text-secondary hover:bg-surface-2 hover:text-text-primary",
-  // A quieter alternative to primary for a page full of repeated "open
-  // this row" actions — accent-tinted rather than solid, so it doesn't
-  // compete with the one real primary action on the page, but still
-  // reads as the current section's color instead of flat gray.
-  "accent-soft": "bg-accent-bg text-accent border border-accent/25 hover:bg-accent/25",
+  // The row-level "open this" action — secondary to whatever the one
+  // real primary action on the page is, so it stays ghosted (no fill,
+  // muted text, hairline border) and only picks up the accent on hover.
+  "accent-soft":
+    "border border-border text-text-secondary hover:bg-accent/12 hover:text-accent hover:border-accent/25",
 };
 
 const BASE_CLASSES =
