@@ -8,6 +8,8 @@ import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tier } from "@/components/ui/tier";
 import { Sparkline } from "@/components/ui/sparkline";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SearchIcon } from "@/components/ui/empty-icons";
 import { cn } from "@/lib/utils";
 import type { EnrichedTrader } from "@/lib/trader-metrics";
 
@@ -145,7 +147,15 @@ export function ScoreboardTable({ rows }: { rows: Row[] }) {
         </Select>
       </Card>
 
-      <DataTable columns={columns} data={filtered} rowKey={(r) => r.trader.id} />
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={<SearchIcon />}
+          title="Нічого не знайдено"
+          description="Жоден трейдер не відповідає обраним фільтрам. Спробуйте прибрати частину умов."
+        />
+      ) : (
+        <DataTable columns={columns} data={filtered} rowKey={(r) => r.trader.id} />
+      )}
     </div>
   );
 }

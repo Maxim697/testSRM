@@ -6,6 +6,8 @@ import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
 import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SearchIcon } from "@/components/ui/empty-icons";
 import { Tier } from "@/components/ui/tier";
 import { RiskBadge } from "@/components/risk/risk-badge";
 import { RISK_LEVEL_COLOR_VAR } from "@/lib/risk-score";
@@ -294,6 +296,13 @@ export function PortfolioTable({
         />
       </div>
 
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={<SearchIcon />}
+          title="Нічого не знайдено"
+          description="Жоден трейдер не відповідає обраним фільтрам. Спробуйте прибрати частину умов."
+        />
+      ) : (
       <DataTable
         columns={columns}
         data={filtered}
@@ -309,6 +318,7 @@ export function PortfolioTable({
             : undefined
         }
       />
+      )}
     </div>
   );
 }

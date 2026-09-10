@@ -2,7 +2,8 @@
  * navigating (see app/(dashboard)/loading.tsx) — a rough approximation of
  * "title + KPI row + table" that fits most pages well enough to make the
  * transition feel instant while the real content streams in behind it.
- * Static blocks only, no animation, no layout-affecting motion. */
+ * Blocks pulse via .skeleton-block (opacity only) — nothing here changes
+ * size or position. */
 export function PageSkeleton() {
   return (
     <div className="flex flex-1 flex-col gap-3" aria-hidden="true">

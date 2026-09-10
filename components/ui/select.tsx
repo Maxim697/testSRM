@@ -156,7 +156,7 @@ export function Select({
         disabled={disabled}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={handleKeyDown}
-        className="field flex h-8 w-full items-center justify-between gap-1.5 px-2.5 text-left text-base text-text-primary outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        className="field flex h-field w-full items-center justify-between gap-1.5 px-2.5 text-left text-base text-text-primary disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span className="truncate">{selectedOption?.label ?? placeholder ?? ""}</span>
         <ChevronIcon open={open} />
@@ -175,7 +175,7 @@ export function Select({
               onMouseEnter={() => setHighlighted(i)}
               onClick={() => commit(i)}
               className={cn(
-                "flex h-8 cursor-pointer items-center whitespace-nowrap rounded-control px-2.5",
+                "flex h-menu-item cursor-pointer items-center whitespace-nowrap rounded-control px-2.5",
                 opt.disabled
                   ? "cursor-not-allowed text-text-muted opacity-50"
                   : i === highlighted

@@ -106,17 +106,28 @@ body {
   background: var(--color-accent-bg);
 }
 
+/* One focus treatment for everything reachable by Tab — buttons, links,
+   fields, selects, menu items, sortable headers: a 2px accent ring held
+   2px off the element. Components must not set `outline: none` without
+   replacing it. */
 :focus-visible {
   outline: 2px solid var(--color-focus-ring);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
 .w-sidebar {
   width: var(--sidebar-width);
 }
 
+/* Shared sizing tokens — table row / input+select / menu item. */
 .h-row {
   height: var(--row-height);
+}
+.h-field {
+  height: var(--field-height);
+}
+.h-menu-item {
+  height: var(--menu-item-height);
 }
 
 /* ==========================================================================
@@ -160,12 +171,10 @@ body {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-control);
 }
-.field:focus,
-.field:focus-visible,
+/* Keyboard focus is the shared :focus-visible ring above. This is just the
+   persistent hint on a custom <select>'s trigger while its list is open. */
 .field[aria-expanded="true"] {
-  outline: none;
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 1px var(--color-accent);
 }
 
 /* ==========================================================================
@@ -244,8 +253,8 @@ body {
 }
 
 /* ==========================================================================
-   Motion — transitions on interactive elements, plus a gentle lift on
-   hover for buttons (`.btn-lift`).
+   Motion — 120ms ease on color/background/border/opacity for every
+   interactive element. Never on size, position or layout.
    ========================================================================== */
 
 a,
@@ -255,21 +264,14 @@ select,
 textarea,
 [role="button"],
 [role="option"],
-[role="combobox"] {
+[role="combobox"],
+[role="tab"],
+tr {
   transition:
     background-color var(--transition-fast) ease,
     border-color var(--transition-fast) ease,
     color var(--transition-fast) ease,
-    opacity var(--transition-fast) ease,
-    transform var(--transition-fast) ease,
-    box-shadow var(--transition-fast) ease;
-}
-
-.btn-lift:hover {
-  transform: translateY(-1px);
-}
-.btn-lift:active {
-  transform: translateY(0);
+    opacity var(--transition-fast) ease;
 }
 
 /* ==========================================================================
@@ -333,19 +335,20 @@ textarea,
   animation: fade-enter 120ms ease-out;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .page-enter,
-  .row-enter,
-  .popover-enter,
-  .fade-enter {
-    animation: none;
+/* ==========================================================================
+   Skeletons — placeholder blocks that mirror the shape of the content
+   being loaded. Soft opacity-only pulse, 1.5s.
+   ========================================================================== */
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
   }
 }
-
-/* ==========================================================================
-   Skeletons — a flat, static placeholder block. No animation (the loading
-   shell needs to read as instant, not as another thing loading).
-   ========================================================================== */
 
 .skeleton-block {
   display: inline-flex;
@@ -354,4 +357,17 @@ textarea,
   background-color: var(--color-surface-3);
   border-radius: var(--radius-control);
   color: transparent;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter,
+  .row-enter,
+  .popover-enter,
+  .fade-enter {
+    animation: none;
+  }
+  .skeleton-block {
+    animation: none;
+  }
 }

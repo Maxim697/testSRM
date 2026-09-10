@@ -114,15 +114,17 @@
   --scrollbar-thumb-hover: #3f5170;
 
   /* Motion */
-  --transition-fast: 150ms;
+  --transition-fast: 120ms;
 
   /* Radii */
   --radius-card-base: 12px;
   --radius-control-base: 8px;
 
-  /* Layout */
+  /* Layout — every value a multiple of 4 */
   --sidebar-width: 220px;
-  --row-height: 34px;
+  --row-height: 40px;
+  --field-height: 36px;
+  --menu-item-height: 34px;
 }
 
 [data-theme="light"] {

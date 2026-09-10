@@ -69,7 +69,7 @@ export function TraderSelect({
         type="button"
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
-        className="field flex h-8 w-full items-center justify-between gap-1.5 px-2.5 text-left text-base text-text-primary outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        className="field flex h-field w-full items-center justify-between gap-1.5 px-2.5 text-left text-base text-text-primary disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span className={cn("truncate", !value && "text-text-muted")}>{selectedLabel}</span>
         <svg
@@ -89,13 +89,13 @@ export function TraderSelect({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Пошук трейдера..."
-            className="field mb-1.5 h-7 w-full px-2 text-sm text-text-primary outline-none"
+            className="field mb-1.5 h-7 w-full px-2 text-sm text-text-primary"
           />
           <div className="max-h-56 overflow-y-auto">
             <div
               onClick={() => select("")}
               className={cn(
-                "flex h-8 cursor-pointer items-center rounded-control px-2.5 text-sm",
+                "flex h-menu-item cursor-pointer items-center rounded-control px-2.5 text-sm",
                 !value ? "bg-accent-bg text-accent" : "text-text-primary",
               )}
             >
@@ -111,7 +111,7 @@ export function TraderSelect({
                         key={o.id}
                         onClick={() => select(o.id)}
                         className={cn(
-                          "flex h-8 cursor-pointer items-center rounded-control px-2.5 text-sm",
+                          "flex h-menu-item cursor-pointer items-center rounded-control px-2.5 text-sm",
                           o.id === value ? "bg-accent-bg text-accent" : "text-text-primary",
                         )}
                       >

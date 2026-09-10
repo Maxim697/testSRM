@@ -79,7 +79,7 @@ function TeamMenu({
                 setOpen(false);
                 item.action();
               }}
-              className="flex h-8 w-full items-center rounded-control px-2.5 text-left text-base text-text-primary hover:bg-surface-3"
+              className="flex h-menu-item w-full items-center rounded-control px-2.5 text-left text-base text-text-primary hover:bg-surface-3"
             >
               {item.label}
             </button>

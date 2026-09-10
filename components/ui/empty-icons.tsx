@@ -98,6 +98,15 @@ export function SwapIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function SearchIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m21 21-4.3-4.3" />
+    </IconBase>
+  );
+}
+
 export function HistoryIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <IconBase {...props}>

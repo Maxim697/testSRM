@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 
-/** A static loading placeholder bar — flat, no animation. `chars` sizes it
- * roughly to that many characters wide (kept for call-site compatibility
- * with the old block-character version). */
+/** A loading placeholder bar — soft opacity pulse via .skeleton-block.
+ * `chars` sizes it roughly to that many characters wide (kept for
+ * call-site compatibility with the old block-character version). */
 export function Skeleton({
   chars = 12,
   className,

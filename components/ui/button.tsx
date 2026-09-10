@@ -6,8 +6,8 @@ type ButtonVariant = "primary" | "secondary" | "ghost" | "accent-soft";
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: "bg-accent text-accent-fg hover:bg-accent-hover",
-  secondary: "bg-surface-3 text-text-primary border border-border hover:border-border-strong",
-  ghost: "text-text-secondary hover:bg-surface-2 hover:text-text-primary",
+  secondary: "bg-surface-3 text-text-primary border border-border hover:bg-border hover:border-border-strong",
+  ghost: "text-text-secondary hover:bg-surface-3 hover:text-text-primary",
   // The row-level "open this" action — secondary to whatever the one
   // real primary action on the page is, so it stays ghosted (no fill,
   // muted text, hairline border) and only picks up the accent on hover.
@@ -16,7 +16,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
 };
 
 const BASE_CLASSES =
-  "btn-lift inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-control px-3 text-base font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0";
+  "inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-control px-3 text-base font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;

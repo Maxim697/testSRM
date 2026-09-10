@@ -150,7 +150,12 @@ export function ReportDetailModal({
           </div>
 
           {loading ? (
-            <p className="text-sm text-text-muted">Завантаження…</p>
+            <div className="flex flex-col gap-2" aria-hidden="true">
+              <div className="skeleton-block h-3 w-80" />
+              {Array.from({ length: 6 }, (_, i) => (
+                <div key={i} className="skeleton-block h-8 w-full" />
+              ))}
+            </div>
           ) : (
             <div className="flex max-h-[60vh] flex-col gap-3 overflow-y-auto pr-1">
               <p className="text-xs text-text-muted">

@@ -73,7 +73,7 @@ export function Sidebar({
                       // links stay prefetch={false}, this fixed, small set
                       // doesn't have that scaling problem).
                       className={cn(
-                        "flex h-[30px] items-center gap-2 rounded-control px-2 text-base outline-none",
+                        "flex h-menu-item items-center gap-2 rounded-control px-2 text-base",
                         isActive
                           ? "bg-accent-bg font-medium text-accent"
                           : "text-text-secondary hover:bg-surface-2 hover:text-text-primary",

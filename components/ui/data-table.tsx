@@ -144,7 +144,7 @@ export function DataTable<T>({
                 // wait longer and longer for no real benefit, so row 21+
                 // all appear together with row 20 instead of queuing
                 // further behind it.
-                style={index < 20 ? { animationDelay: `${index * 15}ms` } : undefined}
+                style={index < 20 ? { animationDelay: `${index * 12}ms` } : undefined}
               >
                 {columns.map((column, i) => (
                   <td

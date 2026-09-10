@@ -37,7 +37,24 @@ export function AuditHistoryTab({ traderId }: { traderId: string }) {
     { key: "new_value", header: "Стало", accessor: (r) => r.new_value ?? "—" },
   ];
 
-  if (rows === null) return <p className="text-sm text-text-muted">Завантаження…</p>;
+  if (rows === null) {
+    return (
+      <div className="panel overflow-hidden rounded-card" aria-hidden="true">
+        <div className="flex h-9 items-center gap-6 border-b border-border px-3">
+          {Array.from({ length: 5 }, (_, i) => (
+            <div key={i} className="skeleton-block h-3" style={{ width: 60 + (i % 3) * 20 }} />
+          ))}
+        </div>
+        {Array.from({ length: 4 }, (_, row) => (
+          <div key={row} className="flex h-row items-center gap-6 border-b border-border px-3 last:border-b-0">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div key={i} className="skeleton-block h-3" style={{ width: 50 + ((i + row) % 4) * 18 }} />
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return rows.length === 0 ? (
     <EmptyState title="Історія змін порожня" description="Змін по цьому трейдеру ще не зафіксовано." />

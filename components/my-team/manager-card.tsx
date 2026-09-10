@@ -52,7 +52,7 @@ export function ManagerCard({
     <div
       className={cn(
         "panel flex cursor-pointer flex-col gap-3 rounded-card border p-4",
-        problem ? "border-negative" : "border-transparent",
+        problem ? "border-negative" : "border-transparent hover:border-border-strong",
       )}
       onClick={onOpenTraders}
       role="button"

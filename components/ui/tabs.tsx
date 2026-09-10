@@ -41,7 +41,7 @@ export function Tabs({
             type="button"
             onClick={() => handleSelect(item.value)}
             className={cn(
-              "relative h-8 px-3 text-base font-medium text-text-secondary transition-colors hover:text-text-primary",
+              "relative h-8 px-3 text-base font-medium text-text-secondary hover:text-text-primary",
               isActive && "text-text-primary",
             )}
           >
