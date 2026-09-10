@@ -130,7 +130,7 @@ export function ScoreTrendChart({
       </svg>
       {hovered && (
         <div
-          className="popover-surface pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
+          className="popover-surface backdrop-blur-lg pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
           style={{
             left: `${(hovered.x / WIDTH) * 100}%`,
             top: 0,

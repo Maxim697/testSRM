@@ -165,7 +165,7 @@ export function Select({
         <ul
           id={listboxId}
           role="listbox"
-          className="popover-surface popover-enter absolute left-0 top-full z-30 mt-1 max-h-60 w-full min-w-max overflow-y-auto rounded-control p-1 text-base"
+          className="popover-surface backdrop-blur-lg popover-enter absolute left-0 top-full z-30 mt-1 max-h-60 w-full min-w-max overflow-y-auto rounded-control p-1 text-base"
         >
           {options.map((opt, i) => (
             <li

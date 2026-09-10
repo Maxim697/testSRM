@@ -25,7 +25,7 @@ export function DualLineChart({
   points,
   labelA,
   labelB,
-  colorA = "var(--info)",
+  colorA = "var(--color-series-1)",
   colorB = "var(--color-series-4)",
 }: {
   points: DualLinePoint[];
@@ -118,7 +118,7 @@ export function DualLineChart({
       </svg>
       {hoveredWeek && hoveredX !== null && (
         <div
-          className="popover-surface pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
+          className="popover-surface backdrop-blur-lg pointer-events-none absolute rounded-control px-2 py-1 text-xs text-text-primary"
           style={{ left: `${(hoveredX / WIDTH) * 100}%`, top: 0, transform: "translate(-50%, -110%)" }}
         >
           <div className="text-text-muted">{formatDate(hoveredWeek.weekStart)}</div>

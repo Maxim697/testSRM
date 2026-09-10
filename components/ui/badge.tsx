@@ -4,14 +4,14 @@ import { cn } from "@/lib/utils";
 type BadgeVariant = "green" | "amber" | "red" | "neutral";
 
 const VARIANT_CLASSES: Record<BadgeVariant, string> = {
-  green: "bg-positive-bg text-positive",
-  amber: "bg-warning-bg text-warning",
-  red: "bg-negative-bg text-negative",
-  neutral: "bg-surface-3 text-text-secondary",
+  green: "bg-positive-bg text-positive border-positive/35",
+  amber: "bg-warning-bg text-warning border-warning/35",
+  red: "bg-negative-bg text-negative border-negative/35",
+  neutral: "bg-surface-3 text-text-secondary border-transparent",
 };
 
-/** Compact status pill: 15%-alpha background in the status color, text in
- * the full color, 6px radius. */
+/** Compact status pill: alpha background in the status color, a matching
+ * border at low opacity, text in the full color. */
 export function Badge({
   variant = "neutral",
   className,
@@ -21,7 +21,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center whitespace-nowrap rounded-control px-1.5 py-0.5 text-xs font-medium",
+        "inline-flex items-center whitespace-nowrap rounded-control border px-1.5 py-0.5 text-xs font-medium",
         VARIANT_CLASSES[variant],
         className,
       )}

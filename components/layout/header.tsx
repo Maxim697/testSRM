@@ -15,10 +15,13 @@ export function Header({ profile, notifications }: { profile: Profile; notificat
   const overrideTitle = usePageTitle();
 
   return (
-    <header className="sticky top-0 z-20 flex h-12 shrink-0 items-center justify-between bg-surface-0 px-4">
-      <h2 className="whitespace-nowrap text-lg font-semibold text-text-primary">
-        {overrideTitle ?? match?.item.label ?? "CRM"}
-      </h2>
+    <header className="glass backdrop-blur-lg sticky top-0 z-20 flex h-12 shrink-0 items-center justify-between border-b border-border px-4">
+      <div className="flex items-center gap-2.5">
+        {match && <span className="h-2 w-2 rounded-full bg-accent" />}
+        <h2 className="whitespace-nowrap text-lg font-medium text-text-primary">
+          {overrideTitle ?? match?.item.label ?? "CRM"}
+        </h2>
+      </div>
 
       <div className="flex shrink-0 items-center gap-3">
         <Badge variant="neutral" className="whitespace-nowrap">

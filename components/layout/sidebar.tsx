@@ -39,7 +39,7 @@ export function Sidebar({
   const activePath = pendingHref ?? pathname;
 
   return (
-    <aside className="flex h-full w-sidebar shrink-0 flex-col overflow-y-auto bg-surface-1">
+    <aside className="glass backdrop-blur-lg flex h-full w-sidebar shrink-0 flex-col overflow-y-auto border-r border-border">
       <div className="flex h-12 shrink-0 items-center px-4">
         <span className="text-lg font-semibold text-text-primary">CRM</span>
       </div>
@@ -54,7 +54,10 @@ export function Sidebar({
                 const isActive = activePath === item.href || activePath.startsWith(`${item.href}/`);
                 const Icon = NAV_ICONS[item.href];
                 return (
-                  <li key={item.href}>
+                  <li key={item.href} className="relative">
+                    {isActive && (
+                      <span className="absolute inset-y-1 left-0 w-0.5 rounded-full bg-accent" aria-hidden="true" />
+                    )}
                     <Link
                       href={item.href}
                       onClick={() => setPendingHref(item.href)}
@@ -70,11 +73,13 @@ export function Sidebar({
                       className={cn(
                         "flex h-[30px] items-center gap-2 rounded-control px-2 text-base outline-none",
                         isActive
-                          ? "bg-surface-3 font-medium text-text-primary"
+                          ? "bg-accent-bg font-medium text-accent"
                           : "text-text-secondary hover:bg-surface-2 hover:text-text-primary",
                       )}
                     >
-                      {Icon && <Icon className="shrink-0 text-text-muted" aria-hidden="true" />}
+                      {Icon && (
+                        <Icon className={cn("shrink-0", isActive ? "text-accent" : "text-text-muted")} aria-hidden="true" />
+                      )}
                       <span className="truncate">{item.label}</span>
                       {unreadHrefs?.has(item.href) && (
                         <span className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />

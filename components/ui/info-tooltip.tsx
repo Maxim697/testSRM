@@ -25,7 +25,7 @@ export function InfoTooltip({ text }: { text: string }) {
         // were on the same element, popping the tooltip off-center for the
         // 140ms the animation runs.
         <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1.5 w-56 -translate-x-1/2">
-          <span className="popover-surface popover-enter block rounded-control p-2 text-xs font-normal normal-case text-text-secondary">
+          <span className="popover-surface backdrop-blur-lg popover-enter block rounded-control p-2 text-xs font-normal normal-case text-text-secondary">
             {text}
           </span>
         </span>

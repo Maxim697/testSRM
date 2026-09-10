@@ -36,7 +36,12 @@ export function KpiCard({
   const colorVar = STATUS_COLOR_VAR[status];
 
   return (
-    <Card className={cn("relative overflow-hidden pl-4", className)}>
+    <Card
+      className={cn("relative overflow-hidden pl-4", className)}
+      style={{
+        background: `linear-gradient(135deg, color-mix(in srgb, ${colorVar} 10%, var(--color-surface-2)), var(--color-surface-2) 65%)`,
+      }}
+    >
       <span className="absolute inset-y-0 left-0 w-[3px] rounded-r-full" style={{ background: colorVar }} />
       <div className="field-label">{label}</div>
       <Typewriter

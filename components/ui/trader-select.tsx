@@ -83,7 +83,7 @@ export function TraderSelect({
         </svg>
       </button>
       {open && (
-        <div className="popover-surface popover-enter absolute left-0 top-full z-30 mt-1 w-64 rounded-control p-1.5">
+        <div className="popover-surface backdrop-blur-lg popover-enter absolute left-0 top-full z-30 mt-1 w-64 rounded-control p-1.5">
           <input
             ref={inputRef}
             value={search}

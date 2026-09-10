@@ -66,7 +66,7 @@ function TeamMenu({
         <MenuIcon />
       </button>
       {open && (
-        <div className="popover-surface popover-enter absolute right-0 top-full z-20 mt-1 w-56 rounded-card p-1">
+        <div className="popover-surface backdrop-blur-lg popover-enter absolute right-0 top-full z-20 mt-1 w-56 rounded-card p-1">
           {[
             { label: "Перейменувати", action: onRename },
             { label: "Змінити тімліда", action: onChangeLead },

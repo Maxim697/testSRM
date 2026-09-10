@@ -6,12 +6,12 @@ type ButtonVariant = "primary" | "secondary" | "ghost";
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: "bg-accent text-accent-fg hover:bg-accent-hover",
-  secondary: "bg-surface-3 text-text-primary hover:bg-border-strong",
+  secondary: "bg-surface-3 text-text-primary border border-border hover:border-border-strong",
   ghost: "text-text-secondary hover:bg-surface-2 hover:text-text-primary",
 };
 
 const BASE_CLASSES =
-  "inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-control px-3 text-base font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50";
+  "btn-lift inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-control px-3 text-base font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
