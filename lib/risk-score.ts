@@ -9,6 +9,26 @@ export const RISK_LEVEL_LABELS: Record<RiskLevel, string> = {
   critical: "Критичний",
 };
 
+/** The color a risk level reads as — a real 4-step gray → amber → orange →
+ * red escalation matching the 0-24 / 25-49 / 50-74 / 75-100 score bands
+ * below, not a 2-color "fine or not" split. Shared by anything that shows
+ * risk level as a stripe, a tint, or the score number itself. */
+export const RISK_LEVEL_COLOR_VAR: Record<RiskLevel, string> = {
+  low: "var(--color-border-strong)",
+  medium: "var(--color-warning)",
+  high: "var(--color-risk-high)",
+  critical: "var(--color-negative)",
+};
+
+/** Same 4 colors as Tailwind text-color utility classes, for places that
+ * only need to color text (not a stripe/tint that needs the raw var). */
+export const RISK_LEVEL_TEXT_CLASS: Record<RiskLevel, string> = {
+  low: "text-text-muted",
+  medium: "text-warning",
+  high: "text-risk-high",
+  critical: "text-negative",
+};
+
 export function riskLevel(score: number): RiskLevel {
   if (score >= 75) return "critical";
   if (score >= 50) return "high";

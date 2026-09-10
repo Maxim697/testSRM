@@ -85,7 +85,7 @@ function TaskRow({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {task.trader_id && (
-            <Button href={`/trader/${task.trader_id}`} variant="ghost" className="h-8">
+            <Button href={`/trader/${task.trader_id}`} variant="accent-soft" className="h-8">
               Відкрити
             </Button>
           )}

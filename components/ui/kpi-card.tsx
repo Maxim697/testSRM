@@ -22,7 +22,7 @@ export function KpiCard({
   label,
   value,
   delta,
-  status = "info",
+  status = "neutral",
   size = "md",
   className,
 }: {

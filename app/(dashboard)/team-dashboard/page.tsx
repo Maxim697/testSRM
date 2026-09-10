@@ -53,17 +53,17 @@ export default async function TeamDashboardPage() {
           {
             label: "У зоні ризику",
             value: data.kpi.riskCount.toString(),
-            status: data.kpi.riskCount > 0 ? "warning" : "neutral",
+            status: data.kpi.riskCount > 0 ? "warning" : "positive",
           },
           {
             label: "Звітів на розгляді",
             value: data.kpi.reportsPending.toString(),
-            status: data.kpi.reportsPending > 0 ? "warning" : "neutral",
+            status: data.kpi.reportsPending > 0 ? "warning" : "positive",
           },
           {
             label: "Прострочених завдань",
             value: data.kpi.overdueTasks.toString(),
-            status: data.kpi.overdueTasks > 0 ? "negative" : "neutral",
+            status: data.kpi.overdueTasks > 0 ? "negative" : "positive",
           },
         ]}
       />

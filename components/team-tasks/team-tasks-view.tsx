@@ -123,7 +123,7 @@ export function TeamTasksView({
           {
             label: "Прострочено",
             value: summary.overdue.toString(),
-            status: summary.overdue > 0 ? "negative" : "neutral",
+            status: summary.overdue > 0 ? "negative" : "positive",
           },
         ]}
       />

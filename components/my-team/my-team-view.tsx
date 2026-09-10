@@ -116,14 +116,14 @@ export function MyTeamView({ teams, currentUserId }: { teams: MyTeamData[]; curr
                 label: "У зоні ризику",
                 value: singleTeam.kpi.riskCount.toString(),
                 delta: delta(singleTeam.kpi.riskDelta),
-                status: singleTeam.kpi.riskCount > 0 ? "warning" : "neutral",
+                status: singleTeam.kpi.riskCount > 0 ? "warning" : "positive",
               },
               { label: "Контактів за тиждень", value: singleTeam.kpi.contactsThisWeek.toString(), delta: delta(singleTeam.kpi.contactsDelta) },
               {
                 label: "Прострочених завдань",
                 value: singleTeam.kpi.overdueTasks.toString(),
                 delta: delta(singleTeam.kpi.overdueDelta),
-                status: singleTeam.kpi.overdueTasks > 0 ? "negative" : "neutral",
+                status: singleTeam.kpi.overdueTasks > 0 ? "negative" : "positive",
               },
             ]}
           />

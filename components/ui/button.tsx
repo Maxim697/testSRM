@@ -2,12 +2,17 @@ import type { ButtonHTMLAttributes } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-type ButtonVariant = "primary" | "secondary" | "ghost";
+type ButtonVariant = "primary" | "secondary" | "ghost" | "accent-soft";
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: "bg-accent text-accent-fg hover:bg-accent-hover",
   secondary: "bg-surface-3 text-text-primary border border-border hover:border-border-strong",
   ghost: "text-text-secondary hover:bg-surface-2 hover:text-text-primary",
+  // A quieter alternative to primary for a page full of repeated "open
+  // this row" actions — accent-tinted rather than solid, so it doesn't
+  // compete with the one real primary action on the page, but still
+  // reads as the current section's color instead of flat gray.
+  "accent-soft": "bg-accent-bg text-accent border border-accent/25 hover:bg-accent/25",
 };
 
 const BASE_CLASSES =

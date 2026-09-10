@@ -13,7 +13,7 @@ import { RiskFactorList } from "@/components/risk/risk-factor-list";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format";
-import { RISK_LEVEL_LABELS, type RiskLevel } from "@/lib/risk-score";
+import { RISK_LEVEL_COLOR_VAR, RISK_LEVEL_LABELS, type RiskLevel } from "@/lib/risk-score";
 import type { EnrichedTrader } from "@/lib/trader-metrics";
 
 function AddNoteBox({ traderId, currentUserId, onDone }: { traderId: string; currentUserId: string; onDone: () => void }) {
@@ -125,8 +125,17 @@ export function RiskList({
         )
       ) : (
         <div className="flex flex-col gap-2">
-          {filtered.map((trader) => (
-            <Card key={trader.id} className={cn("flex flex-col gap-2", notingId === trader.id && "gap-0")}>
+          {filtered.map((trader) => {
+            const levelColor = RISK_LEVEL_COLOR_VAR[trader.risk.level];
+            return (
+            <Card
+              key={trader.id}
+              className={cn("relative overflow-hidden pl-4 flex flex-col gap-2", notingId === trader.id && "gap-0")}
+              style={{
+                background: `linear-gradient(135deg, color-mix(in srgb, ${levelColor} 4%, var(--color-surface-2)), var(--color-surface-2) 65%)`,
+              }}
+            >
+              <span className="absolute inset-y-0 left-0 w-[3px]" style={{ background: levelColor }} />
               <div className="flex items-center justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">
                   <RiskBadge risk={trader.risk} size="lg" showBreakdown={false} />
@@ -161,7 +170,8 @@ export function RiskList({
                 <AddNoteBox traderId={trader.id} currentUserId={currentUserId} onDone={() => setNotingId(null)} />
               )}
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

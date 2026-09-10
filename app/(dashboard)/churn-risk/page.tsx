@@ -33,15 +33,23 @@ export default async function ChurnRiskPage() {
           {
             label: "Депозит під ризиком",
             value: formatNumber(depositAtRisk),
-            status: depositAtRisk > 0 ? "negative" : "neutral",
+            status: depositAtRisk > 0 ? "negative" : "positive",
           },
           {
             label: `${RISK_LEVEL_LABELS.critical} ризик`,
             value: levelCounts.critical.toString(),
-            status: "negative",
+            status: levelCounts.critical > 0 ? "negative" : "positive",
           },
-          { label: `${RISK_LEVEL_LABELS.high} ризик`, value: levelCounts.high.toString(), status: "negative" },
-          { label: `${RISK_LEVEL_LABELS.medium} ризик`, value: levelCounts.medium.toString(), status: "warning" },
+          {
+            label: `${RISK_LEVEL_LABELS.high} ризик`,
+            value: levelCounts.high.toString(),
+            status: levelCounts.high > 0 ? "negative" : "positive",
+          },
+          {
+            label: `${RISK_LEVEL_LABELS.medium} ризик`,
+            value: levelCounts.medium.toString(),
+            status: levelCounts.medium > 0 ? "warning" : "positive",
+          },
           { label: `${RISK_LEVEL_LABELS.low} ризик`, value: levelCounts.low.toString(), status: "positive" },
         ]}
       />

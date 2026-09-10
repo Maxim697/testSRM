@@ -56,13 +56,13 @@ export default async function MyDayPage() {
           {
             label: "Потребують уваги",
             value: attentionList.length.toString(),
-            status: attentionList.length > 0 ? "warning" : "neutral",
+            status: attentionList.length > 0 ? "warning" : "positive",
           },
           { label: "Завдань у роботі", value: myInProgressCount.toString() },
           {
             label: "Прострочено",
             value: myOverdueCount.toString(),
-            status: myOverdueCount > 0 ? "negative" : "neutral",
+            status: myOverdueCount > 0 ? "negative" : "positive",
           },
         ]}
       />
@@ -88,7 +88,7 @@ export default async function MyDayPage() {
                     </div>
                   </div>
                 </div>
-                <Button href={`/trader/${trader.id}`} variant="secondary" className="shrink-0">
+                <Button href={`/trader/${trader.id}`} variant="accent-soft" className="shrink-0">
                   Відкрити
                 </Button>
               </Card>

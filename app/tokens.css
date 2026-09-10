@@ -69,6 +69,12 @@
   --info-bg: var(--accent-analytics-bg);
   --emphasis: #ffffff;
 
+  /* A 4th step between warning and negative — used only for the "high"
+     risk band (50-74), so risk reads as a real gray→amber→orange→red
+     escalation instead of just two colors. */
+  --risk-high: #ff8c42;
+  --risk-high-bg: rgba(255, 140, 66, 0.18);
+
   /* Focus ring — follows the current section accent */
   --focus-ring: var(--accent);
 
@@ -156,6 +162,9 @@
   --info: var(--accent-analytics);
   --info-bg: var(--accent-analytics-bg);
   --emphasis: #0e0e10;
+
+  --risk-high: #c1621e;
+  --risk-high-bg: rgba(193, 98, 30, 0.14);
 
   --series-1: var(--info);
   --series-2: var(--positive);

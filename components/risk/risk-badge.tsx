@@ -2,19 +2,12 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { RISK_LEVEL_LABELS, type RiskScore } from "@/lib/risk-score";
-
-const LEVEL_CLASSES: Record<RiskScore["level"], string> = {
-  low: "text-positive",
-  medium: "text-warning",
-  high: "text-negative",
-  critical: "text-negative font-bold",
-};
+import { RISK_LEVEL_LABELS, RISK_LEVEL_TEXT_CLASS, type RiskScore } from "@/lib/risk-score";
 
 const SIZE_CLASSES = {
-  sm: "text-xs",
-  md: "text-sm",
-  lg: "text-xl",
+  sm: "text-sm",
+  md: "text-lg",
+  lg: "text-2xl",
 };
 
 export function RiskBadge({
@@ -38,8 +31,8 @@ export function RiskBadge({
     >
       <span
         className={cn(
-          "inline-flex items-center gap-1 font-semibold tabular-nums leading-none",
-          LEVEL_CLASSES[risk.level],
+          "inline-flex items-center gap-1 font-bold tabular-nums leading-none",
+          RISK_LEVEL_TEXT_CLASS[risk.level],
           SIZE_CLASSES[size],
           className,
         )}

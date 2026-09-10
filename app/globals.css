@@ -53,6 +53,8 @@
   --color-warning-bg: var(--warning-bg);
   --color-info: var(--info);
   --color-info-bg: var(--info-bg);
+  --color-risk-high: var(--risk-high);
+  --color-risk-high-bg: var(--risk-high-bg);
   --color-emphasis: var(--emphasis);
 
   --color-series-1: var(--series-1);

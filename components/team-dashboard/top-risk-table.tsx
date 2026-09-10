@@ -39,7 +39,7 @@ export function TopRiskTable({ traders }: { traders: EnrichedTrader[] }) {
       key: "action",
       header: "",
       accessor: (t) => (
-        <Button href={`/trader/${t.id}`} variant="ghost" className="h-7 px-2 text-xs">
+        <Button href={`/trader/${t.id}`} variant="accent-soft" className="h-7 px-2 text-xs">
           Відкрити
         </Button>
       ),
