@@ -62,8 +62,8 @@
   /* Semantic — status colors for data, plus a fixed "neutral information"
      teal. Backgrounds at 18% alpha so chips read as saturated color, not
      a faint tint; badge borders use the same color at 30%. */
-  --positive: #35c07f;
-  --positive-bg: rgba(53, 192, 127, 0.18);
+  --positive: #3ace84;
+  --positive-bg: rgba(58, 206, 132, 0.18);
   --negative: #e5544b;
   --negative-bg: rgba(229, 84, 75, 0.18);
   --warning: #e0a23c;
@@ -153,8 +153,8 @@
   --accent-bg: var(--accent-crm-bg);
   --accent-fg: #ffffff;
 
-  --positive: #1f9d5f;
-  --positive-bg: rgba(31, 157, 95, 0.14);
+  --positive: #1aa563;
+  --positive-bg: rgba(26, 165, 99, 0.14);
   --negative: #cf4038;
   --negative-bg: rgba(207, 64, 56, 0.14);
   --warning: #b9801f;

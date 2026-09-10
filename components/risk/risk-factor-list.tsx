@@ -7,19 +7,18 @@ export function RiskFactorList({ factors }: { factors: RiskFactor[] }) {
   }
 
   return (
-    <ul className="flex flex-wrap items-center gap-y-0.5 text-xs">
+    <ul className="flex flex-wrap items-center gap-y-1 text-xs">
       {factors.map((f, i) => (
-        <li
-          key={f.key}
-          className={cn(
-            "whitespace-nowrap px-3 first:pl-0",
-            i > 0 && "border-l border-border",
-          )}
-        >
+        <li key={f.key} className="inline-flex items-center whitespace-nowrap">
           <span className="text-text-muted">
             {f.label} ({f.detail})
-          </span>{" "}
-          <span className={cn("font-medium", f.points >= 15 ? "text-negative" : "text-warning")}>+{f.points}</span>
+          </span>
+          <span className={cn("ml-1 font-medium", f.points >= 15 ? "text-negative" : "text-warning")}>
+            +{f.points}
+          </span>
+          {i < factors.length - 1 && (
+            <span aria-hidden="true" className="mx-2 h-3.5 w-px shrink-0 bg-border-strong" />
+          )}
         </li>
       ))}
     </ul>
