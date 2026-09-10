@@ -82,7 +82,7 @@ export function AccessSettingsModal({
                 className={cn(
                   "rounded-control border px-3 py-1.5 text-sm transition-colors",
                   roles[role]
-                    ? "border-info bg-info-bg text-info"
+                    ? "border-accent bg-accent-bg text-accent"
                     : "border-border text-text-secondary hover:text-text-primary",
                 )}
               >

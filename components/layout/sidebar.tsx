@@ -48,7 +48,9 @@ export function Sidebar({
         {sections.map((section, i) => (
           <div key={section.key}>
             {i > 0 && <div className="my-2 h-px bg-border" aria-hidden="true" />}
-            <div className="section-caption px-2">{section.title}</div>
+            <div className="section-caption px-2" style={{ color: `var(--accent-${section.key})` }}>
+              {section.title}
+            </div>
             <ul className="mt-1 space-y-0.5">
               {section.items.map((item) => {
                 const isActive = activePath === item.href || activePath.startsWith(`${item.href}/`);

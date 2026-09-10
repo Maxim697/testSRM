@@ -49,7 +49,7 @@ export function MetricTable({
         <button
           type="button"
           onClick={() => setOpenMetric(r.metric_key)}
-          className="tabular-nums font-medium text-info hover:underline"
+          className="tabular-nums font-medium text-accent hover:underline"
         >
           {r.value ?? "—"}
         </button>

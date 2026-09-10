@@ -25,7 +25,7 @@ export function DualLineChart({
   points,
   labelA,
   labelB,
-  colorA = "var(--color-series-1)",
+  colorA = "var(--accent)",
   colorB = "var(--color-series-4)",
 }: {
   points: DualLinePoint[];

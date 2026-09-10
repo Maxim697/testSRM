@@ -82,7 +82,7 @@ export function TeamTasksView({
       accessor: (t) => (
         <div className="min-w-0">
           <div className="truncate text-text-primary">{t.title}</div>
-          {t.trader && <div className="text-xs text-info">{t.trader.code}</div>}
+          {t.trader && <div className="text-xs text-accent">{t.trader.code}</div>}
         </div>
       ),
       sortValue: (t) => t.title,

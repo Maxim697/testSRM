@@ -38,6 +38,13 @@
   --color-accent-bg: var(--accent-bg);
   --color-accent-fg: var(--accent-fg);
 
+  --color-accent-analytics: var(--accent-analytics);
+  --color-accent-analytics-bg: var(--accent-analytics-bg);
+  --color-accent-crm: var(--accent-crm);
+  --color-accent-crm-bg: var(--accent-crm-bg);
+  --color-accent-platform: var(--accent-platform);
+  --color-accent-platform-bg: var(--accent-platform-bg);
+
   --color-positive: var(--positive);
   --color-positive-bg: var(--positive-bg);
   --color-negative: var(--negative);
@@ -166,6 +173,7 @@ body {
 .chart-grid-line {
   stroke: var(--color-border);
   stroke-width: 1;
+  stroke-opacity: 0.6;
 }
 
 .chart-tooltip {

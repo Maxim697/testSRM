@@ -9,7 +9,7 @@ const STATUS_COLOR_VAR: Record<KpiStatus, string> = {
   negative: "var(--color-negative)",
   warning: "var(--color-warning)",
   info: "var(--info)",
-  neutral: "var(--color-border-strong)",
+  neutral: "var(--color-accent)",
 };
 
 const DELTA_CLASSES: Record<"up" | "down" | "flat", string> = {
@@ -39,7 +39,7 @@ export function KpiCard({
     <Card
       className={cn("relative overflow-hidden pl-4", className)}
       style={{
-        background: `linear-gradient(135deg, color-mix(in srgb, ${colorVar} 10%, var(--color-surface-2)), var(--color-surface-2) 65%)`,
+        background: `linear-gradient(135deg, color-mix(in srgb, ${colorVar} 6%, var(--color-surface-2)), var(--color-surface-2) 65%)`,
       }}
     >
       <span className="absolute inset-y-0 left-0 w-[3px] rounded-r-full" style={{ background: colorVar }} />

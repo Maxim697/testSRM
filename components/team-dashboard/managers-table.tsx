@@ -46,7 +46,7 @@ export function ManagersTable({ managers }: { managers: ManagerSummary[] }) {
         const flags = flagsFor(m);
         return (
           <button type="button" onClick={() => setSelected(m)} className="text-left">
-            <div className="font-medium text-info hover:underline">{m.name}</div>
+            <div className="font-medium text-accent hover:underline">{m.name}</div>
             {flags.length > 0 && (
               <div className="mt-1 flex flex-wrap gap-1">
                 {flags.map((f) => (

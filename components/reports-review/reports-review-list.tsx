@@ -56,7 +56,7 @@ export function ReportsReviewList({
         <button
           type="button"
           onClick={() => setSelected(r)}
-          className="text-left font-medium text-info hover:underline"
+          className="text-left font-medium text-accent hover:underline"
         >
           {r.author?.full_name ?? "—"}
         </button>

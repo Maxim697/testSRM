@@ -17,7 +17,7 @@ function formatValue(value: number, format: "number" | "percent"): string {
 export function TrendChart({
   points,
   variant = "line",
-  color = "var(--info)",
+  color = "var(--accent)",
   format = "number",
 }: {
   points: TrendPoint[];

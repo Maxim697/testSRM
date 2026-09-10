@@ -101,12 +101,12 @@ export function ScoreTrendChart({
 
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--info)" stopOpacity={0.35} />
-            <stop offset="100%" stopColor="var(--info)" stopOpacity={0} />
+            <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.35} />
+            <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
           </linearGradient>
         </defs>
         <path d={areaPath} fill={`url(#${gradientId})`} stroke="none" />
-        <path d={linePath} fill="none" stroke="var(--info)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        <path d={linePath} fill="none" stroke="var(--accent)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
         {coords.map((c, i) => (
           <g key={i}>
             <circle
@@ -114,7 +114,7 @@ export function ScoreTrendChart({
               cy={c.y}
               r={hoverIndex === i ? 3.5 : 2.5}
               fill="var(--color-surface-2)"
-              stroke="var(--info)"
+              stroke="var(--accent)"
               strokeWidth={1.5}
             />
             <rect

@@ -47,7 +47,7 @@ export function Tabs({
           >
             {item.label}
             {isActive && (
-              <span className="absolute inset-x-0 -bottom-px h-0.5 bg-info" />
+              <span className="absolute inset-x-0 -bottom-px h-0.5 bg-accent" />
             )}
           </button>
         );

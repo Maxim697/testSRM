@@ -2,7 +2,7 @@ const WIDTH = 84;
 const HEIGHT = 28;
 const PAD = 3;
 
-export function Sparkline({ values, color = "var(--info)" }: { values: (number | null)[]; color?: string }) {
+export function Sparkline({ values, color = "var(--accent)" }: { values: (number | null)[]; color?: string }) {
   const clean = values.map((v) => v ?? 0);
   const min = Math.min(...clean);
   const max = Math.max(...clean);

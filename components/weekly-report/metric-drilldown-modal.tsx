@@ -34,7 +34,7 @@ export function MetricDrilldownModal({
               className="flex h-row items-center justify-between gap-3 rounded-control px-2 hover:bg-surface-3"
             >
               {item.href ? (
-                <Link href={item.href} prefetch={false} className="font-medium text-info hover:underline">
+                <Link href={item.href} prefetch={false} className="font-medium text-accent hover:underline">
                   {item.label}
                 </Link>
               ) : (
