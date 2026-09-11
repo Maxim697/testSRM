@@ -75,7 +75,7 @@ export function Sidebar({
                       className={cn(
                         "flex h-menu-item items-center gap-2 rounded-control px-2 text-base",
                         isActive
-                          ? "bg-accent-bg font-medium text-accent"
+                          ? "bg-accent-bg font-medium text-nav-active"
                           : "text-text-secondary hover:bg-surface-2 hover:text-text-primary",
                       )}
                     >

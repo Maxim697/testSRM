@@ -16,8 +16,10 @@
   Status colors (green/amber/orange/red) and --info ("neutral
   information", equal to the Analytics section's own hue) are separate
   from that and never repointed — they mean the same thing everywhere.
-  Inter everywhere. Components must never hardcode colors — reference
-  these variables (via the Tailwind theme mapping in globals.css) only.
+  Source Sans 3 everywhere (app/layout.tsx) — one typeface for all four
+  themes, not a per-theme knob. Components must never hardcode colors —
+  reference these variables (via the Tailwind theme mapping in
+  globals.css) only.
 
   The two blue themes keep a blue cast on every neutral (never a flat
   gray, never violet); Графіт-ізумруд is the one deliberately neutral
@@ -96,6 +98,12 @@
 
   /* Focus ring — follows the current section accent */
   --focus-ring: var(--accent);
+
+  /* Active sidebar nav item's text color. Same as --accent in every
+     theme except Молочна, which mixes in text-primary there for
+     contrast (see that block) — this indirection is what lets
+     sidebar.tsx use one class (text-nav-active) everywhere. */
+  --nav-active-text: var(--accent);
 
   /* Data series palette — cold family: blue, teal, green, indigo, amber,
      orange, then two muted blue-grays for charts with more lines. */
@@ -292,6 +300,7 @@
   --warning-border: rgba(224, 162, 60, 0.3);
 
   --focus-ring: var(--accent);
+  --nav-active-text: var(--accent);
 
   --series-1: var(--accent-crm);
   --series-2: var(--accent-analytics);
@@ -336,32 +345,45 @@
    ========================================================================== */
 
 [data-theme="milk"] {
-  --surface-0: #f7f3ec;
-  --surface-1: #f2ece2;
-  --surface-2: #fffdf9;
+  --surface-0: #f5efe4;
+  /* One step darker than the literal #efe7d9 the surface spec would give
+     this — that value and --surface-0 are only ~1.07:1 contrast, close
+     enough to unreadable as flat fills that the "sidebar noticeably
+     darker than content" requirement can't actually be met by it. This
+     is the same tan family, just far enough from surface-0 to read as a
+     real step instead of noise. */
+  --surface-1: #e6d8c1;
+  --surface-2: #fffcf6;
   --surface-3: #ffffff;
 
-  --text-primary: #2b2419;
-  --text-secondary: #6b6153;
-  --text-muted: #9a8f7e;
+  --text-primary: #33291c;
+  --text-secondary: #7a6b56;
+  --text-muted: #a3937c;
 
-  --border: #e4dace;
-  --border-strong: #d3c6b4;
+  --border: #ded2c0;
+  --border-strong: #c9b9a2;
 
-  --accent-analytics: #4a7c6f;
-  --accent-analytics-hover: #5c8f7f;
-  --accent-analytics-bg: rgba(74, 124, 111, 0.12);
-  --accent-crm: #b06f3c;
-  --accent-crm-hover: #c47d45;
-  --accent-crm-bg: rgba(176, 111, 60, 0.12);
-  --accent-platform: #8a6ba8;
-  --accent-platform-hover: #9a7ab8;
-  --accent-platform-bg: rgba(138, 107, 168, 0.12);
+  --accent-analytics: #3d7a68;
+  --accent-analytics-hover: #5a8e7f;
+  --accent-analytics-bg: rgba(61, 122, 104, 0.12);
+  --accent-crm: #a85f2c;
+  --accent-crm-hover: #b5774c;
+  --accent-crm-bg: rgba(168, 95, 44, 0.12);
+  --accent-platform: #7a5a96;
+  --accent-platform-hover: #8e73a6;
+  --accent-platform-bg: rgba(122, 90, 150, 0.12);
 
   --accent: var(--accent-crm);
   --accent-hover: var(--accent-crm-hover);
   --accent-bg: var(--accent-crm-bg);
-  --accent-fg: #ffffff;
+  --accent-fg: #fffcf6;
+
+  /* Active sidebar nav item: the icon and left bar use --accent directly
+     (same as every other theme), but small text on a 12%-alpha accent
+     wash needs more contrast than a glyph or a 2px bar does — this mixes
+     in text-primary so the label stays legible regardless of which
+     section's hue --accent currently is. */
+  --nav-active-text: color-mix(in srgb, var(--accent) 65%, var(--text-primary) 35%);
 
   /* Every semantic color is more saturated than its dark-theme counterpart
      — the same alpha-tinted chip that reads fine on a near-black surface
@@ -407,19 +429,26 @@
   --tier-bronze-bg: rgba(161, 102, 63, 0.14);
 
   --popover-bg: #ffffff;
-  --shadow-card: 0 1px 2px rgba(70, 55, 35, 0.05);
-  --shadow-popover: 0 4px 16px rgba(70, 55, 35, 0.1);
-  --shadow-modal: 0 8px 32px rgba(70, 55, 35, 0.14);
+  --shadow-card: 0 1px 2px rgba(51, 41, 28, 0.05);
+  --shadow-popover: 0 4px 16px rgba(51, 41, 28, 0.1);
+  --shadow-modal: 0 8px 32px rgba(51, 41, 28, 0.14);
 
-  --glass-bg: rgba(242, 236, 226, 0.72);
-  --glass-border: rgba(70, 55, 35, 0.08);
+  /* High opacity, unlike the other themes' 0.72-ish glass — the sidebar's
+     own fill is doing real contrast work here (see --surface-1 above),
+     and 28% of body color bleeding through via backdrop-blur was
+     quietly erasing most of that work. Still technically translucent
+     (backdrop-blur-lg stays on at the call sites) but reads as solid. */
+  --glass-bg: rgba(230, 216, 193, 0.94);
+  --glass-border: rgba(51, 41, 28, 0.14);
 
-  --scrollbar-thumb: #d3c6b4;
-  --scrollbar-thumb-hover: #c0b09a;
+  --scrollbar-thumb: var(--border-strong);
+  --scrollbar-thumb-hover: #ab9d8a;
 
   /* The other themes' table-row hover is a solid one-step-lighter surface
-     — here surface-2/surface-3 sit only 6 units apart (#fffdf9 vs
+     — here surface-2/surface-3 sit only 9 units apart (#fffcf6 vs
      #ffffff), too close for that swap to read at all, so this is a
-     translucent warm accent tint instead. */
-  --row-hover-bg: rgba(176, 111, 60, 0.05);
+     translucent tint of whichever accent is currently active instead
+     (color-mix, not a fixed rgba, so it follows --accent the same way
+     the nav-active text and focus ring do). */
+  --row-hover-bg: color-mix(in srgb, var(--accent) 5%, transparent);
 }

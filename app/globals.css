@@ -2,7 +2,7 @@
 @import "./tokens.css";
 
 @theme inline {
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-source-sans);
 
   /* Type scale: 11 / 12 / 13 / 15 / 20 / 28 */
   --text-xs: 11px;
@@ -78,6 +78,7 @@
 
   --color-focus-ring: var(--focus-ring);
   --color-row-hover: var(--row-hover-bg);
+  --color-nav-active: var(--nav-active-text);
 
   --color-popover: var(--popover-bg);
   --shadow-card: var(--shadow-card);
@@ -98,8 +99,8 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Tabular numbers wherever data is displayed — Inter's own tabular
-   figures, no separate monospace font needed. */
+/* Tabular numbers wherever data is displayed — Source Sans 3's own
+   tabular figures, no separate monospace font needed. */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
