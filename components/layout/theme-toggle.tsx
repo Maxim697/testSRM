@@ -8,6 +8,7 @@ const THEME_LABELS: Record<Theme, string> = {
   light: "Світла синя",
   "graphite-emerald": "Графіт-ізумруд",
   milk: "Молочна",
+  emerald: "Смарагд",
 };
 
 export function ThemeToggle() {

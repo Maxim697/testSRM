@@ -35,6 +35,7 @@
 
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
+  --color-accent-active: var(--accent-active);
   --color-accent-bg: var(--accent-bg);
   --color-accent-fg: var(--accent-fg);
 
@@ -78,7 +79,6 @@
 
   --color-focus-ring: var(--focus-ring);
   --color-row-hover: var(--row-hover-bg);
-  --color-nav-active: var(--nav-active-text);
 
   --color-popover: var(--popover-bg);
   --shadow-card: var(--shadow-card);

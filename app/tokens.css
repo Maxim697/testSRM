@@ -1,14 +1,14 @@
 /*
   Design tokens. Single source of truth for the whole app.
 
-  Four themes, picked in the header's theme selector and applied via
+  Five themes, picked in the header's theme selector and applied via
   [data-theme] on <html> (components/theme-provider.tsx): "Темна синя"
   (:root, below — also the default when no theme has been chosen yet),
   "Світла синя" ([data-theme="light"]), "Графіт-ізумруд"
-  ([data-theme="graphite-emerald"]), and "Молочна"
-  ([data-theme="milk"]). Each is one self-contained block of the same
-  variable names — adding a theme means adding a block here, not touching
-  any component. Glass top layers (header, sidebar, modals,
+  ([data-theme="graphite-emerald"]), "Молочна" ([data-theme="milk"]), and
+  "Смарагд" ([data-theme="emerald"]). Each is one self-contained block of
+  the same variable names — adding a theme means adding a block here, not
+  touching any component. Glass top layers (header, sidebar, modals,
   dropdowns, tooltips — never tables/KPI cards/charts). Each nav section
   (Аналітика/CRM/Платформа) carries its own hue that reaches into its own
   pages (--accent below is repointed per section by SectionAccentScope —
@@ -16,7 +16,7 @@
   Status colors (green/amber/orange/red) and --info ("neutral
   information", equal to the Analytics section's own hue) are separate
   from that and never repointed — they mean the same thing everywhere.
-  Source Sans 3 everywhere (app/layout.tsx) — one typeface for all four
+  Source Sans 3 everywhere (app/layout.tsx) — one typeface for all five
   themes, not a per-theme knob. Components must never hardcode colors —
   reference these variables (via the Tailwind theme mapping in
   globals.css) only.
@@ -24,7 +24,12 @@
   The two blue themes keep a blue cast on every neutral (never a flat
   gray, never violet); Графіт-ізумруд is the one deliberately neutral
   exception — its surfaces and text carry no color cast at all, so the
-  single emerald accent is the only hue in the UI chrome.
+  single emerald accent is the only hue in the UI chrome. Смарагд is a
+  second green-cast dark theme, distinct from Графіт-ізумруд: its base
+  carries the green tint (Графіт-ізумруд's doesn't), and its "positive/
+  growth" green is deliberately a different, brighter shade from its own
+  muted-green accent so the two never get mistaken for each other (see
+  that block's --positive comment).
 */
 
 :root {
@@ -66,6 +71,7 @@
      falls back to the CRM hue outside the dashboard (login, etc). */
   --accent: var(--accent-crm);
   --accent-hover: var(--accent-crm-hover);
+  --accent-active: #2c5ea2;
   --accent-bg: var(--accent-crm-bg);
   --accent-fg: #ffffff;
 
@@ -99,11 +105,19 @@
   /* Focus ring — follows the current section accent */
   --focus-ring: var(--accent);
 
-  /* Active sidebar nav item's text color. Same as --accent in every
-     theme except Молочна, which mixes in text-primary there for
-     contrast (see that block) — this indirection is what lets
-     sidebar.tsx use one class (text-nav-active) everywhere. */
-  --nav-active-text: var(--accent);
+  /* Active sidebar nav item's text color is computed at the call site
+     (sidebar.tsx) as color-mix(in srgb, var(--accent) var(--nav-active-
+     mix) , var(--text-primary)) — 100% here means "just --accent",
+     unchanged from before; Молочна turns this down to mix in some
+     text-primary for contrast (see that block). It has to be a plain
+     percentage, not a resolved color, specifically so it keeps working
+     inside SectionAccentScope: a custom property holding a *resolved*
+     var(--accent) would freeze at the value --accent had where this
+     block is declared (<html>, outside the scope that repoints
+     --accent per section), instead of following the repointed value
+     the way every direct var(--accent)/bg-accent/text-accent already
+     does. A plain number has nothing to freeze. */
+  --nav-active-mix: 100%;
 
   /* Data series palette — cold family: blue, teal, green, indigo, amber,
      orange, then two muted blue-grays for charts with more lines. */
@@ -190,6 +204,7 @@
 
   --accent: var(--accent-crm);
   --accent-hover: var(--accent-crm-hover);
+  --accent-active: #235293;
   --accent-bg: var(--accent-crm-bg);
   --accent-fg: #ffffff;
 
@@ -275,6 +290,7 @@
 
   --accent: var(--accent-crm);
   --accent-hover: var(--accent-crm-hover);
+  --accent-active: #0c7a5f;
   --accent-bg: var(--accent-crm-bg);
   --accent-fg: #ffffff;
 
@@ -300,7 +316,6 @@
   --warning-border: rgba(224, 162, 60, 0.3);
 
   --focus-ring: var(--accent);
-  --nav-active-text: var(--accent);
 
   --series-1: var(--accent-crm);
   --series-2: var(--accent-analytics);
@@ -375,15 +390,17 @@
 
   --accent: var(--accent-crm);
   --accent-hover: var(--accent-crm-hover);
+  --accent-active: #7e4721;
   --accent-bg: var(--accent-crm-bg);
   --accent-fg: #fffcf6;
 
   /* Active sidebar nav item: the icon and left bar use --accent directly
      (same as every other theme), but small text on a 12%-alpha accent
-     wash needs more contrast than a glyph or a 2px bar does — this mixes
-     in text-primary so the label stays legible regardless of which
+     wash needs more contrast than a glyph or a 2px bar does — dialing
+     this down mixes in text-primary at the call site (see --nav-active-
+     mix at :root) so the label stays legible regardless of which
      section's hue --accent currently is. */
-  --nav-active-text: color-mix(in srgb, var(--accent) 65%, var(--text-primary) 35%);
+  --nav-active-mix: 65%;
 
   /* Every semantic color is more saturated than its dark-theme counterpart
      — the same alpha-tinted chip that reads fine on a near-black surface
@@ -447,8 +464,114 @@
   /* The other themes' table-row hover is a solid one-step-lighter surface
      — here surface-2/surface-3 sit only 9 units apart (#fffcf6 vs
      #ffffff), too close for that swap to read at all, so this is a
-     translucent tint of whichever accent is currently active instead
-     (color-mix, not a fixed rgba, so it follows --accent the same way
-     the nav-active text and focus ring do). */
-  --row-hover-bg: color-mix(in srgb, var(--accent) 5%, transparent);
+     translucent warm tint instead. A fixed rgba, deliberately, not
+     color-mix(var(--accent) ...): a custom property declared once here
+     at the theme root freezes any var(--accent) it contains at
+     whatever --accent equals *for this element* (<html>, outside
+     SectionAccentScope) — it does not track the repointed --accent the
+     way a direct bg-accent/text-accent use on a descendant does. This
+     rgba just matches the theme's own default (CRM) accent instead of
+     pretending to follow a section it structurally can't. */
+  --row-hover-bg: rgba(168, 95, 44, 0.05);
+}
+
+/* ==========================================================================
+   Смарагд — a third dark theme, green-cast this time (Темна синя and
+   Світла синя are blue-cast, Графіт-ізумруд is neutral). Same
+   self-contained-block pattern as the other four.
+   ========================================================================== */
+
+[data-theme="emerald"] {
+  /* Elevation order here is body < card < sidebar < raised < popover —
+     the sidebar sits a step above cards rather than below them, unlike
+     every other theme. That's the literal spec, not a mistake: it's
+     still a clean, strictly-increasing lightness ladder, just with the
+     sidebar and card steps swapped from the usual order. */
+  --surface-0: #1a1f1a;
+  --surface-1: #252d25;
+  --surface-2: #212821;
+  --surface-3: #2c352c;
+
+  /* Pure white body text on this much dark-green surface reads as glare
+     at table scale — dimmed to the same near-white every other dark
+     theme in this app already uses, per the brief's own fallback. */
+  --text-primary: #f0f4f0;
+  --text-secondary: #a3aea3;
+  --text-muted: #78827a;
+
+  --border: #3a453a;
+  --border-strong: #4d5a4d;
+
+  --accent-analytics: #0f4f49;
+  --accent-analytics-hover: #3f726d;
+  --accent-analytics-bg: rgba(15, 79, 73, 0.15);
+  --accent-crm: #4e7d55;
+  --accent-crm-hover: #5e9166;
+  --accent-crm-bg: rgba(78, 125, 85, 0.15);
+  --accent-platform: #6d7d3f;
+  --accent-platform-hover: #8a9765;
+  --accent-platform-bg: rgba(109, 125, 63, 0.15);
+
+  --accent: var(--accent-crm);
+  --accent-hover: var(--accent-crm-hover);
+  /* The one --accent-active value actually given by name (elsewhere it's
+     a generic 25%-darker derivation) — also, not by coincidence, the
+     same deep teal as --accent-analytics: both are "the strong dark
+     accent tone", just reached for in two different roles. */
+  --accent-active: #0f4f49;
+  --accent-bg: var(--accent-crm-bg);
+  --accent-fg: #ffffff;
+
+  /* --accent is a muted green, so growth/positive has to sit well apart
+     from it — brighter and cleaner — or a green delta and a green button
+     on the same screen would read as the same color. Verified: #6ede9b
+     next to #4e7d55 doesn't read as "the same green" at a glance. */
+  --positive: #6ede9b;
+  --positive-bg: rgba(110, 222, 155, 0.18);
+  --positive-border: rgba(110, 222, 155, 0.3);
+  --negative: #e5544b;
+  --negative-bg: rgba(229, 84, 75, 0.18);
+  --negative-border: rgba(229, 84, 75, 0.3);
+  --warning: #e0a840;
+  --warning-bg: rgba(224, 168, 64, 0.18);
+  --warning-border: rgba(224, 168, 64, 0.3);
+  --info: var(--accent-analytics);
+  --info-bg: var(--accent-analytics-bg);
+  --emphasis: #ffffff;
+
+  --risk-high: #ec7f3c;
+  --risk-high-bg: rgba(236, 127, 60, 0.18);
+
+  --focus-ring: var(--accent);
+
+  --series-1: var(--accent-crm);
+  --series-2: var(--accent-analytics);
+  --series-3: var(--positive);
+  --series-4: var(--accent-platform);
+  --series-5: var(--warning);
+  --series-6: var(--risk-high);
+  --series-7: var(--text-secondary);
+  --series-8: var(--text-muted);
+
+  --chart-fill-opacity: 0.25;
+
+  --tier-gold: #d4a544;
+  --tier-gold-bg: rgba(212, 165, 68, 0.18);
+  --tier-silver: #a8aeaa;
+  --tier-silver-bg: rgba(168, 174, 170, 0.18);
+  --tier-bronze: #b8794f;
+  --tier-bronze-bg: rgba(184, 121, 79, 0.18);
+
+  --popover-bg: #313a31;
+  --shadow-card: none;
+  --shadow-popover: 0 4px 16px rgba(0, 0, 0, 0.36), 0 1px 2px rgba(0, 0, 0, 0.28);
+  --shadow-modal: 0 4px 16px rgba(0, 0, 0, 0.36), 0 1px 2px rgba(0, 0, 0, 0.28);
+
+  --glass-bg: rgba(37, 45, 37, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  --scrollbar-thumb: var(--border-strong);
+  --scrollbar-thumb-hover: #717b71;
+
+  --row-hover-bg: var(--surface-3);
 }

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 type ButtonVariant = "primary" | "secondary" | "ghost" | "accent-soft";
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: "bg-accent text-accent-fg hover:bg-accent-hover",
+  primary: "bg-accent text-accent-fg hover:bg-accent-hover active:bg-accent-active",
   secondary: "bg-surface-3 text-text-primary border border-border hover:bg-border hover:border-border-strong",
   ghost: "text-text-secondary hover:bg-surface-3 hover:text-text-primary",
   // The row-level "open this" action — secondary to whatever the one

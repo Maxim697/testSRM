@@ -75,9 +75,25 @@ export function Sidebar({
                       className={cn(
                         "flex h-menu-item items-center gap-2 rounded-control px-2 text-base",
                         isActive
-                          ? "bg-accent-bg font-medium text-nav-active"
+                          ? "bg-accent-bg font-medium"
                           : "text-text-secondary hover:bg-surface-2 hover:text-text-primary",
                       )}
+                      // Inline style, not a text-{color} utility: this has to
+                      // resolve var(--accent) live, at this element, to pick
+                      // up whichever section SectionAccentScope has repointed
+                      // it to. A custom property declared once at the theme
+                      // root (:root/[data-theme]) and referenced from a
+                      // Tailwind class would instead freeze at --accent's
+                      // *default* value there, never actually tracking the
+                      // section — see --nav-active-mix in tokens.css for why.
+                      // --nav-active-mix itself is just a percentage (100%
+                      // everywhere except Молочна's 65%), so it's in no
+                      // danger of freezing at a stale color.
+                      style={
+                        isActive
+                          ? { color: "color-mix(in srgb, var(--accent) var(--nav-active-mix), var(--text-primary))" }
+                          : undefined
+                      }
                     >
                       {Icon && (
                         <Icon className={cn("shrink-0", isActive ? "text-accent" : "text-text-muted")} aria-hidden="true" />
