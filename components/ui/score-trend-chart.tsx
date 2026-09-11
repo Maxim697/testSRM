@@ -101,7 +101,7 @@ export function ScoreTrendChart({
 
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.25} />
+            <stop offset="0%" stopColor="var(--accent)" style={{ stopOpacity: "var(--chart-fill-opacity)" }} />
             <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
           </linearGradient>
         </defs>

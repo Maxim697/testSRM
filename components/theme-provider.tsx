@@ -2,9 +2,9 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-export type Theme = "dark" | "light" | "graphite-emerald";
+export type Theme = "dark" | "light" | "graphite-emerald" | "milk";
 
-const THEMES: Theme[] = ["dark", "light", "graphite-emerald"];
+const THEMES: Theme[] = ["dark", "light", "graphite-emerald", "milk"];
 const DEFAULT_THEME: Theme = "dark";
 
 function isTheme(value: string | null): value is Theme {

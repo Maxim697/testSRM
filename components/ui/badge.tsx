@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 type BadgeVariant = "green" | "amber" | "red" | "neutral";
 
 const VARIANT_CLASSES: Record<BadgeVariant, string> = {
-  green: "bg-positive-bg text-positive border-positive/30",
-  amber: "bg-warning-bg text-warning border-warning/30",
-  red: "bg-negative-bg text-negative border-negative/30",
+  green: "bg-positive-bg text-positive border-positive-border",
+  amber: "bg-warning-bg text-warning border-warning-border",
+  red: "bg-negative-bg text-negative border-negative-border",
   neutral: "bg-surface-3 text-text-secondary border-transparent",
 };
 

@@ -1,13 +1,14 @@
 /*
   Design tokens. Single source of truth for the whole app.
 
-  Three themes, picked in the header's theme selector and applied via
+  Four themes, picked in the header's theme selector and applied via
   [data-theme] on <html> (components/theme-provider.tsx): "Темна синя"
   (:root, below — also the default when no theme has been chosen yet),
-  "Світла синя" ([data-theme="light"]), and "Графіт-ізумруд"
-  ([data-theme="graphite-emerald"]). Each is one self-contained block of
-  the same variable names — adding a theme means adding a block here, not
-  touching any component. Glass top layers (header, sidebar, modals,
+  "Світла синя" ([data-theme="light"]), "Графіт-ізумруд"
+  ([data-theme="graphite-emerald"]), and "Молочна"
+  ([data-theme="milk"]). Each is one self-contained block of the same
+  variable names — adding a theme means adding a block here, not touching
+  any component. Glass top layers (header, sidebar, modals,
   dropdowns, tooltips — never tables/KPI cards/charts). Each nav section
   (Аналітика/CRM/Платформа) carries its own hue that reaches into its own
   pages (--accent below is repointed per section by SectionAccentScope —
@@ -84,6 +85,15 @@
   --risk-high: #ec7f3c;
   --risk-high-bg: rgba(236, 127, 60, 0.18);
 
+  /* Badge border alpha — a step below the *-bg fill, same color. The main
+     --accent border (accent-soft buttons etc.) uses Tailwind's own /NN
+     opacity modifier directly on --color-accent instead of a token; these
+     three exist only because Молочна needs its own badge-border alpha
+     (25% there vs 30% here) without changing anything else about badges. */
+  --positive-border: rgba(58, 206, 132, 0.3);
+  --negative-border: rgba(229, 84, 75, 0.3);
+  --warning-border: rgba(224, 162, 60, 0.3);
+
   /* Focus ring — follows the current section accent */
   --focus-ring: var(--accent);
 
@@ -98,6 +108,10 @@
   --series-7: var(--text-secondary);
   --series-8: var(--text-muted);
 
+  /* Max opacity of the area-chart fill-under-line gradient (its top stop;
+     it always fades to 0 at the bottom) — same cap for every chart. */
+  --chart-fill-opacity: 0.25;
+
   /* Tier colors — metallic, muted to sit inside the cold palette */
   --tier-gold: #d4a544;
   --tier-gold-bg: rgba(212, 165, 68, 0.18);
@@ -107,9 +121,13 @@
   --tier-bronze-bg: rgba(184, 121, 79, 0.18);
 
   /* Popover / dropdown / modal layer — glass, see .glass / .popover-surface
-     in globals.css. The only place a shadow appears, soft and low. */
+     / .modal-surface in globals.css. The only place a shadow appears,
+     soft and low — cards stay flat (--shadow-card: none) in every dark
+     theme, only Молочна gives them one too. */
   --popover-bg: #1e2735;
+  --shadow-card: none;
   --shadow-popover: 0 4px 16px rgba(0, 0, 0, 0.36), 0 1px 2px rgba(0, 0, 0, 0.28);
+  --shadow-modal: 0 4px 16px rgba(0, 0, 0, 0.36), 0 1px 2px rgba(0, 0, 0, 0.28);
 
   /* Glass — top layers only (header, sidebar, modals, popovers, tooltips).
      Never used on tables, KPI cards or charts — those stay fully opaque. */
@@ -119,6 +137,11 @@
   /* Scrollbar */
   --scrollbar-thumb: var(--border-strong);
   --scrollbar-thumb-hover: #3f5170;
+
+  /* Table row hover fill — a solid one-step-lighter surface here; Молочна
+     overrides this to a translucent accent tint instead (its own surface
+     steps sit too close together for a solid swap to read). */
+  --row-hover-bg: var(--surface-3);
 
   /* Motion */
   --transition-fast: 120ms;
@@ -175,6 +198,10 @@
   --risk-high: #c9612a;
   --risk-high-bg: rgba(201, 97, 42, 0.14);
 
+  --positive-border: rgba(26, 165, 99, 0.3);
+  --negative-border: rgba(207, 64, 56, 0.3);
+  --warning-border: rgba(185, 128, 31, 0.3);
+
   --series-1: var(--accent-crm);
   --series-2: var(--accent-analytics);
   --series-3: var(--positive);
@@ -184,6 +211,8 @@
   --series-7: #5d6d84;
   --series-8: #8a97a8;
 
+  --chart-fill-opacity: 0.25;
+
   --tier-gold: #b28a2e;
   --tier-gold-bg: rgba(178, 138, 46, 0.14);
   --tier-silver: #6b7688;
@@ -192,13 +221,17 @@
   --tier-bronze-bg: rgba(154, 95, 60, 0.14);
 
   --popover-bg: #ffffff;
+  --shadow-card: none;
   --shadow-popover: 0 4px 16px rgba(22, 32, 46, 0.1), 0 1px 3px rgba(22, 32, 46, 0.08);
+  --shadow-modal: 0 4px 16px rgba(22, 32, 46, 0.1), 0 1px 3px rgba(22, 32, 46, 0.08);
 
   --glass-bg: rgba(255, 255, 255, 0.72);
   --glass-border: rgba(22, 32, 46, 0.1);
 
   --scrollbar-thumb: var(--border-strong);
   --scrollbar-thumb-hover: #a9b6c6;
+
+  --row-hover-bg: var(--surface-3);
 }
 
 /* ==========================================================================
@@ -254,6 +287,10 @@
   --risk-high: #ec7f3c;
   --risk-high-bg: rgba(236, 127, 60, 0.18);
 
+  --positive-border: rgba(78, 201, 127, 0.3);
+  --negative-border: rgba(229, 84, 75, 0.3);
+  --warning-border: rgba(224, 162, 60, 0.3);
+
   --focus-ring: var(--accent);
 
   --series-1: var(--accent-crm);
@@ -265,6 +302,8 @@
   --series-7: var(--text-secondary);
   --series-8: var(--text-muted);
 
+  --chart-fill-opacity: 0.25;
+
   --tier-gold: #d4a544;
   --tier-gold-bg: rgba(212, 165, 68, 0.18);
   --tier-silver: #a8adb3;
@@ -273,11 +312,114 @@
   --tier-bronze-bg: rgba(184, 121, 79, 0.18);
 
   --popover-bg: #26282a;
+  --shadow-card: none;
   --shadow-popover: 0 4px 16px rgba(0, 0, 0, 0.36), 0 1px 2px rgba(0, 0, 0, 0.28);
+  --shadow-modal: 0 4px 16px rgba(0, 0, 0, 0.36), 0 1px 2px rgba(0, 0, 0, 0.28);
 
   --glass-bg: rgba(22, 23, 24, 0.72);
   --glass-border: rgba(255, 255, 255, 0.08);
 
   --scrollbar-thumb: var(--border-strong);
   --scrollbar-thumb-hover: #52565a;
+
+  --row-hover-bg: var(--surface-3);
+}
+
+/* ==========================================================================
+   Молочна (молочно-карамельна) — the second light theme, and the first
+   theme where shadows actually do something: [data-theme="light"] and
+   this block are the only two with box-shadow on real content (cards),
+   because a shadow only reads against a light surface — the two dark
+   themes and Графіт-ізумруд leave --shadow-card at "none" and keep their
+   popover/modal shadows as pure depth-via-opacity, unchanged. Everything
+   else is the same self-contained-block pattern as the other three.
+   ========================================================================== */
+
+[data-theme="milk"] {
+  --surface-0: #f7f3ec;
+  --surface-1: #f2ece2;
+  --surface-2: #fffdf9;
+  --surface-3: #ffffff;
+
+  --text-primary: #2b2419;
+  --text-secondary: #6b6153;
+  --text-muted: #9a8f7e;
+
+  --border: #e4dace;
+  --border-strong: #d3c6b4;
+
+  --accent-analytics: #4a7c6f;
+  --accent-analytics-hover: #5c8f7f;
+  --accent-analytics-bg: rgba(74, 124, 111, 0.12);
+  --accent-crm: #b06f3c;
+  --accent-crm-hover: #c47d45;
+  --accent-crm-bg: rgba(176, 111, 60, 0.12);
+  --accent-platform: #8a6ba8;
+  --accent-platform-hover: #9a7ab8;
+  --accent-platform-bg: rgba(138, 107, 168, 0.12);
+
+  --accent: var(--accent-crm);
+  --accent-hover: var(--accent-crm-hover);
+  --accent-bg: var(--accent-crm-bg);
+  --accent-fg: #ffffff;
+
+  /* Every semantic color is more saturated than its dark-theme counterpart
+     — the same alpha-tinted chip that reads fine on a near-black surface
+     goes chalky on this warm-white one, so the solid colors themselves
+     have to carry more weight. */
+  --positive: #2f8f5b;
+  --positive-bg: rgba(47, 143, 91, 0.14);
+  --positive-border: rgba(47, 143, 91, 0.25);
+  --negative: #c4453c;
+  --negative-bg: rgba(196, 69, 60, 0.14);
+  --negative-border: rgba(196, 69, 60, 0.25);
+  --warning: #c4872a;
+  --warning-bg: rgba(196, 135, 42, 0.14);
+  --warning-border: rgba(196, 135, 42, 0.25);
+  --info: var(--accent-analytics);
+  --info-bg: var(--accent-analytics-bg);
+  --emphasis: #2b2419;
+
+  --risk-high: #d06a2c;
+  --risk-high-bg: rgba(208, 106, 44, 0.14);
+
+  --focus-ring: var(--accent);
+
+  --series-1: var(--accent-crm);
+  --series-2: var(--accent-analytics);
+  --series-3: var(--positive);
+  --series-4: var(--accent-platform);
+  --series-5: var(--warning);
+  --series-6: var(--risk-high);
+  --series-7: var(--text-secondary);
+  --series-8: var(--text-muted);
+
+  /* Lower than the other themes' 0.25 — this base is light enough that a
+     25%-opacity fill under a line chart started competing with the grid
+     and the card surface underneath it. */
+  --chart-fill-opacity: 0.2;
+
+  --tier-gold: #b8862b;
+  --tier-gold-bg: rgba(184, 134, 43, 0.14);
+  --tier-silver: #8a8f9a;
+  --tier-silver-bg: rgba(138, 143, 154, 0.14);
+  --tier-bronze: #a1663f;
+  --tier-bronze-bg: rgba(161, 102, 63, 0.14);
+
+  --popover-bg: #ffffff;
+  --shadow-card: 0 1px 2px rgba(70, 55, 35, 0.05);
+  --shadow-popover: 0 4px 16px rgba(70, 55, 35, 0.1);
+  --shadow-modal: 0 8px 32px rgba(70, 55, 35, 0.14);
+
+  --glass-bg: rgba(242, 236, 226, 0.72);
+  --glass-border: rgba(70, 55, 35, 0.08);
+
+  --scrollbar-thumb: #d3c6b4;
+  --scrollbar-thumb-hover: #c0b09a;
+
+  /* The other themes' table-row hover is a solid one-step-lighter surface
+     — here surface-2/surface-3 sit only 6 units apart (#fffdf9 vs
+     #ffffff), too close for that swap to read at all, so this is a
+     translucent warm accent tint instead. */
+  --row-hover-bg: rgba(176, 111, 60, 0.05);
 }

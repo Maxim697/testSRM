@@ -47,10 +47,13 @@
 
   --color-positive: var(--positive);
   --color-positive-bg: var(--positive-bg);
+  --color-positive-border: var(--positive-border);
   --color-negative: var(--negative);
   --color-negative-bg: var(--negative-bg);
+  --color-negative-border: var(--negative-border);
   --color-warning: var(--warning);
   --color-warning-bg: var(--warning-bg);
+  --color-warning-border: var(--warning-border);
   --color-info: var(--info);
   --color-info-bg: var(--info-bg);
   --color-risk-high: var(--risk-high);
@@ -74,9 +77,12 @@
   --color-tier-bronze-bg: var(--tier-bronze-bg);
 
   --color-focus-ring: var(--focus-ring);
+  --color-row-hover: var(--row-hover-bg);
 
   --color-popover: var(--popover-bg);
+  --shadow-card: var(--shadow-card);
   --shadow-popover: var(--shadow-popover);
+  --shadow-modal: var(--shadow-modal);
 }
 
 html,
@@ -98,8 +104,22 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-* {
-  border-color: var(--color-border);
+/* @layer base (not a bare rule): Tailwind wraps its own utilities in
+   @layer utilities, and cascade layers resolve by layer order before
+   specificity — an unlayered rule beats every layered one no matter how
+   specific the layered selector is. A bare `* { border-color: ... }`
+   here would silently win over every `border-{color}` utility in the
+   app (bg/text utilities were never affected, only border-color), which
+   is exactly what was happening: badge/tier borders and every
+   border-accent/border-negative/etc. card border were rendering as the
+   plain neutral border color instead of their intended tint. Layering
+   this the same as Tailwind's own utilities lets any component's
+   border-color utility win as expected, with this only setting the
+   default for elements that don't specify one. */
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
 }
 
 ::selection {
@@ -152,13 +172,16 @@ body {
 
 /* ==========================================================================
    Panels — cards, KPI cards, table containers. Background contrast plus a
-   thin border; radius 12px everywhere.
+   thin border; radius 12px everywhere. --shadow-card is "none" in every
+   dark theme (a shadow doesn't read against a dark surface) — only the
+   light themes give panels one, and only Молочна makes it visible.
    ========================================================================== */
 
 .panel {
   background-color: var(--color-surface-2);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
 }
 
 /* ==========================================================================
@@ -250,6 +273,23 @@ body {
   border-right: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
   box-shadow: var(--shadow-popover);
+}
+
+/* ==========================================================================
+   Modal layer — same glass treatment as popovers, but its own (heavier)
+   shadow: a modal sits further off the page than a dropdown or tooltip,
+   so it needs more lift. In every theme but Молочна --shadow-modal equals
+   --shadow-popover exactly, so this is visually identical to
+   .popover-surface everywhere except the one theme that draws it deeper.
+   ========================================================================== */
+
+.modal-surface {
+  background: var(--glass-bg);
+  border-top: 1px solid var(--glass-border);
+  border-left: 1px solid var(--glass-border);
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-modal);
 }
 
 /* ==========================================================================

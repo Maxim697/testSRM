@@ -136,7 +136,7 @@ export function DataTable<T>({
               <tr
                 key={rowKey(row)}
                 className={cn(
-                  "h-row row-enter border-b border-border last:border-b-0 hover:bg-surface-3",
+                  "h-row row-enter border-b border-border last:border-b-0 hover:bg-row-hover",
                   rowClassName?.(row),
                 )}
                 // Staggered entrance, capped at the first 20 rows — past
