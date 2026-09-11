@@ -2,18 +2,25 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-type Theme = "dark" | "light";
+export type Theme = "dark" | "light" | "graphite-emerald";
+
+const THEMES: Theme[] = ["dark", "light", "graphite-emerald"];
+const DEFAULT_THEME: Theme = "dark";
+
+function isTheme(value: string | null): value is Theme {
+  return value !== null && (THEMES as string[]).includes(value);
+}
 
 const ThemeContext = createContext<{ theme: Theme; setTheme: (theme: Theme) => void } | null>(
   null,
 );
 
 function applyTheme(theme: Theme) {
-  if (theme === "light") {
-    document.documentElement.setAttribute("data-theme", "light");
-  } else {
-    document.documentElement.removeAttribute("data-theme");
-  }
+  // Always an explicit value — including "dark" — so the selector's
+  // current choice is never encoded as "no attribute". :root already
+  // carries the dark theme's own values regardless, so this is purely
+  // for the attribute to reflect the real, persisted choice.
+  document.documentElement.setAttribute("data-theme", theme);
   try {
     localStorage.setItem("theme", theme);
   } catch {
@@ -22,16 +29,17 @@ function applyTheme(theme: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
+  const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
 
   useEffect(() => {
-    let stored: Theme = "dark";
+    let stored: Theme = DEFAULT_THEME;
     try {
-      stored = localStorage.getItem("theme") === "light" ? "light" : "dark";
+      const raw = localStorage.getItem("theme");
+      if (isTheme(raw)) stored = raw;
     } catch {
       // localStorage unavailable, keep default
     }
-    if (stored === "light") document.documentElement.setAttribute("data-theme", "light");
+    document.documentElement.setAttribute("data-theme", stored);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- syncs React state with the theme read from localStorage on mount
     setThemeState(stored);
   }, []);

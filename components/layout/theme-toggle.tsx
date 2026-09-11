@@ -1,22 +1,28 @@
 "use client";
 
-import { useTheme } from "@/components/theme-provider";
-import { cn } from "@/lib/utils";
+import { useTheme, type Theme } from "@/components/theme-provider";
+import { Select } from "@/components/ui/select";
+
+const THEME_LABELS: Record<Theme, string> = {
+  dark: "Темна синя",
+  light: "Світла синя",
+  "graphite-emerald": "Графіт-ізумруд",
+};
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const isLight = theme === "light";
 
   return (
-    <button
-      type="button"
-      onClick={() => setTheme(isLight ? "dark" : "light")}
-      className={cn(
-        "flex h-8 items-center gap-1.5 whitespace-nowrap rounded-control px-3 text-base text-text-secondary hover:bg-surface-2 hover:text-text-primary",
-      )}
-      aria-label="Перемкнути тему"
+    <Select
+      value={theme}
+      onChange={(e) => setTheme(e.target.value as Theme)}
+      className="w-40"
     >
-      {isLight ? "Світла" : "Темна"}
-    </button>
+      {(Object.keys(THEME_LABELS) as Theme[]).map((value) => (
+        <option key={value} value={value}>
+          {THEME_LABELS[value]}
+        </option>
+      ))}
+    </Select>
   );
 }

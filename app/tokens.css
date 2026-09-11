@@ -1,20 +1,27 @@
 /*
   Design tokens. Single source of truth for the whole app.
 
-  Visual direction: cold, muted, industrial blue. Dark-first, glass top
-  layers (header, sidebar, modals, dropdowns, tooltips — never
-  tables/KPI cards/charts). Every neutral carries a blue cast — never a
-  flat gray, never a violet one. Each nav section (Аналітика/CRM/
-  Платформа) carries its own hue inside the blue family (teal / blue /
-  indigo) that reaches into its own pages (--accent below is repointed
-  per section by SectionAccentScope — see
-  components/layout/section-accent-scope.tsx), not just the sidebar.
-  Status colors (green/amber/orange/red) and --info (a fixed teal,
-  "neutral information" — equal to the Analytics section's own hue) are
-  separate from that and never repointed — they mean the same thing
-  everywhere. Inter everywhere. Components must never hardcode colors —
-  reference these variables (via the Tailwind theme mapping in
-  globals.css) only.
+  Three themes, picked in the header's theme selector and applied via
+  [data-theme] on <html> (components/theme-provider.tsx): "Темна синя"
+  (:root, below — also the default when no theme has been chosen yet),
+  "Світла синя" ([data-theme="light"]), and "Графіт-ізумруд"
+  ([data-theme="graphite-emerald"]). Each is one self-contained block of
+  the same variable names — adding a theme means adding a block here, not
+  touching any component. Glass top layers (header, sidebar, modals,
+  dropdowns, tooltips — never tables/KPI cards/charts). Each nav section
+  (Аналітика/CRM/Платформа) carries its own hue that reaches into its own
+  pages (--accent below is repointed per section by SectionAccentScope —
+  see components/layout/section-accent-scope.tsx), not just the sidebar.
+  Status colors (green/amber/orange/red) and --info ("neutral
+  information", equal to the Analytics section's own hue) are separate
+  from that and never repointed — they mean the same thing everywhere.
+  Inter everywhere. Components must never hardcode colors — reference
+  these variables (via the Tailwind theme mapping in globals.css) only.
+
+  The two blue themes keep a blue cast on every neutral (never a flat
+  gray, never violet); Графіт-ізумруд is the one deliberately neutral
+  exception — its surfaces and text carry no color cast at all, so the
+  single emerald accent is the only hue in the UI chrome.
 */
 
 :root {
@@ -192,4 +199,85 @@
 
   --scrollbar-thumb: var(--border-strong);
   --scrollbar-thumb-hover: #a9b6c6;
+}
+
+/* ==========================================================================
+   Графіт-ізумруд — a second dark theme. Chromatically neutral surfaces
+   (no blue cast, unlike the default dark theme) with a single emerald
+   accent family. Adding a theme is exactly this: one self-contained
+   variable block, same names as :root / [data-theme="light"] above —
+   components never need to change.
+   ========================================================================== */
+
+[data-theme="graphite-emerald"] {
+  --surface-0: #101112;
+  --surface-1: #161718;
+  --surface-2: #1c1d1f;
+  --surface-3: #232426;
+
+  --text-primary: #ececed;
+  --text-secondary: #9b9d9f;
+  --text-muted: #686b6e;
+
+  --border: #303234;
+  --border-strong: #404346;
+
+  --accent-analytics: #2f9e8f;
+  --accent-analytics-hover: #3bb8a6;
+  --accent-analytics-bg: rgba(47, 158, 143, 0.15);
+  --accent-crm: #10a37f;
+  --accent-crm-hover: #14b98f;
+  --accent-crm-bg: rgba(16, 163, 127, 0.15);
+  --accent-platform: #7d9f3a;
+  --accent-platform-hover: #8fb350;
+  --accent-platform-bg: rgba(125, 159, 58, 0.15);
+
+  --accent: var(--accent-crm);
+  --accent-hover: var(--accent-crm-hover);
+  --accent-bg: var(--accent-crm-bg);
+  --accent-fg: #ffffff;
+
+  /* --positive is deliberately not the accent's own emerald — with the
+     accent already living in that hue, a same-color "growth" signal would
+     blend into every primary action and link. A lighter, slightly
+     yellower green keeps the two readable apart. */
+  --positive: #4ec97f;
+  --positive-bg: rgba(78, 201, 127, 0.18);
+  --negative: #e5544b;
+  --negative-bg: rgba(229, 84, 75, 0.18);
+  --warning: #e0a23c;
+  --warning-bg: rgba(224, 162, 60, 0.18);
+  --info: var(--accent-analytics);
+  --info-bg: var(--accent-analytics-bg);
+  --emphasis: #ffffff;
+
+  --risk-high: #ec7f3c;
+  --risk-high-bg: rgba(236, 127, 60, 0.18);
+
+  --focus-ring: var(--accent);
+
+  --series-1: var(--accent-crm);
+  --series-2: var(--accent-analytics);
+  --series-3: var(--positive);
+  --series-4: var(--accent-platform);
+  --series-5: var(--warning);
+  --series-6: var(--risk-high);
+  --series-7: var(--text-secondary);
+  --series-8: var(--text-muted);
+
+  --tier-gold: #d4a544;
+  --tier-gold-bg: rgba(212, 165, 68, 0.18);
+  --tier-silver: #a8adb3;
+  --tier-silver-bg: rgba(168, 173, 179, 0.18);
+  --tier-bronze: #b8794f;
+  --tier-bronze-bg: rgba(184, 121, 79, 0.18);
+
+  --popover-bg: #26282a;
+  --shadow-popover: 0 4px 16px rgba(0, 0, 0, 0.36), 0 1px 2px rgba(0, 0, 0, 0.28);
+
+  --glass-bg: rgba(22, 23, 24, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  --scrollbar-thumb: var(--border-strong);
+  --scrollbar-thumb-hover: #52565a;
 }
