@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { UsersIcon } from "@/components/ui/empty-icons";
 import { ManagerCard } from "@/components/my-team/manager-card";
+import { StaggerItem } from "@/components/motion/stagger-item";
 import { ManagerComparison } from "@/components/my-team/manager-comparison";
 import { AttentionList } from "@/components/my-team/attention-list";
 import { ManagerTradersModal } from "@/components/team-dashboard/manager-traders-modal";
@@ -48,15 +49,15 @@ function ManagerGrid({
 
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-      {data.managers.map((m) => (
-        <div key={m.id} id={`manager-${m.id}`}>
+      {data.managers.map((m, i) => (
+        <StaggerItem key={m.id} index={i} id={`manager-${m.id}`}>
           <ManagerCard
             manager={m}
             onOpenTraders={() => onOpenTraders(m)}
             onAssignTask={() => onAssignTask(data, m.id)}
             onViewReport={() => router.push("/reports-review")}
           />
-        </div>
+        </StaggerItem>
       ))}
     </div>
   );

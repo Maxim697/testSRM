@@ -15,6 +15,8 @@ import { MoveManagerModal } from "@/components/access/move-manager-modal";
 import { ChangeRoleModal } from "@/components/access/change-role-modal";
 import { ToggleActiveModal } from "@/components/access/toggle-active-modal";
 import { CreateUserModal } from "@/components/access/create-user-modal";
+import { StaggerItem } from "@/components/motion/stagger-item";
+import { AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 import type { Profile, Team } from "@/lib/types";
 import type { Role } from "@/lib/roles";
@@ -108,22 +110,25 @@ export function TeamStructureView({
         <EmptyState icon={<UsersIcon />} title="Команд ще немає" description="Створіть першу команду, щоб почати." />
       ) : (
         <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
-          {teams.map((team) => (
-            <TeamBlock
-              key={team.id}
-              team={team}
-              lead={team.lead_id ? (leadById.get(team.lead_id) ?? null) : null}
-              managers={managersByTeam.get(team.id) ?? []}
-              traderCounts={traderCounts}
-              canManage={canManage}
-              onRename={() => setRenamingTeam(team)}
-              onChangeLead={() => setChangingLeadTeam(team)}
-              onDelete={() => setDeletingTeam(team)}
-              onAddManager={() => setAddingManagerTeam(team)}
-              onMoveManager={(m) => setMovingManager({ manager: m })}
-              onToggleActive={(u) => setTogglingUser(u)}
-            />
-          ))}
+          <AnimatePresence>
+            {teams.map((team, i) => (
+              <StaggerItem key={team.id} index={i}>
+                <TeamBlock
+                  team={team}
+                  lead={team.lead_id ? (leadById.get(team.lead_id) ?? null) : null}
+                  managers={managersByTeam.get(team.id) ?? []}
+                  traderCounts={traderCounts}
+                  canManage={canManage}
+                  onRename={() => setRenamingTeam(team)}
+                  onChangeLead={() => setChangingLeadTeam(team)}
+                  onDelete={() => setDeletingTeam(team)}
+                  onAddManager={() => setAddingManagerTeam(team)}
+                  onMoveManager={(m) => setMovingManager({ manager: m })}
+                  onToggleActive={(u) => setTogglingUser(u)}
+                />
+              </StaggerItem>
+            ))}
+          </AnimatePresence>
         </div>
       )}
 

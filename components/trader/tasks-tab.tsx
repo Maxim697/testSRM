@@ -8,6 +8,8 @@ import { DateInput } from "@/components/ui/date-input";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ListCheckIcon } from "@/components/ui/empty-icons";
+import { StaggerItem } from "@/components/motion/stagger-item";
+import { Expand } from "@/components/motion/expand";
 import { createClient } from "@/lib/supabase/client";
 import { TASK_WITH_RELATIONS_SELECT, taskRequiresCommentToClose, updateTaskStatus } from "@/lib/task-actions";
 import { formatDate } from "@/lib/format";
@@ -150,73 +152,75 @@ export function TasksTab({
         />
       ) : (
         <div className="flex flex-col gap-2">
-          {tasks.map((task) => (
-            <Card key={task.id} className="relative flex flex-col gap-2 overflow-hidden pl-4">
-              <span
-                className="absolute inset-y-0 left-0 w-1"
-                style={{ background: STATUS_STRIPE[task.status] }}
-              />
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="truncate text-base text-text-primary">{task.title}</div>
-                  <div className="mt-0.5 flex items-center gap-2 text-xs text-text-muted">
-                    <span>{task.kind ? KIND_LABELS[task.kind] : "—"}</span>
-                    <span>·</span>
-                    <span>Дедлайн: {formatDate(task.due_date)}</span>
-                    {task.created_by !== task.assignee_id && (
-                      <>
-                        <span>·</span>
-                        <span>Поставив: {task.creator?.full_name ?? "—"}</span>
-                      </>
-                    )}
+          {tasks.map((task, i) => (
+            <StaggerItem key={task.id} index={i}>
+              <Card className="relative flex flex-col gap-2 overflow-hidden pl-4">
+                <span
+                  className="absolute inset-y-0 left-0 w-1"
+                  style={{ background: STATUS_STRIPE[task.status] }}
+                />
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="truncate text-base text-text-primary">{task.title}</div>
+                    <div className="mt-0.5 flex items-center gap-2 text-xs text-text-muted">
+                      <span>{task.kind ? KIND_LABELS[task.kind] : "—"}</span>
+                      <span>·</span>
+                      <span>Дедлайн: {formatDate(task.due_date)}</span>
+                      {task.created_by !== task.assignee_id && (
+                        <>
+                          <span>·</span>
+                          <span>Поставив: {task.creator?.full_name ?? "—"}</span>
+                        </>
+                      )}
+                    </div>
                   </div>
+                  <Select
+                    value={task.status}
+                    onChange={(e) => handleStatusChange(task, e.target.value as TaskStatus)}
+                    className="w-36 shrink-0"
+                  >
+                    <option value="in_progress">В роботі</option>
+                    <option value="done">Виконано</option>
+                    <option value="overdue">Прострочено</option>
+                  </Select>
                 </div>
-                <Select
-                  value={task.status}
-                  onChange={(e) => handleStatusChange(task, e.target.value as TaskStatus)}
-                  className="w-36 shrink-0"
-                >
-                  <option value="in_progress">В роботі</option>
-                  <option value="done">Виконано</option>
-                  <option value="overdue">Прострочено</option>
-                </Select>
-              </div>
 
-              {pendingCloseId === task.id && (
-                <div className="flex items-center gap-2 border-t border-border pt-2">
-                  <Input
-                    multiline
-                    rows={2}
-                    placeholder="Що зроблено по цьому завданню..."
-                    value={closeComment}
-                    onChange={(e) => setCloseComment(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant="primary"
-                    className="h-8 shrink-0"
-                    onClick={() => handleConfirmClose(task)}
-                  >
-                    Закрити
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="h-8 shrink-0"
-                    onClick={() => {
-                      setPendingCloseId(null);
-                      setCloseError(null);
-                    }}
-                  >
-                    Скасувати
-                  </Button>
-                </div>
-              )}
-              {pendingCloseId === task.id && closeError && (
-                <p className="text-xs text-negative">{closeError}</p>
-              )}
-            </Card>
+                <Expand open={pendingCloseId === task.id}>
+                  <div className="flex items-center gap-2 border-t border-border pt-2">
+                    <Input
+                      multiline
+                      rows={2}
+                      placeholder="Що зроблено по цьому завданню..."
+                      value={closeComment}
+                      onChange={(e) => setCloseComment(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="primary"
+                      className="h-8 shrink-0"
+                      onClick={() => handleConfirmClose(task)}
+                    >
+                      Закрити
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="h-8 shrink-0"
+                      onClick={() => {
+                        setPendingCloseId(null);
+                        setCloseError(null);
+                      }}
+                    >
+                      Скасувати
+                    </Button>
+                  </div>
+                </Expand>
+                {pendingCloseId === task.id && closeError && (
+                  <p className="text-xs text-negative">{closeError}</p>
+                )}
+              </Card>
+            </StaggerItem>
           ))}
         </div>
       )}

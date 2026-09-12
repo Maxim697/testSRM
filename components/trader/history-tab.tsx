@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HistoryIcon } from "@/components/ui/empty-icons";
+import { StaggerItem } from "@/components/motion/stagger-item";
 import { createClient } from "@/lib/supabase/client";
 import { formatDateTime } from "@/lib/format";
 import type { InteractionKind, InteractionWithAuthor } from "@/lib/types";
@@ -98,29 +99,31 @@ export function HistoryTab({
         />
       ) : (
         <div className="flex flex-col gap-2">
-          {interactions.map((item) => (
-            <Card key={item.id} className="relative overflow-hidden pl-4">
-              <span
-                className="absolute inset-y-0 left-0 w-1"
-                style={{ background: item.kind ? KIND_COLORS[item.kind] : "var(--border-strong)" }}
-              />
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-xs text-text-muted">
-                  <span
-                    className="rounded-control px-1.5 py-0.5 font-medium"
-                    style={{
-                      color: item.kind ? KIND_COLORS[item.kind] : "var(--color-text-secondary)",
-                      background: "var(--color-surface-3)",
-                    }}
-                  >
-                    {item.kind ? KIND_LABELS[item.kind] : "—"}
-                  </span>
-                  <span>{item.author?.full_name ?? "—"}</span>
+          {interactions.map((item, i) => (
+            <StaggerItem key={item.id} index={i}>
+              <Card className="relative overflow-hidden pl-4">
+                <span
+                  className="absolute inset-y-0 left-0 w-1"
+                  style={{ background: item.kind ? KIND_COLORS[item.kind] : "var(--border-strong)" }}
+                />
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-xs text-text-muted">
+                    <span
+                      className="rounded-control px-1.5 py-0.5 font-medium"
+                      style={{
+                        color: item.kind ? KIND_COLORS[item.kind] : "var(--color-text-secondary)",
+                        background: "var(--color-surface-3)",
+                      }}
+                    >
+                      {item.kind ? KIND_LABELS[item.kind] : "—"}
+                    </span>
+                    <span>{item.author?.full_name ?? "—"}</span>
+                  </div>
+                  <span className="text-xs text-text-muted">{formatDateTime(item.created_at)}</span>
                 </div>
-                <span className="text-xs text-text-muted">{formatDateTime(item.created_at)}</span>
-              </div>
-              {item.body && <p className="mt-1.5 text-base text-text-primary">{item.body}</p>}
-            </Card>
+                {item.body && <p className="mt-1.5 text-base text-text-primary">{item.body}</p>}
+              </Card>
+            </StaggerItem>
           ))}
         </div>
       )}

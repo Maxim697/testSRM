@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { RiskBadge } from "@/components/risk/risk-badge";
 import { RiskFactorList } from "@/components/risk/risk-factor-list";
 import { MyTasksSection } from "@/components/my-day/my-tasks-section";
+import { StaggerItem } from "@/components/motion/stagger-item";
 import { getEnrichedTraders } from "@/lib/trader-metrics";
 import { getCurrentProfile } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
@@ -77,21 +78,23 @@ export default async function MyDayPage() {
           />
         ) : (
           <div className="flex flex-col gap-2">
-            {attentionList.map((trader) => (
-              <Card key={trader.id} className="flex items-center justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-3">
-                  <RiskBadge risk={trader.risk} size="lg" />
-                  <div className="min-w-0">
-                    <div className="font-medium text-text-primary">{trader.code}</div>
-                    <div className="mt-1">
-                      <RiskFactorList factors={trader.risk.factors} />
+            {attentionList.map((trader, i) => (
+              <StaggerItem key={trader.id} index={i}>
+                <Card className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <RiskBadge risk={trader.risk} size="lg" />
+                    <div className="min-w-0">
+                      <div className="font-medium text-text-primary">{trader.code}</div>
+                      <div className="mt-1">
+                        <RiskFactorList factors={trader.risk.factors} />
+                      </div>
                     </div>
                   </div>
-                </div>
-                <Button href={`/trader/${trader.id}`} variant="accent-soft" className="shrink-0">
-                  Відкрити
-                </Button>
-              </Card>
+                  <Button href={`/trader/${trader.id}`} variant="accent-soft" className="shrink-0">
+                    Відкрити
+                  </Button>
+                </Card>
+              </StaggerItem>
             ))}
           </div>
         )}

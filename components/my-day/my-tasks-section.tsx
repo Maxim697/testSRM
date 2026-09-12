@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ListCheckIcon } from "@/components/ui/empty-icons";
+import { StaggerItem } from "@/components/motion/stagger-item";
+import { Expand } from "@/components/motion/expand";
 import { createClient } from "@/lib/supabase/client";
 import { taskRequiresCommentToClose, updateTaskStatus } from "@/lib/task-actions";
 import { formatDate } from "@/lib/format";
@@ -102,7 +104,7 @@ function TaskRow({
         </div>
       </div>
 
-      {closing && (
+      <Expand open={closing}>
         <div className="flex items-center gap-2 border-t border-border pt-2">
           <Input
             multiline
@@ -119,7 +121,7 @@ function TaskRow({
             Скасувати
           </Button>
         </div>
-      )}
+      </Expand>
       {error && <p className="text-xs text-negative">{error}</p>}
     </Card>
   );
@@ -153,8 +155,10 @@ export function MyTasksSection({
           />
         ) : (
           <div className="flex flex-col gap-2">
-            {fromLead.map((task) => (
-              <TaskRow key={task.id} task={task} currentUserId={currentUserId} showCreator onUpdated={handleUpdated} />
+            {fromLead.map((task, i) => (
+              <StaggerItem key={task.id} index={i}>
+                <TaskRow task={task} currentUserId={currentUserId} showCreator onUpdated={handleUpdated} />
+              </StaggerItem>
             ))}
           </div>
         )}
@@ -170,14 +174,15 @@ export function MyTasksSection({
           />
         ) : (
           <div className="flex flex-col gap-2">
-            {own.map((task) => (
-              <TaskRow
-                key={task.id}
-                task={task}
-                currentUserId={currentUserId}
-                showCreator={false}
-                onUpdated={handleUpdated}
-              />
+            {own.map((task, i) => (
+              <StaggerItem key={task.id} index={i}>
+                <TaskRow
+                  task={task}
+                  currentUserId={currentUserId}
+                  showCreator={false}
+                  onUpdated={handleUpdated}
+                />
+              </StaggerItem>
             ))}
           </div>
         )}

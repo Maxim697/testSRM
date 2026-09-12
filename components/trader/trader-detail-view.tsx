@@ -13,6 +13,7 @@ import { TasksTab } from "@/components/trader/tasks-tab";
 import { MetricsTab } from "@/components/trader/metrics-tab";
 import { AuditHistoryTab } from "@/components/trader/audit-history-tab";
 import { RiskBadge } from "@/components/risk/risk-badge";
+import { FadeSwitch } from "@/components/motion/fade-switch";
 import { daysSince, formatDate, formatNumber, formatPercent, percentDelta, scoreDelta } from "@/lib/format";
 import { computeRiskScore, computeWeeklyDeltas, isTaskOverdue } from "@/lib/risk-score";
 import { useSetPageTitle } from "@/lib/page-title";
@@ -177,7 +178,7 @@ export function TraderDetailView({
         onValueChange={setTab}
       />
 
-      <div className="fade-enter" key={tab}>
+      <FadeSwitch id={tab}>
         {tab === "history" && (
           <HistoryTab
             traderId={trader.id}
@@ -200,7 +201,7 @@ export function TraderDetailView({
         {tab === "audit" && (currentUserRole === "lead" || currentUserRole === "admin") && (
           <AuditHistoryTab traderId={trader.id} />
         )}
-      </div>
+      </FadeSwitch>
     </div>
   );
 }

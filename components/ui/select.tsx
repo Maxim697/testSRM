@@ -12,7 +12,9 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { OVERLAY, SOFT_SPRING } from "@/lib/motion";
 
 type OptionData = { value: string; label: ReactNode; disabled?: boolean };
 
@@ -64,6 +66,7 @@ export function Select({
 }) {
   const options = useMemo(() => extractOptions(children), [children]);
   const [open, setOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
   const [highlighted, setHighlighted] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
   const listboxId = useId();
@@ -161,35 +164,41 @@ export function Select({
         <span className="truncate">{selectedOption?.label ?? placeholder ?? ""}</span>
         <ChevronIcon open={open} />
       </button>
-      {open && (
-        <ul
-          id={listboxId}
-          role="listbox"
-          className="popover-surface backdrop-blur-lg popover-enter absolute left-0 top-full z-30 mt-1 max-h-60 w-full min-w-max overflow-y-auto rounded-control p-1 text-base"
-        >
-          {options.map((opt, i) => (
-            <li
-              key={opt.value}
-              role="option"
-              aria-selected={opt.value === value}
-              onMouseEnter={() => setHighlighted(i)}
-              onClick={() => commit(i)}
-              className={cn(
-                "flex h-menu-item cursor-pointer items-center whitespace-nowrap rounded-control px-2.5",
-                opt.disabled
-                  ? "cursor-not-allowed text-text-muted opacity-50"
-                  : i === highlighted
-                    ? "bg-accent-bg text-accent"
-                    : opt.value === value
-                      ? "font-medium text-text-primary"
-                      : "text-text-primary",
-              )}
-            >
-              {opt.label}
-            </li>
-          ))}
-        </ul>
-      )}
+      <AnimatePresence>
+        {open && (
+          <motion.ul
+            id={listboxId}
+            role="listbox"
+            className="popover-surface backdrop-blur-lg absolute left-0 top-full z-30 mt-1 max-h-60 w-full min-w-max overflow-y-auto rounded-control p-1 text-base"
+            initial={{ opacity: 0, scale: OVERLAY.scaleFrom }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: OVERLAY.scaleFrom, transition: { duration: reduceMotion ? 0 : OVERLAY.exitDuration } }}
+            transition={reduceMotion ? { duration: 0 } : { ...SOFT_SPRING, duration: OVERLAY.enterDuration }}
+          >
+            {options.map((opt, i) => (
+              <li
+                key={opt.value}
+                role="option"
+                aria-selected={opt.value === value}
+                onMouseEnter={() => setHighlighted(i)}
+                onClick={() => commit(i)}
+                className={cn(
+                  "flex h-menu-item cursor-pointer items-center whitespace-nowrap rounded-control px-2.5",
+                  opt.disabled
+                    ? "cursor-not-allowed text-text-muted opacity-50"
+                    : i === highlighted
+                      ? "bg-accent-bg text-accent"
+                      : opt.value === value
+                        ? "font-medium text-text-primary"
+                        : "text-text-primary",
+                )}
+              >
+                {opt.label}
+              </li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

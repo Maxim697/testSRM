@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getInitials } from "@/lib/roles";
 import { cn } from "@/lib/utils";
+import { OVERLAY, SOFT_SPRING } from "@/lib/motion";
 import type { Profile, Team } from "@/lib/types";
 
 function MenuIcon() {
@@ -42,6 +44,7 @@ function TeamMenu({
   onDelete: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -65,27 +68,35 @@ function TeamMenu({
       >
         <MenuIcon />
       </button>
-      {open && (
-        <div className="popover-surface backdrop-blur-lg popover-enter absolute right-0 top-full z-20 mt-1 w-56 rounded-card p-1">
-          {[
-            { label: "Перейменувати", action: onRename },
-            { label: "Змінити тімліда", action: onChangeLead },
-            { label: "Видалити", action: onDelete },
-          ].map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                item.action();
-              }}
-              className="flex h-menu-item w-full items-center rounded-control px-2.5 text-left text-base text-text-primary hover:bg-surface-3"
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="popover-surface backdrop-blur-lg absolute right-0 top-full z-20 mt-1 w-56 rounded-card p-1"
+            initial={{ opacity: 0, scale: OVERLAY.scaleFrom }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: OVERLAY.scaleFrom, transition: { duration: reduceMotion ? 0 : OVERLAY.exitDuration } }}
+            transition={reduceMotion ? { duration: 0 } : { ...SOFT_SPRING, duration: OVERLAY.enterDuration }}
+          >
+            {[
+              { label: "Перейменувати", action: onRename },
+              { label: "Змінити тімліда", action: onChangeLead },
+              { label: "Видалити", action: onDelete },
+            ].map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  item.action();
+                }}
+                className="flex h-menu-item w-full items-center rounded-control px-2.5 text-left text-base text-text-primary hover:bg-surface-3"
+              >
+                {item.label}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

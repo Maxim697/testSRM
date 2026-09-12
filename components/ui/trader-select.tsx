@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { OVERLAY, SOFT_SPRING } from "@/lib/motion";
 import type { TraderTier } from "@/lib/types";
 
 export type TraderSelectOption = { id: string; code: string; tier: TraderTier | null };
@@ -26,6 +28,7 @@ export function TraderSelect({
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const reduceMotion = useReducedMotion();
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -82,8 +85,15 @@ export function TraderSelect({
           <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
-      {open && (
-        <div className="popover-surface backdrop-blur-lg popover-enter absolute left-0 top-full z-30 mt-1 w-64 rounded-control p-1.5">
+      <AnimatePresence>
+        {open && (
+        <motion.div
+          className="popover-surface backdrop-blur-lg absolute left-0 top-full z-30 mt-1 w-64 rounded-control p-1.5"
+          initial={{ opacity: 0, scale: OVERLAY.scaleFrom }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: OVERLAY.scaleFrom, transition: { duration: reduceMotion ? 0 : OVERLAY.exitDuration } }}
+          transition={reduceMotion ? { duration: 0 } : { ...SOFT_SPRING, duration: OVERLAY.enterDuration }}
+        >
           <input
             ref={inputRef}
             value={search}
@@ -123,8 +133,9 @@ export function TraderSelect({
             )}
             {filtered.length === 0 && <div className="px-2.5 py-2 text-sm text-text-muted">Нічого не знайдено</div>}
           </div>
-        </div>
-      )}
+        </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

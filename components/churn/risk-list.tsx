@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ShieldIcon } from "@/components/ui/empty-icons";
 import { RiskBadge } from "@/components/risk/risk-badge";
 import { RiskFactorList } from "@/components/risk/risk-factor-list";
+import { Expand } from "@/components/motion/expand";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format";
@@ -177,9 +178,9 @@ export function RiskList({
                 </div>
               </div>
 
-              {notingId === trader.id && (
+              <Expand open={notingId === trader.id}>
                 <AddNoteBox traderId={trader.id} currentUserId={currentUserId} onDone={() => setNotingId(null)} />
-              )}
+              </Expand>
             </Card>
             );
           })}

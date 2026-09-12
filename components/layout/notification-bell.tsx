@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { formatDateTime } from "@/lib/format";
+import { NOTIFICATION, SOFT_SPRING } from "@/lib/motion";
 import type { NotificationEntry } from "@/lib/types";
 
 function BellIcon() {
@@ -20,6 +22,7 @@ function BellIcon() {
 export function NotificationBell({ notifications: initial }: { notifications: NotificationEntry[] }) {
   const [notifications, setNotifications] = useState(initial);
   const [open, setOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -76,8 +79,15 @@ export function NotificationBell({ notifications: initial }: { notifications: No
           </span>
         )}
       </button>
-      {open && (
-        <div className="popover-surface backdrop-blur-lg popover-enter absolute right-0 top-full z-30 mt-1.5 w-80 rounded-card p-2">
+      <AnimatePresence>
+        {open && (
+        <motion.div
+          className="popover-surface backdrop-blur-lg absolute right-0 top-full z-30 mt-1.5 w-80 rounded-card p-2"
+          initial={{ opacity: 0, y: NOTIFICATION.y }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: NOTIFICATION.y, transition: { duration: reduceMotion ? 0 : 0.12 } }}
+          transition={reduceMotion ? { duration: 0 } : { ...SOFT_SPRING, duration: NOTIFICATION.duration }}
+        >
           <div className="mb-1 flex items-center justify-between px-1">
             <span className="field-label">Сповіщення</span>
             {unreadCount > 0 && (
@@ -114,8 +124,9 @@ export function NotificationBell({ notifications: initial }: { notifications: No
               ))}
             </div>
           )}
-        </div>
-      )}
+        </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
